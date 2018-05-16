@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Client Service Log</title>
+</head>
+<body>
+<form id="client_service_log" method="post">
+    <div id="date_field">
+        Date: <input type="text" name="Date" value="">
+    </div>
+
+{#    first table#}
+    <div id="first">
+        <table name="first">
+            <th>Client Information</th>
+            <th>In Home</th>
+            <tr>
+                <td>
+                    <table id="info">
+                        <th>Last Name</th>
+                        <th>First Name</th>
+                        <th>DOB</th>
+                        <th>Gender</th>
+                        <th>Telephone</th>
+
+                        <tr>
+                            <td><input type="text" name="lastname" required></td>
+                            <td><input type="text" name="firstname" required></td>
+                            <td><input type="date" name="dob" required></td>
+                            <td>
+                                <select name="gender">
+                                    <option value="Female">Female</option>
+                                    <option value="Male">Male</option>
+                                </select>
+                            </td>
+                            <td><input type="tel" name="phone"></td>
+                        </tr>
+                    </table>
+                </td>
+                <td>
+                    Adults: <input type="number" name="adults" min="0"><br>
+                    Under 18: <input type="number" name="under18" min="0"><br>
+                    Total: <input type="number" name="inhome" min="0">
+                </td>
+            </tr>
+        </table>  
+    </div>
+
+{#    second table#}
+    <div id="second">
+        <table name="second">
+            <th>Program Status</th>
+            <th>Appointment Type</th>
+            <th>Appointment Description</th>
+            <th>Service UOS</th>
+
+            <tr>
+                <td>
+                    ACES MEMBER: <input type="checkbox" name="acesmember"><br>
+                    Housing Services: <input type="checkbox" name="housingservices"><br>
+                    S.W.H.P. Participant: <input type="checkbox" name="swhp"><br>
+                    Youth Ed. Family: <input type="checkbox" name="youthed"><br>
+                    Senior Support: <input type="checkbox" name="seniorsupport"><br>
+                    Adult Education: <input type="checkbox" name="adulted"><br>
+                    FOC Services: <input type="checkbox" name="focservices"><br>
+                    Other: <input type="checkbox" name="other_pgm_status">
+                </td>
+
+                <td>
+                    Indirect Service: <input type="checkbox" name="indirectservice" checked><br>
+                    Phone Call: <input type="checkbox" name="phonecall"><br>
+                    Walk In/Group: <input type="checkbox" name="walkin"><br>
+                    Scheduled Appointment<br>
+                    (In Office): <input type="checkbox" name="inoffice"><br>
+                    (Out of Office): <input type="checkbox" name="outofoffice"><br>
+                    Location:<br> <input type="text" name="location">
+                </td>
+
+                <td>
+                    Orientation/Pre Enrollment: <input type="checkbox" name="orientation" checked><br>
+                    Initial Intake/Assessment/Plan: <input type="checkbox" name="initialintake"><br>
+                    General CM/Coaching/Follow-up: <input type="checkbox" name="generalcm"><br>
+                    Finance Coaching: <input type="checkbox" name="financecoaching"><br>
+                    Employment Coaching: <input type="checkbox" name="employmentcoaching"><br>
+                    Re-Assessment/New Plan: <input type="checkbox" name="reassessment"><br>
+                    Case Staffing: <input type="checkbox" name="casestaffing"><br>
+                    Case Closure: <input type="checkbox" name="caseclosure">
+                </td>
+
+                <td>
+                    15 Minutes: <input type="checkbox" name="15mins"><br>
+                    30 Minutes: <input type="checkbox" name="30mins"><br>
+                    45 Minutes: <input type="checkbox" name="45mins"><br>
+                    1 Hour: <input type="checkbox" name="1hour"><br>
+                    Other: <input type="checkbox" name="other_service"> <input type="text" name="other_service_txt"><br>
+                    New Apointment:<br>
+                    Date: <input type="date"><br>
+                    Time: <input type="time">
+                </td>
+            </tr>
+        </table>
+    </div>
+
+{#    third table#}
+    <div id="third">
+        <table name="third">
+            <th>Case Note: Service Need(s) AND Service(s) Provided:</th>
+            <th></th>
+         
+            <tr>
+                <td>
+                    <textarea name="casenote" cols="45" rows="7"></textarea>
+                </td>
+
+                <td>
+                    Did member demonstrate Improvement in Presenting Issue (Immediate Need met)?<br>
+                    Yes: <input type="checkbox" name="yes_member_improved"><br>
+                    No: <input type="checkbox" name="no_member_improved"><br>
+                    Pending: <input type="checkbox" name="pending_member_improved"><br>
+                    Did member demonstrate Gained Life Management Skills (HW Completion)?<br>
+                    Yes: <input type="checkbox" name="yes_gained_skills"><br>
+                    No: <input type="checkbox" name="no_gained_skills"><br>
+                    Pending: <input type="checkbox" name="pending_gained_skills">
+                </td>
+            </tr>
+        </table>
+    </div>
+
+{#    fourth table#}
+    <div id="fourth">
+        <table name="fourth">
+            <th>Supportive Services Provided:</th>
+            <th>QTY</th>
+            <th>$ Value</th>
+
+            <tr>
+                <td>
+                    Food<br>
+                    1-2 Day Supply <input type="checkbox" name="1-2day">
+                    3-5 Day Supply <input type="checkbox" name="3-5day">
+                    Dog Food <input type="checkbox" name="dogfood">
+                    Cat Food <input type="checkbox" name="catfood">
+                </td>
+                <td><input type="number" name="foodqty"></td>
+                <td>$<input type="number" step="0.01" name="foodvalue"></td>
+            </tr>
+
+            <tr>
+                <td>
+                    Clothing<br>
+                    Single Item <input type="checkbox" name="singleclothing">
+                    Outfit <input type="checkbox" name="outfitclothing">
+                    Multiple Items <input type="checkbox" name="multipleclothing">
+                    Multiple Outfits <input type="checkbox" name="multipleoutfitsclothing">
+                </td>
+                <td><input type="number" name="clothingqty"></td>
+                <td>$<input type="number" step="0.01" name="clothingvalue"></td>
+            </tr>
+
+            <tr>
+                <td>
+                    Hygiene<br>
+                    Signle Item <input type="checkbox" name="singlehygiene">
+                    Basic Pack <input type="checkbox" name="basichygiene">
+                    Family Pack <input type="checkbox" name="familyhygiene">
+                </td>
+                <td><input type="number" name="hygieneqty"></td>
+                <td>$<input type="number" step="0.01" name="hygienevalue"></td>
+            </tr>
+
+            <tr>
+                <td>
+                    Baby Items<br>
+                    Diaper/Wipes <input type="checkbox" name="diaperbaby">
+                    Formula <input type="checkbox" name="formulababy">
+                    Baby Food <input type="checkbox" name="foodbaby">
+                    Layette <input type="checkbox" name="layettebaby">
+                </td>
+                <td><input type="number" name="babyqty"></td>
+                <td>$<input type="number" step="0.01" name="babyvalue"></td>
+            </tr>
+
+            <tr>
+                <td>
+                    Financial<br>
+                    RR: Deposit <input type="checkbox" name="depositfinance">
+                    RR: Rent <input type="checkbox" name="rentfinance">
+                    Rent Arrears <input type="checkbox" name="arrearsfinance">
+                    Utility Arrears <input type="checkbox" name="utilityfinance">
+                </td>
+                <td><input type="number" name="financeqty"></td>
+                <td>$<input type="number" step="0.01" name="financevalue"></td>
+            </tr>
+
+            <tr>
+                <td>
+                    Legal<br>
+                    PSL <input type="checkbox" name="psllegal">
+                    Immigration <input type="checkbox" name="immigrationlegal">
+                    Other <input type="checkbox" name="other_legal">
+                </td>
+                <td><input type="number" name="legalqty"></td>
+                <td>$<input type="number" step="0.01" name="legalvalue"></td>
+            </tr>
+
+            <tr>
+                <td>
+                    HouseHold<br>
+                    Signle Item <input type="checkbox" name="singlehousehold">
+                    Basic Pack <input type="checkbox" name="basichousehold">
+                    Family Pack <input type="checkbox" name="familyhousehold">
+                </td>
+                <td><input type="number" name="familyqty"></td>
+                <td>$<input type="number" step="0.01" name="familyvalue"></td>
+            </tr>
+
+            <tr>
+                <td>
+                    Other: <input type="text" name="other_service_provided">
+                </td>
+                <td><input type="number" name="otherqty"></td>
+                <td>$<input type="number" step="0.01" name="othervalue"></td>
+            </tr>
+
+            <tr>
+                <td>
+                    Transportation <input type="checkbox" name="transportation?"><br>
+                    To/From: <input type="text" name="to_from">
+                    Miles: <input type="number" name="miles">
+                </td>
+                <td><input type="number" name="transportationqty"></td>
+                <td>$<input type="number" step="0.01" name="transportationvalue"></td>
+            </tr>
+        </table>
+    </div>
+
+{#    fifth#}
+    <div id="fifth">
+        <table>
+            <th></th>
+            <th></th>
+
+            <tr>
+                <td>
+                    <table name="fifth_l">
+                        <th>External Referral Information</th>
+                        <tr>
+                            <td>Agency:</td>
+                            <td><input type="text" name="agency"></td>
+                        </tr>
+                        <tr>
+                            <td>Contact Person:</td>
+                            <td><input type="text" name="contactperson"></td>
+                        </tr>
+                        <tr>
+                            <td>Telephone #:</td>
+                            <td><input type="tel" name="external_telephone"></td>
+                        </tr>
+                    </table>
+                </td>
+
+                <td>
+                    <table name="fifth_r">
+                        <th>Staff Notes / Other</th>
+                        <tr><td><input type="text" name="staff_notes"></td></tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div id="staffCSL">
+        Staff Completing CSL: <input type="text" name="staff_completing_csl">
+    </div>
+    <input type="submit" name="action"/>
+</form>
+</body>
+</html>
