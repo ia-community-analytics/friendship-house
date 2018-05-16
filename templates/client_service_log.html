@@ -7,7 +7,7 @@
 <body>
 <form id="client_service_log" method="post">
     <div id="date_field">
-        Date: <input type="text" name="Date" value="">
+        Date: <input type="date" name="Date" value={{ date }}>
     </div>
 
 {#    first table#}
@@ -25,26 +25,23 @@
                         <th>Telephone</th>
 
                         <tr>
-                            <td><input type="text" name="lastname" required></td>
-                            <td><input type="text" name="firstname" required></td>
-                            <td><input type="date" name="dob" required></td>
+                            <td><input type="text" name="lastname" value="{{ data.get('last_name') }}" required></td>
+                            <td><input type="text" name="firstname" value="{{ data.get('first_name') }}" required></td>
+                            <td><input type="date" name="dob" value="{{ data.get('dob') }}" required></td>
                             <td>
-                                <select name="gender">
-                                    <option value="Female">Female</option>
-                                    <option value="Male">Male</option>
-                                </select>
+                                <input type="text" name="gender" value="{{ data.get('gender') }}">
                             </td>
-                            <td><input type="tel" name="phone"></td>
+                            <td><input type="tel" name="phone" value="{{ data.get('phone') }}"></td>
                         </tr>
                     </table>
                 </td>
                 <td>
-                    Adults: <input type="number" name="adults" min="0"><br>
-                    Under 18: <input type="number" name="under18" min="0"><br>
-                    Total: <input type="number" name="inhome" min="0">
+                    Adults: <input type="number" name="adults" min="0" value="{{ data.get('nber_adults') }}"><br>
+                    Under 18: <input type="number" name="under18" min="0" value="{{ data.get('nber_under_18') }}"><br>
+                    Total: <input type="number" name="inhome" min="0" value="{{ data.get('total_in_home') }}">
                 </td>
             </tr>
-        </table>  
+        </table>
     </div>
 
 {#    second table#}
@@ -89,11 +86,14 @@
                 </td>
 
                 <td>
-                    15 Minutes: <input type="checkbox" name="15mins"><br>
-                    30 Minutes: <input type="checkbox" name="30mins"><br>
-                    45 Minutes: <input type="checkbox" name="45mins"><br>
-                    1 Hour: <input type="checkbox" name="1hour"><br>
-                    Other: <input type="checkbox" name="other_service"> <input type="text" name="other_service_txt"><br>
+                    <select name="uos">
+                        <option value="15">15 Minutes</option>
+                        <option value="30">30 Minutes</option>
+                        <option value="45">45 Minutes</option>
+                        <option value="1">1 Hour</option>
+                        <option value="other">Other</option>
+                    </select>
+                    Other:<input type="number" name="other_service_txt" min="0", step=".25"><br>
                     New Apointment:<br>
                     Date: <input type="date"><br>
                     Time: <input type="time">
@@ -107,21 +107,26 @@
         <table name="third">
             <th>Case Note: Service Need(s) AND Service(s) Provided:</th>
             <th></th>
-         
+
             <tr>
                 <td>
-                    <textarea name="casenote" cols="45" rows="7"></textarea>
+                    <textarea rows="5" cols="50" name="casenote">
+                    </textarea>
                 </td>
 
                 <td>
                     Did member demonstrate Improvement in Presenting Issue (Immediate Need met)?<br>
-                    Yes: <input type="checkbox" name="yes_member_improved"><br>
-                    No: <input type="checkbox" name="no_member_improved"><br>
-                    Pending: <input type="checkbox" name="pending_member_improved"><br>
+                    <select name="need_met">
+                        <option value="Y">Yes</option>
+                        <option value="N">No</option>
+                        <option value="P">Pending</option>
+                    </select><br>
                     Did member demonstrate Gained Life Management Skills (HW Completion)?<br>
-                    Yes: <input type="checkbox" name="yes_gained_skills"><br>
-                    No: <input type="checkbox" name="no_gained_skills"><br>
-                    Pending: <input type="checkbox" name="pending_gained_skills">
+                    <select name="hw_completion">
+                        <option value="Y">Yes</option>
+                        <option value="N">No</option>
+                        <option value="P">Pending</option>
+                    </select><br>
                 </td>
             </tr>
         </table>
@@ -272,6 +277,8 @@
     <div id="staffCSL">
         Staff Completing CSL: <input type="text" name="staff_completing_csl">
     </div>
+    <input name="race" value="{{ data.get('race','') }}" hidden>
+    <input name="zipcode" value="{{ data.get('zipcode', '') }}" hidden>
     <input type="submit" name="action"/>
 </form>
 </body>
