@@ -1,0 +1,290 @@
+{% extends 'layout.html' %}
+
+{% block header %}
+    <h1>{% block title %}Client Service Log{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+    <p>Add a new service log</p>
+    <form id="client_service_log" method="post">
+        <div id="date_field">
+            Date: <input type="date" name="Date" value={{ date }}>
+        </div>
+
+        {#    first table#}
+        <div id="first">
+            <table name="first">
+                <th>Client Information</th>
+                <th>In Home</th>
+                <tr>
+                    <td>
+                        <table id="info">
+                            <th>Last Name</th>
+                            <th>First Name</th>
+                            <th>DOB</th>
+                            <th>Gender</th>
+                            <th>Telephone</th>
+
+                            <tr>
+                                <td><input type="text" name="lastname" value="{{ data.get('last_name') }}" required>
+                                </td>
+                                <td><input type="text" name="firstname" value="{{ data.get('first_name') }}" required>
+                                </td>
+                                <td><input type="date" name="dob" value="{{ data.get('dob') }}" required></td>
+                                <td>
+                                    <input type="text" name="gender" value="{{ data.get('gender') }}">
+                                </td>
+                                <td><input type="tel" name="phone" value="{{ data.get('phone') }}"></td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td>
+                        Adults: <input type="number" name="adults" min="0" value="{{ data.get('nber_adults') }}"><br>
+                        Under 18: <input type="number" name="under18" min="0"
+                                         value="{{ data.get('nber_under_18') }}"><br>
+                        Total: <input type="number" name="inhome" min="0" value="{{ data.get('total_in_home') }}">
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        {#    second table#}
+        <div id="second">
+            <table name="second">
+                <th>Program Status</th>
+                <th>Appointment Type</th>
+                <th>Appointment Description</th>
+                <th>Service UOS</th>
+
+                <tr>
+                    <td>
+                        ACES MEMBER: <input type="checkbox" name="acesmember"><br>
+                        Housing Services: <input type="checkbox" name="housingservices"><br>
+                        S.W.H.P. Participant: <input type="checkbox" name="swhp"><br>
+                        Youth Ed. Family: <input type="checkbox" name="youthed"><br>
+                        Senior Support: <input type="checkbox" name="seniorsupport"><br>
+                        Adult Education: <input type="checkbox" name="adulted"><br>
+                        FOC Services: <input type="checkbox" name="focservices"><br>
+                        Other: <input type="checkbox" name="other_pgm_status">
+                    </td>
+
+                    <td>
+                        Indirect Service: <input type="checkbox" name="indirectservice" checked><br>
+                        Phone Call: <input type="checkbox" name="phonecall"><br>
+                        Walk In/Group: <input type="checkbox" name="walkin"><br>
+                        Scheduled Appointment<br>
+                        (In Office): <input type="checkbox" name="inoffice"><br>
+                        (Out of Office): <input type="checkbox" name="outofoffice"><br>
+                        Location:<br> <input type="text" name="location">
+                    </td>
+
+                    <td>
+                        Orientation/Pre Enrollment: <input type="checkbox" name="orientation" checked><br>
+                        Initial Intake/Assessment/Plan: <input type="checkbox" name="initialintake"><br>
+                        General CM/Coaching/Follow-up: <input type="checkbox" name="generalcm"><br>
+                        Finance Coaching: <input type="checkbox" name="financecoaching"><br>
+                        Employment Coaching: <input type="checkbox" name="employmentcoaching"><br>
+                        Re-Assessment/New Plan: <input type="checkbox" name="reassessment"><br>
+                        Case Staffing: <input type="checkbox" name="casestaffing"><br>
+                        Case Closure: <input type="checkbox" name="caseclosure">
+                    </td>
+
+                    <td>
+                        <select name="uos">
+                            <option value="15">15 Minutes</option>
+                            <option value="30">30 Minutes</option>
+                            <option value="45">45 Minutes</option>
+                            <option value="1">1 Hour</option>
+                            <option value="other">Other</option>
+                        </select>
+                        Other:<input type="number" name="other_service_txt" min="0" , step=".25"><br>
+                        New Apointment:<br>
+                        Date: <input type="date"><br>
+                        Time: <input type="time">
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        {#    third table#}
+        <div id="third">
+            <table name="third">
+                <th>Case Note: Service Need(s) AND Service(s) Provided:</th>
+                <th></th>
+
+                <tr>
+                    <td>
+                    <textarea rows="5" cols="50" name="casenote">
+                    </textarea>
+                    </td>
+
+                    <td>
+                        Did member demonstrate Improvement in Presenting Issue (Immediate Need met)?<br>
+                        <select name="need_met">
+                            <option value="Y">Yes</option>
+                            <option value="N">No</option>
+                            <option value="P">Pending</option>
+                        </select><br>
+                        Did member demonstrate Gained Life Management Skills (HW Completion)?<br>
+                        <select name="hw_completion">
+                            <option value="Y">Yes</option>
+                            <option value="N">No</option>
+                            <option value="P">Pending</option>
+                        </select><br>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        {#    fourth table#}
+        <div id="fourth">
+            <table name="fourth">
+                <th>Supportive Services Provided:</th>
+                <th>QTY</th>
+                <th>$ Value</th>
+
+                <tr>
+                    <td>
+                        Food<br>
+                        1-2 Day Supply <input type="checkbox" name="1-2day">
+                        3-5 Day Supply <input type="checkbox" name="3-5day">
+                        Dog Food <input type="checkbox" name="dogfood">
+                        Cat Food <input type="checkbox" name="catfood">
+                    </td>
+                    <td><input type="number" name="foodqty"></td>
+                    <td>$<input type="number" step="0.01" name="foodvalue"></td>
+                </tr>
+
+                <tr>
+                    <td>
+                        Clothing<br>
+                        Single Item <input type="checkbox" name="singleclothing">
+                        Outfit <input type="checkbox" name="outfitclothing">
+                        Multiple Items <input type="checkbox" name="multipleclothing">
+                        Multiple Outfits <input type="checkbox" name="multipleoutfitsclothing">
+                    </td>
+                    <td><input type="number" name="clothingqty"></td>
+                    <td>$<input type="number" step="0.01" name="clothingvalue"></td>
+                </tr>
+
+                <tr>
+                    <td>
+                        Hygiene<br>
+                        Signle Item <input type="checkbox" name="singlehygiene">
+                        Basic Pack <input type="checkbox" name="basichygiene">
+                        Family Pack <input type="checkbox" name="familyhygiene">
+                    </td>
+                    <td><input type="number" name="hygieneqty"></td>
+                    <td>$<input type="number" step="0.01" name="hygienevalue"></td>
+                </tr>
+
+                <tr>
+                    <td>
+                        Baby Items<br>
+                        Diaper/Wipes <input type="checkbox" name="diaperbaby">
+                        Formula <input type="checkbox" name="formulababy">
+                        Baby Food <input type="checkbox" name="foodbaby">
+                        Layette <input type="checkbox" name="layettebaby">
+                    </td>
+                    <td><input type="number" name="babyqty"></td>
+                    <td>$<input type="number" step="0.01" name="babyvalue"></td>
+                </tr>
+
+                <tr>
+                    <td>
+                        Financial<br>
+                        RR: Deposit <input type="checkbox" name="depositfinance">
+                        RR: Rent <input type="checkbox" name="rentfinance">
+                        Rent Arrears <input type="checkbox" name="arrearsfinance">
+                        Utility Arrears <input type="checkbox" name="utilityfinance">
+                    </td>
+                    <td><input type="number" name="financeqty"></td>
+                    <td>$<input type="number" step="0.01" name="financevalue"></td>
+                </tr>
+
+                <tr>
+                    <td>
+                        Legal<br>
+                        PSL <input type="checkbox" name="psllegal">
+                        Immigration <input type="checkbox" name="immigrationlegal">
+                        Other <input type="checkbox" name="other_legal">
+                    </td>
+                    <td><input type="number" name="legalqty"></td>
+                    <td>$<input type="number" step="0.01" name="legalvalue"></td>
+                </tr>
+
+                <tr>
+                    <td>
+                        HouseHold<br>
+                        Signle Item <input type="checkbox" name="singlehousehold">
+                        Basic Pack <input type="checkbox" name="basichousehold">
+                        Family Pack <input type="checkbox" name="familyhousehold">
+                    </td>
+                    <td><input type="number" name="familyqty"></td>
+                    <td>$<input type="number" step="0.01" name="familyvalue"></td>
+                </tr>
+
+                <tr>
+                    <td>
+                        Other: <input type="text" name="other_service_provided">
+                    </td>
+                    <td><input type="number" name="otherqty"></td>
+                    <td>$<input type="number" step="0.01" name="othervalue"></td>
+                </tr>
+
+                <tr>
+                    <td>
+                        Transportation <input type="checkbox" name="transportation?"><br>
+                        To/From: <input type="text" name="to_from">
+                        Miles: <input type="number" name="miles">
+                    </td>
+                    <td><input type="number" name="transportationqty"></td>
+                    <td>$<input type="number" step="0.01" name="transportationvalue"></td>
+                </tr>
+            </table>
+        </div>
+
+        {#    fifth#}
+        <div id="fifth">
+            <table>
+                <th></th>
+                <th></th>
+
+                <tr>
+                    <td>
+                        <table name="fifth_l">
+                            <th>External Referral Information</th>
+                            <tr>
+                                <td>Agency:</td>
+                                <td><input type="text" name="agency"></td>
+                            </tr>
+                            <tr>
+                                <td>Contact Person:</td>
+                                <td><input type="text" name="contactperson"></td>
+                            </tr>
+                            <tr>
+                                <td>Telephone #:</td>
+                                <td><input type="tel" name="external_telephone"></td>
+                            </tr>
+                        </table>
+                    </td>
+
+                    <td>
+                        <table name="fifth_r">
+                            <th>Staff Notes / Other</th>
+                            <tr>
+                                <td><input type="text" name="staff_notes"></td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div id="staffCSL">
+            Staff Completing CSL: <input type="text" name="staff_completing_csl">
+        </div>
+        <input name="race" value="{{ data.get('race','') }}" hidden>
+        <input name="zipcode" value="{{ data.get('zipcode', '') }}" hidden>
+        <input type="submit" name="action"/>
+    </form>
+{% endblock %}

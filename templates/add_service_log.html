@@ -1,0 +1,36 @@
+{% extends 'layout.html' %}
+
+{% block header %}
+  <h1>{% block title %}Add Service Log{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+    <p>Select a Client to add a new Service Log</p>
+<div id="edit">
+    <form name="add" method="post">
+    <table>
+        <th>Last Name</th>
+        <th>First Name</th>
+        <th>Date of Birth</th>
+        <th></th>
+
+        {% for option in options %}
+            <tr>
+            <td>
+                {{ option.split('_')[0] }}
+            </td>
+            <td>
+                {{ option.split('_')[1] }}
+            </td>
+            <td>
+                {{ option.split('_')[2] }}
+            </td>
+            <td>
+                <button type="submit" name="record" value={{ option }}>Add Service Log</button>
+            </td>
+            </tr>
+        {% endfor %}
+    </table>
+    </form>
+</div>
+{% endblock %}
