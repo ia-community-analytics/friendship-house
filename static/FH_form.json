@@ -1,0 +1,522 @@
+{
+  "Client Details": {
+    "Name": {
+      "First": "",
+      "Last": ""
+    },
+    "Birth date": "",
+    "Mailing Address": {
+      "Street": "",
+      "City": "",
+      "State": "",
+      "Zip": ""
+    },
+    "Email": {
+      "Personal": "",
+      "Work": ""
+    },
+    "Phone": {
+      "Preferred": [
+        "Home",
+        "Work",
+        "Mobile"
+      ],
+      "Home Phone": "",
+      "Work Phone": "",
+      "Mobile Phone": ""
+    },
+    "Gender": [
+      "Female",
+      "Male",
+      "Transgender",
+      "Other"
+    ],
+    "Race": [
+      "African American/Black",
+      "American Indian/Alaskan Native",
+      "Asian",
+      "Bi-racial",
+      "Caucasian/White",
+      "Hawaiian/Pacific Islander",
+      "Multi-racial",
+      "Other"
+    ],
+    "Ethnicity": [
+      "Hispanic",
+      "Non-Hispanic"
+    ],
+    "Primary Language": [
+      "English",
+      "Spanish",
+      "Polish",
+      "Chinese",
+      "Arabic",
+      "Other"
+    ],
+    "Highest Grade Completed": {
+      "Choices": [
+        "High School Equivalency (GED, HiSet, TASC)",
+        "College Certificate (non-credit bearing)",
+        "Bachelor's Degree",
+        "No High School Diploma/Equivalency",
+        "High School Diploma",
+        "College Certificate (credit bearing)",
+        "Master's Degree",
+        "Some College",
+        "Associate Degree",
+        "Doctoral Degree"
+      ],
+      "Comment": "If you completed education in another country, estimate the equivalent education in the U.S. (Note to staff: Note the difference in a case note or employment/education assessment.)"
+    },
+    "Vocational Training/Bridge Program History": [
+      "No vocational training/bridge program history",
+      "Some vocational traning/bridge program(s)",
+      "Completed vocational training/bridge program(s)"
+    ],
+    "Military Status": [
+      "Active Duty",
+      "Veteran",
+      "Spouse of Active Duty Member",
+      "Spouse of Veteran",
+      "Never Served"
+    ],
+    "Criminal Convictions": [
+      "Convicted of Misdemeanor(s) only",
+      "Convicted of Felony(ies)",
+      "No Convictions"
+    ],
+    "Marital Status": [
+      "Single (Never Married)",
+      "Married living together",
+      "Married living separately",
+      "Widowed",
+      "Separated",
+      "Divorced",
+      "Domestic Partner",
+      "Common Law"
+    ],
+    "Household Role": {
+      "Choices": [
+        "Self",
+        "Spouse/Partner",
+        "Child",
+        "Parent",
+        "Step parent",
+        "Foster Parent",
+        "Grandparent",
+        "Sibling",
+        "Aunt/Uncle",
+        "Other"
+      ],
+      "Comment": "A household is 1 or more heads household & their dependents. This may include people who don't live together (e.g. child at college, parent in nursing home). People living together may not be in the same household (e.g. rommates who don't blend finances)."
+    },
+    "Living Arrangement": {
+      "Choices": [
+        "House/apt. is owned by household member",
+        "House/apt. is rented by household member - subsidized",
+        "House/apt. is rented by household member - unsubsidized",
+        "Household stays in the house/apt./room for free (no lease)",
+        "Household is homeless (without a roof) or in a shelter"
+      ],
+      "Comment": "If you are incarcerated or in an institution (such as a rehabilitation facility or a group home) and do NOT pay rent, please select 'Household stays...for free...'."
+    },
+    "Health Insurance Status (primary insurance only)": [
+      "Insured through a government program (e.g. Medicaid, Medicare, SCHIP",
+      "Private insurance through a household member's employer",
+      "Private insurance (not through a household member's employer), unsubsidized",
+      "Private insurance (not through a household member's employer), partially or completely subsidized",
+      "No insurance at all"
+    ],
+    "Primary Interest at Program Entry (select one)": [
+      "Job Placement/Career Development",
+      "Education/Training",
+      "Digital Literacy/Computer Instruction",
+      "Income Supports/Public Benefits",
+      "Financial Education/Counseling",
+      {
+        "Other": ""
+      }
+    ],
+    "Woring at program entry?": {
+      "Choices": [
+        "Yes",
+        "No"
+      ],
+      "Comment": "Please create an Employment record for current job."
+    },
+    "Is school/training at program entry?": {
+      "Choices": [
+        "Yes",
+        "No"
+      ],
+      "Comment": "Please create an Educational/Traning Program record for current school/training."
+    },
+    "For past 12 months, earned income after tax": {
+      "Answer": "",
+      "Comment": "This ONLY includes earned income (wages, salaries, tips, etc.). Report your actual income over the last 12 months. Note that this is different from the later question about gross annual household income."
+    },
+    "For past 12 months, # of full months wored": {
+      "Answer": "",
+      "Comment": "A full month refers to either (1) the calendar month, or (2) any 4 continuous weeks"
+    }
+  },
+  "Household Details": {
+    "Your Gross Household Income": {
+      "Answer": "",
+      "Comment": "Estimate household income for past 12 months. Only include wages/salaries/tips, business, interest/dividend, unemployment/disability, welfare assistance, alimony/child support, pension/retirement, regular gifts from non-household members & armed forces."
+    }
+  },
+  "Case Detals": {
+    "Enrolled Date": ""
+  },
+  "Household Members": {
+    "First Name": [],
+    "Last Name": [],
+    "Middle Initial": [],
+    "Household Role (see roles above)": [],
+    "Gender ('F - Female', 'M - Male', 'T - Transgender', 'O - Other')": []
+  },
+  "Orientation": {
+    "Orientation Attended": {
+      "Choices": [
+        "Yes",
+        "No"
+      ],
+      "Orientation Date if 'Yes'": ""
+    }
+  },
+  "Bridges To Career Opportunities": {
+    "Is this client part of the Bridges to Career Opportunities SIF grant?": [
+      "Yes",
+      "No"
+    ],
+    "BCO Start Date if 'Yes'": ""
+  },
+  "FOC Assigned Staff": {
+    "Coaching agreement signed?": [
+      "Yes",
+      "No"
+    ],
+    "Coaching Agreement Date if 'Yes'": "",
+    "Career Coach": "",
+    "Employment Coach": "",
+    "Financial Coach": "",
+    "Income Support Coach": "",
+    "Other FOC Staff": ""
+  },
+  "Consent To Participate In Research": {
+    "Consented to participate in research?": [
+      "Yes",
+      "No"
+    ],
+    "Date Consent Signed if 'Yes'": ""
+  },
+  "Inbound Referral Information": {
+    "Referral Date": "",
+    "Referred Form Contact": "",
+    "Referred From Organization": ""
+  },
+  "Program Exit Summary": {
+    "Exit Date": "",
+    "Reason for Exit": [
+      "Asked to leave",
+      "Incarceration",
+      "Left voluntarily",
+      "Moved",
+      "Noncompliance",
+      "No service for 12 months",
+      "Not known",
+      {
+        "Other": ""
+      }
+    ]
+  },
+  "Copyrights and Legal Statement": {
+    "FFT": "",
+    "Local Initiatives Support Corporation 2010": ""
+  },
+  "FFT (TM) Financial Health Assessment (Baseline Profile)": {
+    "Client Name": "",
+    "Assessment Date": "",
+    "Comment": "See the CFPB Financial Well-Being Scale and the UW Financial Capability Scale forms for the first 5 sections.",
+    "Banking Information": {
+      "Do you presently have a checking account with a bank or a credit union?": [
+        "Yes",
+        "No"
+      ],
+      "If 'Yes', do you bounce checks frequently (at least once a month for the past 3 months)?": [
+        "Yes",
+        "No"
+      ],
+      "If 'No', have you ever had a checking account?": [
+        "Yes",
+        "No"
+      ],
+      "If 'No', what is the reason for not having one?": [
+        "In ChexSystems",
+        "Transactions take too long",
+        "Not sure how to set one up",
+        "Fees too high",
+        "Don't like dealing with bank personnel",
+        "Not enough money to make account useful",
+        "Other"
+      ],
+      "Notes": ""
+    }
+  },
+  "CFPB Financial Well-Being Scale": {
+    "Questionnaire": {
+      "Part 1": {
+        "Choices": [
+          "Completelt",
+          "Very well",
+          "Somewhat",
+          "Very little",
+          "Not at all"
+        ],
+        "This statement describes me": [
+          "I could handle a major unexpected expense",
+          "I am securing my financial future",
+          "Because of my money situation, I feel like I will never have the things I want in life",
+          "I can enjoy life because of the way I'm managing my money",
+          "I am just getting by financially",
+          "I am concerned that the money I have or will save won't last"
+        ]
+      },
+      "Part 2": {
+        "Choices": [
+          "Always",
+          "Often",
+          "Sometimes",
+          "Rarely",
+          "Never"
+        ],
+        "This statement applies to me": [
+          "Giving a gift for a wedding, birthday or other occasion would put a strain on my finances for the month",
+          "I have money left over at the end of the month",
+          "I am behind with my finances",
+          "My finances control my life"
+        ]
+      },
+      "Tell us about yourself": {
+        "How old are you": [
+          "18-61",
+          "62+"
+        ],
+        "How did you take the questionnaire?": [
+          "I read the questions",
+          "Someone read the questions to me"
+        ]
+      }
+    },
+    "Scoring worksheet": {
+      "Name Or Number": "",
+      "Action 1": "Select the person's answers, record the response value in the right hand column and add up the total values for each part of the uestionnaire",
+      "Response Value": {
+        "Part 1": {
+          "I could handle a major unexpected expense": {
+            "Completely": 4,
+            "Very well": 3,
+            "Somewhat": 2,
+            "Very little": 1,
+            "Not at all": 0
+          },
+          "I am securing my financial future": {
+            "Completely": 4,
+            "Very well": 3,
+            "Somewhat": 2,
+            "Very little": 1,
+            "Not at all": 0
+          },
+          "Because of my money situation, I feel like I will never have the things I want in life": {
+            "Completely": 0,
+            "Very well": 1,
+            "Somewhat": 2,
+            "Very little": 3,
+            "Not at all": 4
+          },
+          "I can enjoy life because of the way I'm managing my money": {
+            "Completely": 4,
+            "Very well": 3,
+            "Somewhat": 2,
+            "Very little": 1,
+            "Not at all": 0
+          },
+          "I am just getting by financially": {
+            "Completely": 0,
+            "Very well": 1,
+            "Somewhat": 2,
+            "Very little": 3,
+            "Not at all": 4
+          },
+          "I am concerned that the money I have or will save won't last": {
+            "Completely": 0,
+            "Very well": 1,
+            "Somewhat": 2,
+            "Very little": 3,
+            "Not at all": 4
+          },
+          "Subtotal": "SUM"
+        },
+        "Part 2": {
+          "Giving a gift for a wedding, birthday or other occasion would put a strain on my finances for the month": {
+            "Always": 0,
+            "Often": 1,
+            "Sometimes": 2,
+            "Rarely": 3,
+            "Never": 4
+          },
+          "I have money left over at the end of the month": {
+            "Always": 4,
+            "Often": 3,
+            "Sometimes": 2,
+            "Rarely": 1,
+            "Never": 0
+          },
+          "I am behind with my finances": {
+            "Always": 0,
+            "Often": 1,
+            "Sometimes": 2,
+            "Rarely": 3,
+            "Never": 4
+          },
+          "My finances control my life": {
+            "Always": 0,
+            "Often": 1,
+            "Sometimes": 2,
+            "Rarely": 3,
+            "Never": 4
+          },
+          "Subtotal": "SUM"
+        },
+        "Total Response Value": "SUM"
+      },
+      "Financial Well-Being Score": {
+        "How old is the person?": [
+          "18-61",
+          "62+"
+        ],
+        "How did the person take the questionaire?": [
+          "Self administered",
+          "Administered by someone else"
+        ],
+        "Comment": "Because scores vary based on age and how the questionnaire was administered, you must convert the total response value to a financial well-being score.",
+        "Action 2": {
+          "a.": "Find the row that corresponds to the total response value.",
+          "b.": "Follow that roww across to the column that corresponds to the person's age and how the questionnaire was administered.",
+          "c.": "Record the final score."
+        },
+        "Look up Table": "LINK HERE - USE SIMPLE CSV TABLE AS DATA",
+        "Financial well-being score": "ENTRY"
+      }
+    }
+  },
+  "FFTTM Budget Assessment": {
+    "Josiah Comment": "LINK HERE - USE SIMPLE CSV TABLE AS DATA - FORM CAN BE OBTAINED ONLINE",
+    "Client Name": "",
+    "Assessment Date": "",
+    "Sheet Comments": {
+      "Do you want this budget to reflect just your own finances or the finances of your whole household? (Note to participants: please make sure all of your answers for this Budget assessment stay consistent with your response to this question.)": [
+        "Budget reflects participant only or a household of one",
+        "Budget reflects whole household"
+      ],
+      "Is this the first budget created for this participant?": [
+        "Yes",
+        {
+          "No": {
+            "Is this a partial or complete update of the budget?": [
+              "Partial update",
+              "Complete update"
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "FFTTM Balence Assessment": {
+    "Client Name": "",
+    "Assessment Date": "",
+    "Sheet Comments": {
+      "Do you want this balance sheet to reflect just your own finances or the finances of your whole household? (Note to participants: please make sure all of your answers for this Balance Sheet assessment stay consistent with your response to this question.)": [
+        "Balance sheet reflects participant only or a household of one",
+        "Balance sheet reflects whole household"
+      ],
+      "Is this the first balance sheet created for this participant?": [
+        "Yes",
+        {
+          "No": {
+            "Is this a partial or complete update of the budget?": [
+              "Partial update",
+              "Complete update"
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "FFTM Action Plan (Vision)": {
+    "Client Name": "",
+    "Staff": "",
+    "Start Date": "",
+    "End Date": "",
+    "Vision Narrative": "",
+    "Client Goal": {
+      "Budgeting": {
+        "Goal Action (s)": [
+          "Document all spending",
+          "Lower expenses",
+          "other"
+        ],
+        "Target Completion Date": "",
+        "Actual Completion Date": "",
+        "Description": ""
+      },
+      "Credit Building": {
+        "Goal Action (s)": [
+          "Keep balances low",
+          "Open new tradelines",
+          "Pay bills on time",
+          "Resolve errors/issues",
+          "Other"
+        ],
+        "Target Completion Date": "",
+        "Actual Completion Date": "",
+        "Description": ""
+      },
+      "Debt Management": {
+        "Goal Action (s)": [
+          "Call to negotiate better terms",
+          "Make lump sum payment",
+          "Move debt to lower interest credit card or loan",
+          "Set up payment plan",
+          "Other"
+        ],
+        "Target Completion Date": "",
+        "Actual Completion Date": "",
+        "Description": ""
+      },
+      "Savings/Investing": {
+        "Goal Action (s)": [
+          "Direct deposit to retirement",
+          "Direct deposit to savings",
+          "Open savings account",
+          "Open retirement account",
+          "Other"
+        ],
+        "Target Completion Date": "",
+        "Actual Completion Date": "",
+        "Description": ""
+      },
+      "Transacting": {
+        "Goal Action (s)": [
+          "Open checking account",
+          "Open stored value card (prepaid card)",
+          "Other"
+        ],
+        "Target Completion Date": "",
+        "Actual Completion Date": "",
+        "Description": ""
+      }
+    }
+  }
+}

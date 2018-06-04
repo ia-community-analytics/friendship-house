@@ -1,0 +1,56 @@
+{% extends 'layout.html' %}
+
+{% block header %}
+    <h1>{% block title %}Export Client Log{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+    <p>Please Select a Time Period to Export a CSV Summary.</p>
+    <div id="period">
+        <form method="post">
+            From:<input type="date" min="1960-01-01" max="{{ date }}" name="start">
+            To:<input type="date" min="1960-01-01" max="{{ date }}" name="end">
+            <button type="submit">Export</button>
+        </form>
+    </div><br>
+    <p>{{ header | safe }}</p>
+    <div id="table_div"></div>
+
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+    <script type="text/javascript">
+        var columns = {{ columns | tojson }};
+        var rows = {{ data_list | tojson }};
+        var dtype = {{ dtype | tojson }};
+
+        console.log(columns);
+        console.log(rows);
+        console.log(dtype);
+    </script>
+
+    <script type="text/javascript">
+        google.charts.load('current', {'packages': ['table']});
+        google.charts.setOnLoadCallback(drawTable);
+
+        var columns = {{ columns | tojson }};
+        var rows = {{ data_list | tojson }};
+        var dtype = {{ dtype | tojson }};
+
+        function drawTable() {
+            var data = new google.visualization.DataTable();
+
+            for (i = 0; i < columns.length; i++) {
+                {#data.addColumn(dtype[columns[i]], columns[i]);#}
+                data.addColumn("string", columns[i]);
+            }
+
+            for (i = 0; i < rows.length; i++) {
+                data.addRow(rows[i]);
+            }
+
+            var table = new google.visualization.Table(document.getElementById('table_div'));
+
+            table.draw(data, {showRowNumber: true, width: '100%', height: '100%', frozenColumns:3});
+        }
+    </script>
+{% endblock %}
