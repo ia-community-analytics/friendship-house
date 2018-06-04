@@ -10,10 +10,12 @@ from flask_basicauth import BasicAuth
 # TODO serve https and not http since we are using basic auth.
 
 app = Flask(__name__)
+# TODO: use an environment variable for this app secret!
 app.secret_key = b'some46fu23yp/;:/sjdh'
 
 today = pd.datetime.today()
 
+# TODO: use environment variable for these as well
 app.config['BASIC_AUTH_USERNAME'] = 'someguy@domain.com'
 app.config['BASIC_AUTH_PASSWORD'] = 'Inconnu1'
 
