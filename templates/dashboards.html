@@ -1,17 +1,350 @@
 {% extends 'layout.html' %}
 
-{% block header %}
+{% block title %}Dashboards{% endblock %}
+
+{% block scripts %}
     <meta charset="UTF-8">
-    {% block title %}Dashboards{% endblock %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='leaflet.css') }}" />
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='leaflet-legend.css') }}" />
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='MarkerCluster.Default.css') }}" />
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='MarkerCluster.css') }}" />
+    <script type="text/javascript" src="{{ url_for('static', filename='jquery-1.10.2.js') }}"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='dc.css') }}" />
+    <script src="{{ url_for('static', filename='d3.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='crossfilter.min.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='dc.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='leaflet-src.js') }}"></script>
+    <script src="{{ url_for('static', filename='leaflet.markercluster-src.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='dc.leaflet.js') }}" type="text/javascript"></script>
+
+        <style>
+        .dc-chart {
+            font-size: 12px;
+        }
+
+        .dc-table-group {
+            padding-left: 10px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .dc-table-column {
+            padding-left: 10px;
+            font-size: 12px;
+            font-weight: normal;
+        }
+    </style>
 {% endblock %}
 
 {% block content %}
     <h1>Dashboards fo Daizz</h1>
     <body>
+        <div class="row"  style="width: 550px;float: left;">
+            <div id="chart-ring-year" class="col-sm-5">
+                <strong>Year: </strong>
+                <a class="reset" href="javascript:void(0)" onclick="yearRingChart.filterAll();dc.redrawAll();" style="display: none">reset</a>
+            </div>
+            <div id="month-select-chart" class="col-sm-2">
+                <strong>Month in Year: </strong>
+                <a class="reset" href="javascript:void(0)" onclick="monthChart.filterAll();dc.redrawAll();" style="display: none">reset</a>
+            </div>
+        </div>
+        <br />
+        <br />
+        <div class="row"  style="width: 500px;float: left;">
+            <div class="left" id="chart-line-hitsperday" >
+                <strong>Total Hits: </strong>
+                <a class="reset" href="javascript:void(0)" onclick="hitslineChart.filterAll();dc.redrawAll();" style="display: none">reset</a>
+            </div>
+        </div>
+        <div class="row" id="monthly-volume-chart" class="row">
+            <strong>Monthly Volume: </strong>
+            <a class="reset" href="javascript:void(0)" onclick="volumeChart.filterAll();dc.redrawAll();" style="display: none">reset</a>
 
+            <br />
+        </div>
+        <br />
+        <div id="http-type-chart" class="row left" style="float: left; width: 500px;">
+                <strong>Request Type: </strong>
+
+                <a class="reset" href="javascript:void(0)" onclick="httpChart.filterAll();dc.redrawAll();" style="display: none">reset</a>
+        </div>
+        <br/>
+        <div id="country-chart" class="row">
+            <strong>Company and Country Origin: </strong>
+            <a class="reset" href="javascript:void(0)" onclick="countryChart.filterAll();dc.redrawAll();" style="display: none">reset</a>
+        </div>
+        <div id="mytable" class="table row table-hover dc-chart dc-table-group" style="overflow:auto; height: 275px; width: 530px">
+                <a class="reset" href="javascript:void(0)" onclick="tableChart.filterAll();dc.redrawAll();" style="display: none">reset</a>
+        </div>
     </body>
-    <script>
-    hi = 0;
-    hi = hi + 1;
+        <script>
+        var hitslineChart = dc.lineChart("#chart-line-hitsperday");
+        var httpChart = dc.rowChart('#http-type-chart');
+        var tableChart = dc.dataTable("#mytable");
+        var volumeChart = dc.barChart('#monthly-volume-chart');
+        var monthChart = dc.pieChart('#month-select-chart');
+        var yearRingChart = dc.pieChart("#chart-ring-year");
+        var countryChart = dc.heatMap("#country-chart");
+
+        d3.csv(src="{{ url_for('static', filename='WebRequestsData2.csv') }}", function (data) {
+            var parseDate = d3.time.format("%m/%d/%Y").parse;
+            data.forEach(function (d) {
+                d.date = parseDate(d.date);
+                d.Year = d.date.getFullYear();
+                d.month = d3.time.month(d.date);
+                //console.log(d.geo);
+            });
+            var ndx = crossfilter(data);
+           // var all = ndx.groupAll();
+
+
+            var dateDim = ndx.dimension(function (d) { return d.date; });
+            var hits = dateDim.group().reduceSum(function (d) { return d.amount; });
+            var minDate = dateDim.bottom(1)[0].date;
+            var maxDate = dateDim.top(1)[0].date;
+            var monthDim = ndx.dimension(function (d) {
+                var month = d.date.getMonth();
+                var name = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                return name[month];
+            });
+            // Group by total movement within month
+            var monthDim2 = ndx.dimension(function (d) {
+                return d.month;
+            });
+            var requestType = ndx.dimension(function (d) { return d.request_type });
+            var requestTypeGroup = requestType.group().reduceSum(function (d) { return d.amount });
+
+            var country = ndx.dimension(function (d) { return d.country });
+            var countryGroup = country.group().reduceSum(function (d) { return d.amount; });
+
+
+            var monthGroup = monthDim.group();
+            var monthGroup2 = monthDim2.group().reduceSum(function (d) {
+                return d.amount;
+            });
+            var status_200 = monthDim2.group().reduceSum(function (d) {
+                if (d.request_type === "http_200")
+                    return d.amount;
+                else
+                    return +0;
+            });
+            var status_404 = monthDim2.group().reduceSum(function (d) {
+                if (d.request_type === "http_404")
+                    return d.amount;
+                else
+                    return +0;
+            });
+            var status_302 = monthDim2.group().reduceSum(function (d) {
+                if (d.request_type === "http_302")
+                    return d.amount;
+                else
+                    return +0;
+            });
+            var status_503 = monthDim2.group().reduceSum(function (d) {
+                if (d.request_type === "http_503")
+                    return d.amount;
+                else
+                    return +0;
+            });
+            var status_508 = monthDim2.group().reduceSum(function (d) {
+                if (d.request_type === "http_508")
+                    return d.amount;
+                else
+                    return +0;
+            });
+            var status_401 = monthDim2.group().reduceSum(function (d) {
+                if (d.request_type === "http_401")
+                    return d.amount;
+                else
+                    return +0;
+            });
+            var status_409 = monthDim2.group().reduceSum(function (d) {
+                if (d.request_type === "http_409")
+                    return d.amount;
+                else
+                    return +0;
+            });
+            var status_201 = monthDim2.group().reduceSum(function (d) {
+                if (d.request_type === "http_201")
+                    return d.amount;
+                else
+                    return +0;
+            });
+            var status_206 = monthDim2.group().reduceSum(function (d) {
+                if (d.request_type === "http_206")
+                    return d.amount;
+                else
+                    return +0;
+            });
+
+            var whereDim = ndx.dimension(function (d) { return [d.country, d.Company]; });
+            var whereGroup = whereDim.group().reduceSum(function (d) { return +d.amount; });
+
+            //var heatColorMapping = d3.scale.linear()
+            //    .domain([0, 1])
+            //    .range(["#e8e88b", "#171a63"]);
+
+            countryChart
+                .width(45 * 20 + 80)
+                .height(45 * 5 + 40)
+                .dimension(whereDim)
+                .group(whereGroup)
+                .keyAccessor(function (d) { return d.key[0]; })
+                .valueAccessor(function (d) { return d.key[1]; })
+                .colorAccessor(function (d) { return d.value; })
+                .title(function (d) {
+                    return "Country:   " + d.key[0] + "\n" +
+                        "Company:  " + d.key[1] + "\n" +
+                        "Amount: " + (d.value) + "";
+                })
+                .colors(["#ececec", "#b9e9ec", "#a3deeb", "#93d3e9", "#86c5e5", "#7bb9e1",
+                    "#71acdb", "#68a1d5", "#6094cd", "#5888c5", "#517dba", "#4a71b0", "#4466a3",
+                    "#3e5b96", "#385188", "#334678", "#2d3d69", "#283457", "#222c45", "#1c2432"])
+                .calculateColorDomain()
+                .on('preRedraw', function () {
+                    countryChart.calculateColorDomain();  //this will make the scale adjust to the scale of filtered values.
+
+                });
+            //countryChart
+            //    .width(500)
+            //    .height(200)
+            //    .margins({ top: 20, left: 10, right: 10, bottom: 20 })
+            //    .group(countryGroup)
+            //    .dimension(country)
+            //    // Assign colors to each value in the x scale domain
+            //    // Title sets the row text
+            //    .title(function (d) {
+            //        return d.value;
+            //    })
+            //    .elasticX(true)
+            //    .xAxis().ticks(4);
+
+            httpChart
+                .width(500)
+                .height(200)
+                .margins({ top: 20, left: 10, right: 10, bottom: 20 })
+                .group(requestTypeGroup)
+                .dimension(requestType)
+                .ordinalColors(["#a4da74", "#1648a0", "#af45d7", "#315f32", "#d02f34", "#beb92f",
+                    "#462c0c", "#615594", "#bf500e"])
+                // Assign colors to each value in the x scale domain
+                // Title sets the row text
+                .on('preRedraw', function () {
+                    httpChart.ordering(function (d) { return -d.value });  //this will make the scale adjust to the scale of filtered values.
+
+                })
+                .title(function (d) {
+                    return d.value;
+                })
+                .ordering(function (d) { return d.key })
+                .elasticX(true)
+                .xAxis().ticks(4)
+
+
+            monthChart /* dc.pieChart('#quarter-chart', 'chartGroup') */
+                .width(180)
+                .height(180)
+                .radius(80)
+                .innerRadius(30)
+                .dimension(monthDim)
+                .group(monthGroup)
+                .ordering(dc.pluck('key')); //orders alphabetically by group label name
+
+            volumeChart.width(500) /* dc.barChart('#monthly-volume-chart', 'chartGroup'); */
+                .height(85)
+                .margins({ top: 10, right: 50, bottom: 40, left: 40 })
+                .dimension(monthDim2)
+                .round(d3.time.month.round)
+                .group(monthGroup2)
+                .centerBar(true)
+                .gap(1)
+                .x(d3.time.scale().domain([minDate, maxDate]))
+                .xUnits(d3.time.month)
+                .elasticY(true)
+                .yAxis().ticks(4);
+
+            hitslineChart
+                .renderArea(true)
+                .width(475)
+                .height(250)
+                .transitionDuration(200)
+                .margins({ top: 30, right: 0, bottom: 60, left: 40 })
+                .dimension(monthDim2)
+                .mouseZoomable(true)
+                .rangeChart(volumeChart)
+                .x(d3.time.scale().domain([minDate, maxDate]))
+                .round(d3.time.month.round)
+                .xUnits(d3.time.months)
+                .elasticY(true)
+                .renderHorizontalGridLines(true)
+                .legend(dc.legend().x(40).y(10).itemHeight(10).gap(5).horizontal(true).itemWidth(50).legendWidth(520))
+                .brushOn(false)
+                .group(status_200, "200")
+                .stack(status_201, "201")
+                //.stack(status_206, "206")
+                .stack(status_302, "302")
+                .stack(status_401, "401")
+                .stack(status_404, "404")
+                .stack(status_409, "409")
+                .stack(status_503, "503")
+                .stack(status_508, "508")
+                .ordinalColors(["#a4da74", "#1648a0", "#af45d7", "#315f32", "#d02f34", "#beb92f",
+                    "#462c0c", "#615594", "#bf500e"])
+                .on("renderlet", function (chart) {
+                    // rotate x-axis labels
+                    chart.selectAll('g.x text')
+                        .attr('transform', 'translate(-13,30) rotate(270)')
+                });
+
+
+
+            var yearDim = ndx.dimension(function (d) { return +d.Year; });
+            var date_total = dateDim.group().reduceSum(function (d) { return d.amount; });
+            var year_total = yearDim.group().orderNatural().reduceSum(function (d) { return d.amount; });
+
+            yearRingChart
+                .width(200).height(200)
+                .dimension(yearDim)
+                .group(year_total)
+                .innerRadius(50)
+                .ordering(dc.pluck('key'));
+
+            tableChart /* dc.dataTable('.dc-data-table', 'chartGroup') */
+                .width(500)
+                .dimension(dateDim)
+                // Data table does not use crossfilter group but rather a closure
+                // as a grouping function
+                .group(function (data) {
+                    return ~~(data.Year);
+                })
+                // (_optional_) max number of records to be shown, `default = 25`
+                .size(25)
+                // There are several ways to specify the columns; see the data-table documentation.
+                // This code demonstrates generating the column header automatically based on the columns.
+                .columns([
+                    // Use the `d.date` field; capitalized automatically
+                    'date',
+                    // Use `d.open`, `d.close` http_404: 35, http_200: 123, http_302: 41
+                    'amount',
+                    'request_type',
+                    'country',
+                    'Company'
+                ])
+
+                // (_optional_) sort using the given field, `default = function(d){return d;}`
+                .sortBy(function (d) {
+                    return d.value;
+                })
+                // (_optional_) sort order, `default = d3.ascending`
+                .order(d3.ascending)
+                // (_optional_) custom renderlet to post-process chart using [D3](http://d3js.org)
+                ;
+
+
+
+            dc.renderAll();
+            dc.redrawAll();
+        });
     </script>
 {% endblock %}
