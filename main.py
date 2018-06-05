@@ -245,5 +245,12 @@ def export():
     return Response(content,mimetype="test/csv", headers={"Content-disposition":
                                                           "attachment; filename=export%sto%s.csv" % (start, end)})
 
+@app.route('/dashboards')
+@basic_auth.required
+@authentication_required
+def dashboards():
+    return render_template('dashboards.html')
+
+
 if __name__ == '__main__':
     app.run(debug=True)
