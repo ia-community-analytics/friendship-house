@@ -212,6 +212,7 @@ def service_log_add(record):
     return render_template('client_service_log.html', data=data, date=today.strftime("%Y-%m-%d"))
 
 
+
 @app.route('/admin/<edit_rec>')
 @basic_auth.required
 @authentication_required
