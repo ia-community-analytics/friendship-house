@@ -20,11 +20,6 @@
         });
     </script>
     <p>Add a new service log</p>
-
-    <select class="js-example-basic-single" name="state">
-        <option value="AL">Alabama</option>
-        <option value="WY">Wyoming</option>
-    </select>
     <form id="client_service_log" method="post">
         <div id="date_field">
             Date: <input type="date" min="1960-01-01" max="{{ date }}" name="Date" value={{ date }}>
@@ -77,35 +72,36 @@
 
                 <tr>
                     <td>
-                        ACES MEMBER: <input type="checkbox" name="acesmember"><br>
-                        Housing Services: <input type="checkbox" name="housingservices"><br>
-                        S.W.H.P. Participant: <input type="checkbox" name="swhp"><br>
-                        Youth Ed. Family: <input type="checkbox" name="youthed"><br>
-                        Senior Support: <input type="checkbox" name="seniorsupport"><br>
-                        Adult Education: <input type="checkbox" name="adulted"><br>
-                        FOC Services: <input type="checkbox" name="focservices"><br>
-                        Other: <input type="checkbox" name="other_pgm_status">
+                        <select class="programs" multiple="multiple">
+                            <option name="acesmember">ACES Member</option>
+                            <option name="housingservices">Housing Services</option>
+                            <option name="swhp">S.W.H.P. Participant</option>
+                            <option name="youthed">Youth Ed. Family</option>
+                            <option name="seniorsupport">Senior Support</option>
+                            <option name="adulted">Adult Education</option>
+                            <option name="focservices">FOC Services</option>
+                            <option name="other_pgm_status">Other</option>
+                        </select>
                     </td>
-
                     <td>
-                        Indirect Service: <input type="checkbox" name="indirectservice" checked><br>
-                        Phone Call: <input type="checkbox" name="phonecall"><br>
-                        Walk In/Group: <input type="checkbox" name="walkin"><br>
-                        Scheduled Appointment<br>
-                        (In Office): <input type="checkbox" name="inoffice"><br>
-                        (Out of Office): <input type="checkbox" name="outofoffice"><br>
-                        Location:<br> <input type="text" name="location">
+                        <select class="programs" multiple="multiple">
+                            <option name="indirectservice">Indirect Service</option>
+                            <option name="phonecall">Phone Call</option>
+                            <option name="walkin">Walk In/Group</option>
+                            <option name="inoffice">(In Office)</option>
+                            <option name="outofoffice">(Out of Office)</option>
+                        </select>
+                        <br>Location:<br> <input type="text" name="location">
                     </td>
-
                     <td>
-                        Orientation/Pre Enrollment: <input type="checkbox" name="orientation" checked><br>
-                        Initial Intake/Assessment/Plan: <input type="checkbox" name="initialintake"><br>
-                        General CM/Coaching/Follow-up: <input type="checkbox" name="generalcm"><br>
-                        Finance Coaching: <input type="checkbox" name="financecoaching"><br>
-                        Employment Coaching: <input type="checkbox" name="employmentcoaching"><br>
-                        Re-Assessment/New Plan: <input type="checkbox" name="reassessment"><br>
-                        Case Staffing: <input type="checkbox" name="casestaffing"><br>
-                        Case Closure: <input type="checkbox" name="caseclosure">
+                        <select class="programs" multiple="multiple">
+                            <option name="generalcm">General CM/Coaching/Follow-up</option>
+                            <option name="financecoaching">Finance Coaching</option>
+                            <option name="employmentcoaching">Employment Coaching</option>
+                            <option name="reassessment">Re-Assessment/New Plan</option>
+                            <option name="casestaffing">Case Staffing</option>
+                            <option name="caseclosure">Case Closure</option>
+                        </select>
                     </td>
 
                     <td>
@@ -164,11 +160,13 @@
 
                 <tr>
                     <td>
-                        Food<br>
-                        1-2 Day Supply <input type="checkbox" name="1-2day">
-                        3-5 Day Supply <input type="checkbox" name="3-5day">
-                        Dog Food <input type="checkbox" name="dogfood">
-                        Cat Food <input type="checkbox" name="catfood">
+                        Food
+                        <select class="supportiveservices" multiple="multiple">
+                            <option name="1-2day">1-2 Day Supply</option>
+                            <option name="3-5day">3-5 Day Supply</option>
+                            <option name="dogfood">Dog Food</option>
+                            <option name="catfood">Cat Food</option>
+                        </select>
                     </td>
                     <td><input type="number" name="foodqty"></td>
                     <td>$<input type="number" step="0.01" name="foodvalue"></td>
@@ -176,11 +174,13 @@
 
                 <tr>
                     <td>
-                        Clothing<br>
-                        Single Item <input type="checkbox" name="singleclothing">
-                        Outfit <input type="checkbox" name="outfitclothing">
-                        Multiple Items <input type="checkbox" name="multipleclothing">
-                        Multiple Outfits <input type="checkbox" name="multipleoutfitsclothing">
+                        Clothing
+                        <select class="supportiveservices" multiple="multiple">
+                            <option name="singleclothing">Single Item</option>
+                            <option name="outfitclothing">Outfit</option>
+                            <option name="multipleclothing">Multiple Items</option>
+                            <option name="multipleoutfitsclothing">Multiple Outfits</option>
+                        </select>
                     </td>
                     <td><input type="number" name="clothingqty"></td>
                     <td>$<input type="number" step="0.01" name="clothingvalue"></td>
@@ -188,10 +188,12 @@
 
                 <tr>
                     <td>
-                        Hygiene<br>
-                        Signle Item <input type="checkbox" name="singlehygiene">
-                        Basic Pack <input type="checkbox" name="basichygiene">
-                        Family Pack <input type="checkbox" name="familyhygiene">
+                        Hygiene
+                        <select class="supportiveservices" multiple="multiple">
+                            <option name="singlehygiene">Single Item</option>
+                            <option name="basichygiene">Basic Pack</option>
+                            <option name="familyhygieneItems">Family Pack</option>
+                        </select>
                     </td>
                     <td><input type="number" name="hygieneqty"></td>
                     <td>$<input type="number" step="0.01" name="hygienevalue"></td>
@@ -199,11 +201,13 @@
 
                 <tr>
                     <td>
-                        Baby Items<br>
-                        Diaper/Wipes <input type="checkbox" name="diaperbaby">
-                        Formula <input type="checkbox" name="formulababy">
-                        Baby Food <input type="checkbox" name="foodbaby">
-                        Layette <input type="checkbox" name="layettebaby">
+                        Baby Items
+                        <select class="supportiveservices" multiple="multiple">
+                            <option name="diaperbaby">Diaper/Wipes</option>
+                            <option name="formulababy">Formula</option>
+                            <option name="foodbaby">Baby Food</option>
+                            <option name="layettebaby">Layette </option>
+                        </select>
                     </td>
                     <td><input type="number" name="babyqty"></td>
                     <td>$<input type="number" step="0.01" name="babyvalue"></td>
@@ -211,11 +215,13 @@
 
                 <tr>
                     <td>
-                        Financial<br>
-                        RR: Deposit <input type="checkbox" name="depositfinance">
-                        RR: Rent <input type="checkbox" name="rentfinance">
-                        Rent Arrears <input type="checkbox" name="arrearsfinance">
-                        Utility Arrears <input type="checkbox" name="utilityfinance">
+                        Financial
+                        <select class="supportiveservices" multiple="multiple">
+                            <option name="depositfinance">RR: Deposit </option>
+                            <option name="rentfinance">RR: Rent </option>
+                            <option name="arrearsfinance">Rent Arrears </option>
+                            <option name="utilityfinance">Utility Arrears </option>
+                        </select>
                     </td>
                     <td><input type="number" name="financeqty"></td>
                     <td>$<input type="number" step="0.01" name="financevalue"></td>
@@ -223,10 +229,12 @@
 
                 <tr>
                     <td>
-                        Legal<br>
-                        PSL <input type="checkbox" name="psllegal">
-                        Immigration <input type="checkbox" name="immigrationlegal">
-                        Other <input type="checkbox" name="other_legal">
+                        Legal
+                        <select class="supportiveservices" multiple="multiple">
+                            <option name="psllegal">PSL </option>
+                            <option name="immigrationlegal">Immigration </option>
+                            <option name="other_legal">Other </option>
+                        </select>
                     </td>
                     <td><input type="number" name="legalqty"></td>
                     <td>$<input type="number" step="0.01" name="legalvalue"></td>
@@ -234,10 +242,12 @@
 
                 <tr>
                     <td>
-                        HouseHold<br>
-                        Signle Item <input type="checkbox" name="singlehousehold">
-                        Basic Pack <input type="checkbox" name="basichousehold">
-                        Family Pack <input type="checkbox" name="familyhousehold">
+                        HouseHold
+                        <select class="supportiveservices" multiple="multiple">
+                            <option name="singlehousehold">Single Item</option>
+                            <option name="basichousehold">Basic Pack</option>
+                            <option name="familyhousehold">Family Pack</option>
+                        </select>
                     </td>
                     <td><input type="number" name="familyqty"></td>
                     <td>$<input type="number" step="0.01" name="familyvalue"></td>
