@@ -2,9 +2,10 @@
 <html>
 <head>
     {% block head %}
-        <link rel="stylesheet" href="{{ url_for('static', filename='stylesheet.css') }}">
-        <title>{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='stylesheet.css') }}">
+    <title>{% block title %}{% endblock %}</title>
     {% endblock %}
+    {% block scripts %}{% endblock %}
 </head>
 <body>
 <ul>
@@ -13,6 +14,7 @@
 {#    <li><a href="{{ url_for( 'select_client' ) }}">Clients</a></li>#}
     <li><a href="{{ url_for( 'export' ) }}">Export</a></li>
     <li><a href="{{ url_for( 'authenticate' ) }}">Authenticate</a></li>
+    <li><a href="{{ url_for( 'dashboards' ) }}">Dashboards</a></li>
 </ul>
 <div id="content" style="margin-left:25%;padding:1px 16px;height:1000px;">{% block content %}{% endblock %}</div>
 </body>

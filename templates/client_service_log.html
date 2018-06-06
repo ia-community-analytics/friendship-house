@@ -26,23 +26,23 @@
                             <th>Telephone</th>
 
                             <tr>
-                                <td><input type="text" name="lastname" value="{{ data.get('last_name') }}" required>
+                                <td><input type="text" name="lastname" value="{{ data.last_name }}" required>
                                 </td>
-                                <td><input type="text" name="firstname" value="{{ data.get('first_name') }}" required>
+                                <td><input type="text" name="firstname" value="{{ data.first_name }}" required>
                                 </td>
-                                <td><input type="date" min="1960-01-01" max="{{ date }}" name="dob" value="{{ data.get('dob') }}" required></td>
+                                <td><input type="date" min="1960-01-01" max="{{ date }}" name="dob" value="{{ data.dob }}" required></td>
                                 <td>
-                                    <input type="text" name="gender" value="{{ data.get('gender') }}">
+                                    <input type="text" name="gender" value="{{ data.gender }}">
                                 </td>
-                                <td><input type="tel" name="phone" value="{{ data.get('phone') }}"></td>
+                                <td><input type="tel" name="phone" value="{{ data.phone }}"></td>
                             </tr>
                         </table>
                     </td>
                     <td>
-                        Adults: <input type="number" name="adults" min="0" value="{{ data.get('nber_adults') }}"><br>
+                        Adults: <input type="number" name="adults" min="0" value="{{ data.nber_adults }}"><br>
                         Under 18: <input type="number" name="under18" min="0"
-                                         value="{{ data.get('nber_under_18') }}"><br>
-                        Total: <input type="number" name="inhome" min="0" value="{{ data.get('total_in_home') }}">
+                                         value="{{ data.nber_under_18 }}"><br>
+                        Total: <input type="number" name="inhome" min="0" value="{{ data.total_in_home }}">
                     </td>
                 </tr>
             </table>
@@ -283,8 +283,8 @@
         <div id="staffCSL">
             Staff Completing CSL: <input type="text" name="staff_completing_csl">
         </div>
-        <input name="race" value="{{ data.get('race','') }}" hidden>
-        <input name="zipcode" value="{{ data.get('zipcode', '') }}" hidden>
+        <input name="race" value="{{ data.race }}" hidden>
+        <input name="zipcode" value="{{ data.zipcode }}" hidden>
         <input type="submit" name="action"/>
     </form>
 {% endblock %}
