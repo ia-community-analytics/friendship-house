@@ -1,0 +1,18 @@
+{% extends 'layout.html' %}
+
+{% block header %}
+    <h1>{% block title %}Confirmation{% endblock %}</h1>
+{% endblock %}
+
+
+{% block content %}
+    <form method="post" name="search">
+        <div id="search_bar">
+            First Name: <input type="text" name="fname_search" required>
+            Last Name: <input type="text" name="lname_search" required>
+            Date of Birth: <input type="date" name="dob_search" min="1960-01-01" max="{{ date }}" required>
+            <button type="submit" name="search">Search Client</button>
+            <input name="thesearchform" hidden>
+        </div>
+    </form>
+{% endblock %}
