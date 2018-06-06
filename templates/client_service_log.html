@@ -4,8 +4,27 @@
     <h1>{% block title %}Client Service Log{% endblock %}</h1>
 {% endblock %}
 
+{% block scripts %}
+
+
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='select2.css') }}" />
+    <script type="text/javascript" src="{{ url_for('static', filename='jquery-1.10.2.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='select2.js') }}"></script>
+{% endblock %}
+
+
 {% block content %}
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('.js-example-basic-single').select2();
+        });
+    </script>
     <p>Add a new service log</p>
+
+    <select class="js-example-basic-single" name="state">
+        <option value="AL">Alabama</option>
+        <option value="WY">Wyoming</option>
+    </select>
     <form id="client_service_log" method="post">
         <div id="date_field">
             Date: <input type="date" min="1960-01-01" max="{{ date }}" name="Date" value={{ date }}>
