@@ -189,8 +189,19 @@ def select_client():
 @basic_auth.required
 @authentication_required
 def service_log_admin():
-    record = request.form.get('record')
-    return redirect(url_for('service_log_add', record=record))
+    print(request.form)
+    print(request.form.get('action').split('_')[0].lower())
+    if request.form.get('action').split('_')[0].lower() == 'add':
+
+        record = request.form.get('action').split('_')
+        record.pop(0)
+        record = '_'.join(record)
+        return redirect(url_for('service_log_add', record=record))
+    elif request.form.get('action').split('_')[0].lower() == 'edit':
+        record = request.form.get('action').split('_')
+        record.pop(0)
+        record = '_'.join(record)
+        return redirect(url_for('dashboards'))
 
 
 @app.route('/admin/<record>')
@@ -201,13 +212,21 @@ def service_log_add(record):
     return render_template('client_service_log.html', data=data, date=today.strftime("%Y-%m-%d"))
 
 
+@app.route('/admin/<edit_rec>')
+@basic_auth.required
+@authentication_required
+def service_log_edit(edit_rec):
+    data = database.child('clients/'+edit_rec+'/information').get()
+    return render_template('client_service_log.html', data=data, date=today.strftime("%Y-%m-%d"))
+
+
 @app.route('/admin/<record>', methods=["POST"])
 @basic_auth.required
 @authentication_required
 def service_log_post(record):
     form = request.form
     log_month = month(form.get('Date'))
-    database.child('service_logs/'+log_month+'/'+record).push(form) # set data
+    database.child('service_logs/'+log_month+'/'+record).push(form)  # set data
     return redirect(url_for('select_client'))
 
 

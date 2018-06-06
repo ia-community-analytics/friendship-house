@@ -16,18 +16,21 @@
 
         {% for option in options %}
             <tr>
-            <td>
-                {{ option.split('_')[0].upper() }}
-            </td>
-            <td>
-                {{ option.split('_')[1].upper() }}
-            </td>
-            <td>
-                {{ option.split('_')[2] }}
-            </td>
-            <td>
-                <button type="submit" name="record" value={{ option.lower() }}>Add Service Log</button>
-            </td>
+                <td>
+                    {{ option.split('_')[0].upper() }}
+                </td>
+                <td>
+                    {{ option.split('_')[1].upper() }}
+                </td>
+                <td>
+                    {{ option.split('_')[2] }}
+                </td>
+                <td>
+                    <button type="submit" name="action" value="add_{{ option.lower() }}">Add Service Log</button>
+                </td>
+                <td>
+                    <button type="submit" name="action" value="edit_{{ option.lower() }}">Edit</button>
+                </td>
             </tr>
         {% endfor %}
     </table>
