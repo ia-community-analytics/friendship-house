@@ -1,0 +1,93 @@
+{% extends 'layout.html' %}
+
+{% block header %}
+    <h1>{% block title %}Confirmation{% endblock %}</h1>
+{% endblock %}
+
+
+{% block content %}
+    <script>
+        function delete_confirm() {
+            confirm("You Are About To Delete A Client Record! Their Service Logs WILL NOT be removed.")
+        }
+    </script>
+    {% if flash_message %}
+        <script>
+            alert("{{ flash_message }}")
+        </script>
+    {% endif %}
+    <form method="post">
+        <div id="date_field" hidden>
+            Date: <input type="date" name="Date" min="1960-01-01" max="{{ date }}" value={{ date }}>
+        </div>
+
+        <div id="first">
+            <table name="first">
+                <th>Client Information</th>
+                <th>In Home</th>
+                <tr>
+                    <td>
+                        <table id="info">
+                            <th>Last Name</th>
+                            <th>First Name</th>
+                            <th>DOB</th>
+                            <th>Gender</th>
+                            <th>Telephone</th>
+
+                            <tr>
+                                <td><input type="text" name="lastname" value="{{ data.get('last_name','') | safe }}"
+                                           required></td>
+                                <td><input type="text" name="firstname" value="{{ data.get('first_name','') | safe }}"
+                                           required></td>
+                                <td><input type="date" min="1960-01-01" max="{{ date }}" name="dob"
+                                           value="{{ data.get('dob','') | safe }}" required></td>
+                                <td>
+                                    <select name="gender">
+                                        <option value="Female">Female</option>
+                                        <option value="Male">Male</option>
+                                    </select>
+                                </td>
+                                <td><input type="tel" name="phone" value="{{ data.get('phone','') | safe }}"></td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td>
+                        Adults: <input type="number" name="adults" min="0"
+                                       value="{{ data.get('nber_adults','') | safe }}"><br>
+                        Under 18: <input type="number" name="under18" min="0"
+                                         value="{{ data.get('nber_under_18','') | safe }}"><br>
+                        {#                    Total: <input type="number" name="inhome" min="0">#}
+                    </td>
+                </tr>
+            </table>
+            <table>
+                <th>Street Address</th>
+                <th>City</th>
+                <th>State</th>
+                <th>Zip Code</th>
+                <th>Ethnicity</th>
+                <tr>
+                    <td><input type="text" name="street_address" value="{{ data.get('address','') | safe }}"></td>
+                    <td><input type="text" name="city" value="{{ data.get('city','') | safe }}"></td>
+                    <td><input type="text" name="state" value="IL" value="{{ data.get('state','') | safe }}"></td>
+                    <td><input type="text" name="zipcode" value="{{ data.get('zipcode','') | safe }}"></td>
+                    <td>
+                        <select name="race">
+                            <option name="African American">African American</option>
+                            <option name="White">White</option>
+                        </select>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <input name="thecrudform" hidden>
+        {% if allow_log == 'NO' %}
+            <button type="submit" name="create_record">Add</button>
+        {% endif %}
+        {% if allow_log == 'YES' %}
+            <button type="submit" name="update_record">Update</button>
+            <button type="submit" name="delete_record" onclick="delete_confirm()">Delete</button>
+            <button type="submit" name="add_client_log_for_record">Add Service Log</button>
+        {% endif %}
+    </form>
+{% endblock %}

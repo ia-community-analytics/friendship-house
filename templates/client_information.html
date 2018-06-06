@@ -5,11 +5,21 @@
 {% endblock %}
 
 {% block content %}
-    <p>Enter Client New Client Information</p>
+    <p>Enter New Client Information</p>
+    <form method="post" name="search">
+        <div id="search_bar">
+            First Name: <input type="text" name="fname_search" required>
+            Last Name: <input type="text" name="lname_search" required>
+            Date of Birth: <input type="date" name="dob_search" min="1960-01-01" max="{{ date }}" required>
+            <input type="text" value="searchingclients" hidden>
+            <button type="submit" name="search">Search Client</button>
+        </div>
+    </form>
     <form method="post">
         <div id="date_field">
             Date: <input type="date" name="Date" min="1960-01-01" max="{{ date }}" value={{ date }}>
         </div>
+
         <div id="first">
             <table name="first">
                 <th>Client Information</th>

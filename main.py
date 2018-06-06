@@ -1,3 +1,4 @@
+
 import firebase_admin
 import pandas as pd
 import io
@@ -15,7 +16,6 @@ app.secret_key = b'some46fu23yp/;:/sjdh'
 
 today = pd.datetime.today()
 
-# TODO: use environment variable for these as well
 app.config['BASIC_AUTH_USERNAME'] = 'someguy@domain.com'
 app.config['BASIC_AUTH_PASSWORD'] = 'Inconnu1'
 
@@ -31,6 +31,20 @@ def intg(x):
 
 def month(date):
     return '-'.join(date.split('-')[0:2]+['01'])
+
+def format_tel(tel):
+    if tel is None:
+        return ''
+
+    tel = str(tel)
+    # length should be this and that
+    if len(tel) == 10:
+        return tel[0:3] + '-' + tel[3:6] + '-' + tel[6:]
+    else:
+        return tel
+
+def create_user_id(last_name, first_name, dob):
+    return last_name.lower() + '_' + first_name.lower() + '_' + dob
 
 def initials(full_name):
     # TODO: strip non acii characters?
@@ -57,6 +71,7 @@ def generate_csv(json_data):
             temp = pd.DataFrame.from_dict(json_data.get(key).get(child_key), orient='index')
             temp = temp[['lastname','firstname', 'dob', 'gender', 'race', 'inhome', 'zipcode', 'phone', 'Date',
                         'staff_completing_csl', 'uos', 'staff_notes', 'need_met', 'other_service_txt']]
+            temp['phone'] = [format_tel(tel) for tel in temp['phone'].values]
             other_indices = temp['uos'] == 'other'
             temp.loc[other_indices,'uos'] = temp.loc[other_indices,'other_service_txt'] # if other then there should be an entry
             uos_map = {'15':'.25', '30':'.5', '45':'.75', '1':1}
@@ -96,7 +111,7 @@ def authentication_required(f):
 
 # real routes
 @app.route('/authenticate', methods=["GET", "POST"])
-@basic_auth.required
+# @basic_auth.required
 def authenticate():
     if request.method == 'POST' and session.get('fire_token', None) is None:
         form = request.form
@@ -125,115 +140,42 @@ def authenticate():
 
 
 @app.route('/')
-@basic_auth.required
+# @basic_auth.required
 @authentication_required
 def homepage():
-    return render_template('client_information.html', date=today.strftime("%Y-%m-%d"))
-
-
-@app.route('/', methods=["POST"])
-@basic_auth.required
-@authentication_required
-def dataPost():
-    form = request.form
-    last_name = form.get('lastname')
-    first_name = form.get('firstname')
-    dob = form.get('dob')
-    user_id = last_name.lower() + '_' + first_name.lower() + '_' + dob
-    exists = database.child('clients').order_by_key().start_at(user_id).end_at(user_id).get()
-    # if the key already exists we have to warn user
-    if len(exists) > 0:
-        flash(message="This User Already Exists! You are about to wipe the existing information", category="warning")
-        # TODO
-
-    gender = form.get('gender')
-    phone = form.get('phone')
-    nber_adults = form.get('adults')
-    nber_under_18 = form.get('under18')
-    race = form.get('race')
-    address = form.get('street_address')
-    city = form.get('city')
-    state = form.get('state')
-    zipcode = form.get('zipcode')
-    total = intg(nber_adults) + intg(nber_under_18)
-
-    # make data json. easy with name and dob separate
-    # service_log should be a child with dates or something
-    data = dict(last_name=last_name, first_name=first_name, dob=dob, gender=gender, phone=phone,
-                nber_adults=nber_adults, nber_under_18=nber_under_18, total_in_home=total,
-                race=race, address=address, city=city, state=state, zipcode=zipcode)
-
-    # using set makes sure that we only have one value for information
-    database.child('clients/'+ user_id+'/information').set(data)
-    # TODO: return simple html
-    return render_template('confirmation.html')
-
-
-@app.route('/admin')
-@basic_auth.required
-@authentication_required
-def select_client():
-    # make use of real time editing
-    # TODO: Create a table instead - easily have last name, first name, dob and click on button to go to page
-    records = database.child('clients').get(shallow=True)
-
-    if records is None:
-        records = []
-    else:
-        records = list(records)
-
-    return render_template('add_service_log.html', options=records)
+    return redirect(url_for('home_page'))
 
 
 @app.route('/admin', methods=["POST"])
-@basic_auth.required
+# @basic_auth.required
 @authentication_required
 def service_log_admin():
-    print(request.form)
-    print(request.form.get('action').split('_')[0].lower())
-    if request.form.get('action').split('_')[0].lower() == 'add':
-
-        record = request.form.get('action').split('_')
-        record.pop(0)
-        record = '_'.join(record)
-        return redirect(url_for('service_log_add', record=record))
-    elif request.form.get('action').split('_')[0].lower() == 'edit':
-        record = request.form.get('action').split('_')
-        record.pop(0)
-        record = '_'.join(record)
-        return redirect(url_for('dashboards'))
+    record = request.form.get('record')
+    return redirect(url_for('service_log_add', record=record))
 
 
 @app.route('/admin/<record>')
-@basic_auth.required
+# @basic_auth.required
 @authentication_required
 def service_log_add(record):
     data = database.child('clients/'+record+'/information').get()
     return render_template('client_service_log.html', data=data, date=today.strftime("%Y-%m-%d"))
 
 
-
-@app.route('/admin/<edit_rec>')
-@basic_auth.required
-@authentication_required
-def service_log_edit(edit_rec):
-    data = database.child('clients/'+edit_rec+'/information').get()
-    return render_template('client_service_log.html', data=data, date=today.strftime("%Y-%m-%d"))
-
-
 @app.route('/admin/<record>', methods=["POST"])
-@basic_auth.required
+# @basic_auth.required
 @authentication_required
 def service_log_post(record):
     form = request.form
     log_month = month(form.get('Date'))
-    database.child('service_logs/'+log_month+'/'+record).push(form)  # set data
+    database.child('service_logs/'+log_month+'/'+record).push(form) # set data
+    # TODO add log path to client
     return redirect(url_for('select_client'))
 
 
 # for export! use start_at and end_at since we now have months as keys in service log!
 @app.route('/admin/export')
-@basic_auth.required
+# @basic_auth.required
 @authentication_required
 def date_select():
     start = str(today.year) + '-01-01'
@@ -249,13 +191,16 @@ def date_select():
 
 
 @app.route('/admin/export', methods=["POST"])
-@basic_auth.required
+# @basic_auth.required
 @authentication_required
 def export():
     form = request.form
     start = month(form.get('start'))
     end = month(form.get('end'))
-    data = database.child('service_logs').order_by_key().start_at(start).end_at(end).get()
+    if start == '-01' or end == '-01':
+        data = database.child('service_logs').order_by_key().get()
+    else:
+        data = database.child('service_logs').order_by_key().start_at(start).end_at(end).get()
     csv = generate_csv(data)
     buffer = io.StringIO()
     csv.to_csv(buffer, index=False)
@@ -266,10 +211,77 @@ def export():
                                                           "attachment; filename=export%sto%s.csv" % (start, end)})
 
 @app.route('/dashboards')
-@basic_auth.required
+# @basic_auth.required
 @authentication_required
 def dashboards():
     return render_template('dashboards.html')
+
+
+@app.route('/home', methods=["GET", "POST"])
+@authentication_required
+def home_page():
+    if request.method == 'GET':
+        return render_template("homepage.html")
+    else:
+        form = request.form
+        if 'thesearchform' in form.keys():
+            last_name = form.get('lname_search')
+            first_name = form.get('fname_search')
+            dob = form.get('dob_search')
+
+            user_id = create_user_id(last_name, first_name, dob)
+            exists = database.child('clients').order_by_key().start_at(user_id).end_at(user_id).get()
+
+            # if the key already exists we have to warn user
+            if len(exists) > 0:
+                message="This User Already Exists! Do you wish to update or delete the record"
+                info = database.child('clients/%s/information' % user_id).get()
+                return render_template("update_and_delete.html", flash_message=message,data=info,
+                                       allow_log='YES')
+            else:
+                message = "There is no record for such client. Please Add a new record"
+                return render_template("update_and_delete.html", flash_message=message,
+                                       data=dict(last_name=last_name, first_name=first_name, dob=dob),
+                                       allow_log='NO')
+        elif 'thecrudform' in form.keys():
+            last_name = form.get('lastname')
+            first_name = form.get('firstname')
+            dob = form.get('dob')
+            user_id = create_user_id(last_name, first_name, dob)
+            gender = form.get('gender')
+            phone = form.get('phone')
+            nber_adults = form.get('adults')
+            nber_under_18 = form.get('under18')
+            race = form.get('race')
+            address = form.get('street_address')
+            city = form.get('city')
+            state = form.get('state')
+            zipcode = form.get('zipcode')
+            total = intg(nber_adults) + intg(nber_under_18)
+
+            # make data json. easy with name and dob separate
+            # service_log should be a child with dates or something
+            data = dict(last_name=last_name, first_name=first_name, dob=dob, gender=gender, phone=phone,
+                        nber_adults=nber_adults, nber_under_18=nber_under_18, total_in_home=total,
+                        race=race, address=address, city=city, state=state, zipcode=zipcode)
+
+            if "create_record" in form.keys():
+                # using set makes sure that we only have one value for information
+                database.child('clients/' + user_id + '/information').set(data)
+                return render_template("confirmation.html")
+            elif "update_record" in form.keys():
+                # using set makes sure that we only have one value for information
+                database.child('clients/' + user_id + '/information').set(data)
+                return render_template("confirmation.html")
+            elif "delete_record" in form.keys():
+                database.child('clients/' + user_id + '/information').delete()
+                return render_template("confirmation.html")
+            elif "add_client_log_for_record" in form.keys():
+                return redirect(url_for('service_log_add', record=user_id))
+            else:
+                return redirect(url_for(home_page))
+        else:
+            return redirect(url_for(home_page))
 
 
 if __name__ == '__main__':
