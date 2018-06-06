@@ -210,7 +210,7 @@ def export():
                                                           "attachment; filename=export%sto%s.csv" % (start, end)})
 
 @app.route('/dashboards')
-@basic_auth.required
+# @basic_auth.required
 @authentication_required
 def dashboards():
     return render_template('dashboards.html')
