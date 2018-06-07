@@ -298,7 +298,9 @@ def home_page():
                     user_id = '_'.join(all_keys[0])
                     exists = 'Yes'
                 else:
-                    all_clients = [[capitalize(el[0]), capitalize(el[1]), el[2]] for el in all_keys]
+                    all_clients = [[capitalize(el[0]), capitalize(el[1]), el[2]]
+                                   for el in all_keys]
+
                     return render_template("homepage.html", multiple_clients=all_clients, redirected=None)
             else:
                 user_id = create_user_id(last_name, first_name, dob)
