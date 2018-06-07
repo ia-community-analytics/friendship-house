@@ -167,9 +167,16 @@ def service_log_add(record):
 def service_log_post(record):
     form = request.form
     log_month = month(form.get('Date'))
-    database.child('service_logs/'+log_month+'/'+record).push(form) # set data
+    push = database.child('service_logs/'+log_month+'/'+record).push(form) # set data
+    # we need to add to paths
+    paths = database.child('clients/%s/paths' % record).get() # the array or None
+    if paths is None:
+        database.child('clients/%s/paths' % record).set(['service_logs/' + log_month + '/' + record + '/' + push.key])
+    else:
+        ner_paths = len(paths)
+        database.child('clients/%s/paths/%s' % (record,str(ner_paths))).set('service_logs/' + log_month + '/' + record + '/' + push.key)
     # TODO add log path to client
-    return redirect(url_for('select_client'))
+    return redirect(url_for('home_page'))
 
 
 # for export! use start_at and end_at since we now have months as keys in service log!
@@ -273,6 +280,7 @@ def home_page():
                 database.child('clients/' + user_id + '/information').set(data)
                 return render_template("confirmation.html")
             elif "delete_record" in form.keys():
+                # TODO clicking cancel on confirm dialog does not stop
                 database.child('clients/' + user_id + '/information').delete()
                 return render_template("confirmation.html")
             elif "add_client_log_for_record" in form.keys():
