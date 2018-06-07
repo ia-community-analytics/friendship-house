@@ -356,7 +356,8 @@ def home_page():
 
             # make data json. easy with name and dob separate
             # service_log should be a child with dates or something
-            data = dict(last_name=capitalize(last_name), first_name=capitalize(first_name), dob=dob, gender=gender, phone=phone,
+            data = dict(last_name=capitalize(last_name), first_name=capitalize(first_name), dob=dob, gender=gender,
+                        phone=phone,
                         nber_adults=nber_adults, nber_under_18=nber_under_18, total_in_home=total,
                         race=race, address=address, city=city, state=state, zipcode=zipcode)
 
@@ -371,8 +372,23 @@ def home_page():
                 return render_template("confirmation.html")
             elif "delete_record" in form.keys():
                 # TODO clicking cancel on confirm dialog does not stop
-                database.child('clients/' + user_id + '/information').delete()
-                return render_template("confirmation.html")
+                confirmation = form.get('delete_confirmation', 'NO')
+                if confirmation == 'YES':
+                    database.child('clients/' + user_id).delete()
+                    return render_template("confirmation.html")
+
+                else:
+                    info = database.child('clients/%s/information' % user_id).get()
+                    # because these are multiple choice
+                    race = info.get('race')  # selected race
+                    gender = info.get('gender')  # selected gender
+                    return render_template("update_and_delete.html", data=info, allow_log='YES',
+                                           races_nd_selected=[dict(race=a, selected='YES' if race == a else 'NO') for a
+                                                              in
+                                                              races],
+                                           genders_nd_selected=[dict(gender=a, selected='YES' if gender == a else 'NO')
+                                                                for
+                                                                a in genders])
             elif "add_client_log_for_record" in form.keys():
                 return redirect(url_for('service_log_add', record=user_id))
             else:

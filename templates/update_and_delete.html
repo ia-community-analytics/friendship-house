@@ -6,9 +6,13 @@
 
 
 {% block content %}
-    <script>
+    <script type="text/javascript">
         function delete_confirm() {
-            confirm("You Are About To Delete A Client Record! Their Service Logs WILL NOT be removed.")
+            var confirmed = confirm("You Are About To Delete A Client Record! Their Service Logs WILL NOT be removed.")
+            if (confirmed) {
+                var s = document.getElementById('delete_confirmation')
+                s.value = "YES"
+            }
         }
     </script>
     {% if flash_message %}
@@ -104,6 +108,7 @@
             <button type="submit" name="update_record">Update</button>
             <button type="submit" name="delete_record" onclick="delete_confirm()">Delete</button>
             <button type="submit" name="add_client_log_for_record">Add Service Log</button>
+            <input type="text" name="delete_confirmation" id="delete_confirmation" hidden>
         {% endif %}
     </form>
 {% endblock %}
