@@ -43,8 +43,16 @@
                                            value="{{ data.get('dob','') | safe }}" required></td>
                                 <td>
                                     <select name="gender">
-                                        <option value="Female">Female</option>
-                                        <option value="Male">Male</option>
+                                        {% for option in genders_nd_selected %}
+                                            {% if option.get('selected','NO') == 'YES' %}
+                                                <option name="{{ option.get('gender') | safe }}"
+                                                        selected>{{ option.get('gender') | safe }}</option>
+                                            {% endif %}
+
+                                            {% if option.get('selected','NO') == 'NO' %}
+                                                <option name="{{ option.get('gender') | safe }}">{{ option.get('gender') | safe }}</option>
+                                            {% endif %}
+                                        {% endfor %}
                                     </select>
                                 </td>
                                 <td><input type="tel" name="phone" value="{{ data.get('phone','') | safe }}"></td>
@@ -73,8 +81,16 @@
                     <td><input type="text" name="zipcode" value="{{ data.get('zipcode','') | safe }}"></td>
                     <td>
                         <select name="race">
-                            <option name="African American">African American</option>
-                            <option name="White">White</option>
+                            {% for option in races_nd_selected %}
+                                {% if option.get('selected','NO') == 'YES' %}
+                                    <option name="{{ option.get('race') | safe }}"
+                                            selected>{{ option.get('race') | safe }}</option>
+                                {% endif %}
+
+                                {% if option.get('selected','NO') == 'NO' %}
+                                    <option name="{{ option.get('race') | safe }}">{{ option.get('race') | safe }}</option>
+                                {% endif %}
+                            {% endfor %}
                         </select>
                     </td>
                 </tr>
