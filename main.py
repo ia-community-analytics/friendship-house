@@ -15,8 +15,8 @@ app = Flask(__name__)
 app.secret_key = b'some46fu23yp/;:/sjdh'
 
 today = pd.datetime.today()
-
 app.config['BASIC_AUTH_USERNAME'] = 'someguy@domain.com'
+
 app.config['BASIC_AUTH_PASSWORD'] = 'Inconnu1'
 
 firebase_admin.initialize_app()
