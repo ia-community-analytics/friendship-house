@@ -261,7 +261,7 @@ def export():
 
 @app.route('/dashboards')
 # @basic_auth.required
-@authentication_required
+#@authentication_required
 def dashboards():
     return render_template('dashboards.html')
 
