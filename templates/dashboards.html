@@ -68,8 +68,8 @@
 
 {% block content %}
     <h1>Dashboards fo Daizz</h1>
-        <div class="d-flex p-3">
-            <div class="d-flex flex-column justify-content-center align-content-center">
+        <div class="d-flex p-3" style="width:750px;">
+            <div class="d-flex flex-column justify-content-center align-content-center" style="width: 100%;">
                 <div class="p-1">
                     <div class="d-flex flex-row justify-content-center" >
                         <div id="chart-ring-year" class="p-4">
@@ -93,7 +93,7 @@
                 <div class="p-1">
                     <div class="d-flex flex-row justify-content-center">
 
-                        <div id="chart-line-hitsperday" class="p-4" >
+                        <div id="chart-line-hitsperday" class="p-0" >
                             <div>
                                 <strong>Total Hits :  </strong>
                                 <a class="reset" href="javascript:void(0)" onclick="hitslineChart.filterAll();dc.redrawAll();" style="display: none">reset</a>
@@ -103,7 +103,7 @@
                 </div>
                 <div class="p-1">
                     <div class="d-flex flex-row justify-content-center">
-                        <div id="monthly-volume-chart" class="p-2">
+                        <div id="monthly-volume-chart" class="p-0">
                             <div class="bottom">
                                 <strong>Monthly Volume: </strong>
                                 <a class="reset" href="javascript:void(0)" onclick="volumeChart.filterAll();dc.redrawAll();" style="display: none">reset</a>
@@ -273,8 +273,9 @@
             //    .range(["#e8e88b", "#171a63"]);
 
             countryChart
-                .width(45 * 20 + 80)
-                .height(45 * 5 + 40)
+                .width(720)
+                .height(250)
+                .margins({ top: 20, left: 45, right: 0, bottom: 20 })
                 .dimension(whereDim)
                 .group(whereGroup)
                 .keyAccessor(function (d) { return d.key[0]; })
@@ -338,9 +339,9 @@
                 <!--.group(monthGroup)-->
                 <!--.ordering(dc.pluck('key')); //orders alphabetically by group label name-->
 
-            volumeChart.width(500) /* dc.barChart('#monthly-volume-chart', 'chartGroup'); */
+            volumeChart.width(475) /* dc.barChart('#monthly-volume-chart', 'chartGroup'); */
                 .height(72)
-                .margins({ top: 3, right: 50, bottom: 40, left: 40 })
+                .margins({ top: 3, right: 0, bottom: 40, left: 40 })
                 .dimension(monthDim2)
                 //.round(d3.timeMonth.round)
                 .group(monthGroup2)
