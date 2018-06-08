@@ -8,7 +8,7 @@
 {% block content %}
     <form method="post" autocomplete="off">
         Email:<input type="email" name="email" value="{{ email | safe }}" required>
-    Token:<input type="text" name="uid" value="{{ uid | safe }}" required>
+    Token:<input type="password" name="uid" value="{{ uid | safe }}" required>
     <button type="submit">(UN) Authenticate</button>
     </form>
 {% endblock %}
