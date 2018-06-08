@@ -1,4 +1,4 @@
-{% extends 'layout.html' %}
+{% extends "bootstrap/base.html" %}
 
 {% block header %}
     <h1>{% block title %}Confirmation{% endblock %}</h1>
@@ -16,7 +16,7 @@
         }
     </script>
     {% if flash_message %}
-        <script>
+        <script type="text/javascript">
             alert("{{ flash_message }}")
         </script>
     {% endif %}
@@ -102,12 +102,12 @@
         </div>
         <input name="thecrudform" hidden>
         {% if allow_log == 'NO' %}
-            <button type="submit" name="create_record">Add</button>
+            <button type="submit" name="create_record" class="btn btn-success btn-block">Add</button>
         {% endif %}
         {% if allow_log == 'YES' %}
-            <button type="submit" name="update_record">Update</button>
-            <button type="submit" name="delete_record" onclick="delete_confirm()">Delete</button>
-            <button type="submit" name="add_client_log_for_record">Add Service Log</button>
+            <button type="submit" name="update_record" class="btn btn-success">Update</button>
+            <button type="submit" name="delete_record" class="btn btn-danger" onclick="delete_confirm()">Delete</button>
+            <button type="submit" name="add_client_log_for_record" class="btn btn-primary">Add Service Log</button>
             <input type="text" name="delete_confirmation" id="delete_confirmation" hidden>
         {% endif %}
     </form>

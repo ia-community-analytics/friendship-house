@@ -1,22 +1,24 @@
-{% extends 'layout.html' %}
+{% extends "bootstrap/base.html" %}
 
 {% block header %}
-    <h1>{% block title %}Confirmation{% endblock %}</h1>
+    <h1>{% block title %}Home{% endblock %}</h1>
 {% endblock %}
 
 
 {% block content %}
+    {{ super() }}
     {% if redirected %}
         <script>
             alert("{{ redirected | safe }}")
         </script>
     {% endif %}
     <form method="post" name="search">
-        <div id="search_bar">
-            <div>First Name: <input type="text" name="fname_search"></div><br>
-            <div>Last Name: <input type="text" name="lname_search"></div><br>
-            <div>Date of Birth: <input type="date" name="dob_search" min="1960-01-01" max="{{ date }}"></div><br>
-            <button type="submit" name="search">Search Client</button>
+        <div id="search_bar" class="container-fluid">
+            <div>First Name: <input type="text" name="fname_search">
+                Last Name: <input type="text" name="lname_search">
+                Date of Birth<input type="date" name="dob_search" min="1960-01-01" max="{{ date }}">
+                <button type="submit" name="search" class="btn btn-default">Search Client</button>
+            </div>
             <input name="thesearchform" hidden>
         </div>
     </form><br>
@@ -45,6 +47,7 @@
                     html_el.name = "client_select_one";
                     html_el.type = "submit";
                     html_el.innerHTML = "This One";
+                    html_el.className = "btn btn-default";
                     html_el.value = value;
 
                     data.addRow(rows[i].concat([html_el.outerHTML]));

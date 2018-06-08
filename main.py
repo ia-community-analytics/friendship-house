@@ -1,35 +1,28 @@
 import firebase_admin
-import pandas as pd
 import io
+from non_app_specific import (today, intg, races, genders, get_all_client_keys, generate_csv,
+                              capitalize, month, create_user_id, dtype, appointment_description, appointment_type,
+                              service_uos, program_status, supportive_service_provided)
 from functools import wraps
 from firebase_admin import db
 from firebase_admin import auth
 from flask import Flask, render_template, request, redirect, url_for, Response, flash, session
 from flask_basicauth import BasicAuth
+from flask_bootstrap import Bootstrap
+from flask_nav import Nav
+from flask_nav.elements import Navbar, View
 
 # TODO serve https and not http since we are using basic auth.
 
 app = Flask(__name__)
+Bootstrap(app)
+nav = Nav(app)
+
+nav.register_element('friend_navbar', Navbar(' ', View('Home', 'home_page'),
+                                             View('Export', 'export'), View('Dashboards', 'dashboards'),
+                                             View('Authenticate', 'authenticate')))
 # TODO: use an environment variable for this app secret!
 app.secret_key = b'some46fu23yp/;:/sjdh'
-
-today = pd.datetime.today()
-races = [
-    "African American/Black",
-    "American Indian/Alaskan Native",
-    "Asian",
-    "Bi-racial",
-    "Caucasian/White",
-    "Hawaiian/Pacific Islander",
-    "Multi-racial",
-    "Other"
-]
-genders = [
-    "Female",
-    "Male",
-    "Transgender",
-    "Other"
-]
 
 app.config['BASIC_AUTH_USERNAME'] = 'someguy@domain.com'
 app.config['BASIC_AUTH_PASSWORD'] = 'Inconnu1'
@@ -37,103 +30,6 @@ app.config['BASIC_AUTH_PASSWORD'] = 'Inconnu1'
 firebase_admin.initialize_app()
 database = db.reference()
 basic_auth = BasicAuth(app)
-
-
-def intg(x):
-    try:
-        return int(x)
-    except ValueError:
-        return 0
-
-
-def capitalize(word):
-    return word[0].upper() + word[1:].lower()
-
-
-def month(date):
-    return '-'.join(date.split('-')[0:2] + ['01'])
-
-
-def format_tel(tel):
-    if tel is None:
-        return ''
-
-    tel = str(tel)
-    # length should be this and that
-    if len(tel) == 10:
-        return tel[0:3] + '-' + tel[3:6] + '-' + tel[6:]
-    else:
-        return tel
-
-
-def create_user_id(last_name, first_name, dob):
-    return last_name.lower() + '_' + first_name.lower() + '_' + dob
-
-
-def initials(full_name):
-    # TODO: strip non acii characters?
-    if full_name == '':
-        return ''
-    return ''.join([el[0] for el in full_name.split(' ')])
-
-
-def get_all_client_keys():
-    all_clients = database.child('clients').order_by_key().get()
-    if all_clients is None:
-        all_clients = []
-    else:
-        all_clients = list(all_clients.keys())
-
-    return all_clients
-
-
-# TOO: move this and the function to static?
-dtype = {'Last Name': "string", 'First Name': "string", 'DOB': "string", 'SEX M/F': "string",
-         'Race': "string", '#In Home': "string", 'Zip': "string", 'Phone': "string", 'Service Date': "string",
-         'SRF Done (1=Yes, 0=No)': "string", 'Service Requested/Provided': "string", 'Staff (Initials)': "string",
-         'Need Met (Y,N,P)': "string", 'UOS (.25, .5, .75, 1)': "number", 'Notes': "string"}
-
-
-def generate_csv(json_data):
-    # this may vary based on the way the data is represented.
-    columns = ['Last Name', 'First Name', 'DOB', 'SEX M/F', 'Race', '#In Home', 'Zip', 'Phone', 'Service Date',
-               'SRF Done (1=Yes, 0=No)', 'Service Requested/Provided', 'Staff (Initials)',
-               'Need Met (Y,N,P)', 'UOS (.25, .5, .75, 1)', 'Notes']
-    df = pd.DataFrame(columns=columns)
-
-    for key in json_data.keys():
-        for child_key in json_data.get(key).keys():
-            temp = pd.DataFrame.from_dict(json_data.get(key).get(child_key), orient='index')
-            temp = temp[['lastname', 'firstname', 'dob', 'gender', 'race', 'inhome', 'zipcode', 'phone', 'Date',
-                         'staff_completing_csl', 'uos', 'staff_notes', 'need_met', 'other_service_txt']]
-            temp['phone'] = [format_tel(tel) for tel in temp['phone'].values]
-            other_indices = temp['uos'] == 'other'
-            temp.loc[other_indices, 'uos'] = temp.loc[
-                other_indices, 'other_service_txt']  # if other then there should be an entry
-            uos_map = {'15': '.25', '30': '.5', '45': '.75', '1': 1}
-            temp['UOS (.25, .5, .75, 1)'] = [uos_map.get(el, el) for el in temp['uos'].values]
-
-            # TODO use a gender to sex function . put race
-            temp['SEX M/F'] = list(map(lambda x: x[0], temp['gender'].values))
-            temp['Race'] = [el[0] for el in
-                            temp['race'].values]  # TODO - maybe display full race or have an abbreviations
-            temp['Staff (Initials)'] = temp['staff_completing_csl'].apply(initials)
-            temp['SRF Done (1=Yes, 0=No)'] = ''
-            temp['Service Requested/Provided'] = ''
-
-            temp.rename(index=str, columns={'lastname': 'Last Name',
-                                            'firstname': 'First Name',
-                                            'dob': 'DOB',
-                                            'inhome': '#In Home',
-                                            'zipcode': 'Zip',
-                                            'phone': 'Phone',
-                                            'Date': 'Service Date',
-                                            'staff_notes': 'Notes',
-                                            'need_met': 'Need Met (Y,N,P)'},
-                        inplace=True)
-            df = df.append(temp[columns].copy())
-
-    return df.astype(str)
 
 
 # TODO: have a decorator and an authenticate page where a token or id is provided.
@@ -198,7 +94,10 @@ def service_log_admin():
 @authentication_required
 def service_log_add(record):
     data = database.child('clients/' + record + '/information').get()
-    return render_template('client_service_log.html', data=data, date=today.strftime("%Y-%m-%d"))
+    return render_template('client_service_log.html', data=data, date=today.strftime("%Y-%m-%d"),
+                           appointment_type=appointment_type, program_status=program_status,
+                           appointment_description=appointment_description, service_uos=service_uos,
+                           supportive_service_provided=supportive_service_provided)
 
 
 @app.route('/admin/<record>', methods=["POST"])
@@ -282,7 +181,7 @@ def home_page():
 
             # the can search first names, last names or date of births
             if last_name.strip() == '' or first_name.strip() == '' or dob == '':
-                all_keys = get_all_client_keys()
+                all_keys = get_all_client_keys(database)
                 all_keys = [el.split('_') for el in all_keys]  # these are keys as they appear on the db
 
                 if last_name != '':
