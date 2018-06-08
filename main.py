@@ -75,7 +75,7 @@ def initials(full_name):
     # TODO: strip non acii characters?
     if full_name == '':
         return ''
-    return ''.join([el[0] for el in full_name.split(' ')])
+    return full_name.split(' ')[0]
 
 
 def get_all_client_keys():
@@ -263,6 +263,12 @@ def export():
 # @basic_auth.required
 #@authentication_required
 def dashboards():
+    start = str(today.year) + '-01-01'
+    end = str(today.year) + '-12-31'
+    data = database.child('service_logs').order_by_key().start_at(start).end_at(end).get()
+    print(data)
+    df = generate_csv(data)
+    df.to_csv("static/WebRequestsData4.csv")
     return render_template('dashboards.html')
 
 
