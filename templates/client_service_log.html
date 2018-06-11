@@ -12,16 +12,23 @@
                 Date: <input type="date" min="1960-01-01" max="{{ date }}" name="Date" value={{ date }}>
             </div>
 
+            <fieldset id="client_info_1">
+                <legend>Client Information:</legend>
+                Last Name: <input type="text" name="lastname" value="{{ data.last_name }}"
+                                  placeholder="Last Name" title="Last Name" required>
+                First Name: <input type="text" name="firstname" value="{{ data.first_name }}"
+                                   placeholder="First Name" title="First Name" required>
+                Date of Birth: <input type="date" min="1960-01-01" max="{{ date }}" name="dob"
+                                      value="{{ data.dob }}" placeholder="Date of Birth" title="Date of Birth"
+                                      required>
+                Gender: <input type="text" name="gender" value="{{ data.gender }}" placeholder="Gender"
+                               title="Gender">
+            </fieldset>
             <div class="row" id="client_info_1">
-                <div class="col-sm-3"><input type="text" name="lastname" value="{{ data.last_name }}"
-                                             placeholder="Last Name" title="Last Name" required></div>
-                <div class="col-sm-3"><input type="text" name="firstname" value="{{ data.first_name }}"
-                                             placeholder="First Name" title="First Name" required></div>
-                <div class="col-sm-3"><input type="date" min="1960-01-01" max="{{ date }}" name="dob"
-                                             value="{{ data.dob }}" placeholder="Date of Birth" title="Date of Birth"
-                                             required></div>
-                <div class="col-sm-3"><input type="text" name="gender" value="{{ data.gender }}" placeholder="Gender"
-                                             title="Gender"></div>
+                <div class="col-sm-3"></div>
+                <div class="col-sm-3"></div>
+                <div class="col-sm-3"></div>
+                <div class="col-sm-3"></div>
             </div>
             <br>
 
