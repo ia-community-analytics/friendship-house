@@ -12,89 +12,84 @@
                 Date: <input type="date" min="1960-01-01" max="{{ date }}" name="Date" value={{ date }}>
             </div>
 
-            <fieldset>
-                <legend align="center">Client Information:</legend>
-                <div class="col-sm-5" align="left">
-                    <fieldset>
-                        <legend>General</legend>
-                        Last Name: <input type="text" name="lastname" value="{{ data.last_name }}"
-                                          placeholder="Last Name" title="Last Name" required><br>
-                        First Name: <input type="text" name="firstname" value="{{ data.first_name }}"
-                                           placeholder="First Name" title="First Name" required><br>
-                        Date of Birth: <input type="date" min="1960-01-01" max="{{ date }}" name="dob"
-                                              value="{{ data.dob }}" placeholder="Date of Birth" title="Date of Birth"
-                                              required><br>
-                        Gender: <input type="text" name="gender" value="{{ data.gender }}" placeholder="Gender"
-                                       title="Gender"><br>
-                        Telephone: <input type="tel" name="phone" value="{{ data.phone }}" placeholder="phone #"
-                                          title="phone #">
-                    </fieldset>
-                </div>
-
-                <div class="col-sm-5" align="right">
-                    <fieldset>
-                        <legend>#In Home</legend>
-                        # Adults: <input type="number" name="adults" min="0" value="{{ data.nber_adults }}"
-                                         placeholder="# Adults" title="# Adults"><br>
-                        # Under 18: <input type="number" name="under18" min="0"
-                                           value="{{ data.nber_under_18 }}" placeholder="# Under 18"
-                                           title="# Under 18"><br>
-                        Total: <input type="number" name="inhome" min="0" value="{{ data.total_in_home }}"
-                                      placeholder="Total" title="Total In Home">
-                    </fieldset>
-                </div>
-            </fieldset>
+            <div class="row" id="client_info_1">
+                <div class="col-sm-3"><input type="text" name="lastname" value="{{ data.last_name }}"
+                                             placeholder="Last Name" title="Last Name" required></div>
+                <div class="col-sm-3"><input type="text" name="firstname" value="{{ data.first_name }}"
+                                             placeholder="First Name" title="First Name" required></div>
+                <div class="col-sm-3"><input type="date" min="1960-01-01" max="{{ date }}" name="dob"
+                                             value="{{ data.dob }}" placeholder="Date of Birth" title="Date of Birth"
+                                             required></div>
+                <div class="col-sm-3"><input type="text" name="gender" value="{{ data.gender }}" placeholder="Gender"
+                                             title="Gender"></div>
+            </div>
             <br>
-            <div class="row">
-                <div class="col-sm-8" align="left">
-                    <fieldset>
-                        <legend align="center">Program & Appointment</legend>
-                        <div align="left">
-                            Program Status:
-                            <select name="program_status" id="program_status" onclick="enter_status()">
-                                {% for status in program_status %}
-                                    <option value="{{ status | safe }}">{{ status | safe }}</option>
-                                {% endfor %}
-                            </select>
-                            <div id="program_status_other" class="col-sm-2" title="Other"
-                                 style="visibility: hidden">
-                                <input type="text" name="program_status_other" placeholder="other program">
-                            </div>
 
-                            <br>
-                            Appointment Type:
-                            <select name="appointment_type" id="appointment_type" onclick="enter_location()">
-                                {% for type in appointment_type %}
-                                    <option value="{{ type | safe }}">{{ type | safe }}</option>
-                                {% endfor %}
-                            </select>
-                            <div id="appointment_location" title="Location" style="visibility: hidden">
-                                <input type="text" name="appointment_location" placeholder="location">
-                            </div>
-                            <br>
-                            Appointment Description:
-                            <select name="appointment_description" id="appointment_description">
-                                {% for description in appointment_description %}
-                                    <option value="{{ description | safe }}">{{ description | safe }}</option>
-                                {% endfor %}
-                            </select>
-                            <br>
-                            Service UOS:
-                            <select name="uos" id="service_uos" onclick="enter_uos()">
-                                {% for tm in service_uos %}
-                                    <option value="{{ tm.get('value') | safe }}">{{ tm.get('display') | safe }}</option>
-                                {% endfor %}
-                            </select>
-                            <div id="uos_other" class="col-sm-2" title="Other" style="visibility: hidden">
-                                <input type="number" name="other_service_txt" min="0" step=".25">
-                            </div>
-                            <br>
-                            New Appointment:
-                            <input type="datetime-local" min="1960-01-01" max="{{ date }}"
-                                   name="new_appointment">
-                        </div>
-                    </fieldset>
+            <div class="row" id="client_info_2">
+                <div class="col-sm-3"><input type="tel" name="phone" value="{{ data.phone }}" placeholder="phone #"
+                                             title="phone #">
                 </div>
+                <div class="col-sm-3"><input type="number" name="adults" min="0" value="{{ data.nber_adults }}"
+                                             placeholder="# Adults" title="# Adults"></div>
+                <div class="col-sm-3"><input type="number" name="under18" min="0"
+                                             value="{{ data.nber_under_18 }}" placeholder="# Under 18"
+                                             title="# Under 18"></div>
+                <div class="col-sm-3"><input type="number" name="inhome" min="0" value="{{ data.total_in_home }}"
+                                             placeholder="Total" title="Total In Home"></div>
+            </div>
+            <br>
+
+            <div class="row" id="program_related_info">
+                <div class="col-sm-2" title="Program Status">
+                    <select name="program_status" id="program_status" onclick="enter_status()">
+                        {% for status in program_status %}
+                            <option value="{{ status | safe }}">{{ status | safe }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div id="program_status_other" class="col-sm-2" title="Other" style="visibility: hidden">
+                    <input type="text" name="program_status_other">
+                </div>
+
+
+                <div class="col-sm-2" title="Appointment Type">
+                    <select name="appointment_type" id="appointment_type" onclick="enter_location()">
+                        {% for type in appointment_type %}
+                            <option value="{{ type | safe }}">{{ type | safe }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div id="appointment_location" class="col-sm-2" title="Location" style="visibility: hidden">
+                    <input type="text" name="appointment_location">
+                </div>
+                <div class="col-sm-4" title="Appointment Description">
+                    <select name="appointment_description" id="appointment_description">
+                        {% for description in appointment_description %}
+                            <option value="{{ description | safe }}">{{ description | safe }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <br>
+
+            <div id="service_uos_new_appointment_notes" class="row">
+                <div class="col-sm-2" title="Service UOS">
+                    <select name="uos" id="service_uos" onclick="enter_uos()">
+                        {% for tm in service_uos %}
+                            <option value="{{ tm.get('value') | safe }}">{{ tm.get('display') | safe }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div id="uos_other" class="col-sm-2" title="Other" style="visibility: hidden">
+                    <input type="number" name="other_service_txt" min="0" step=".25">
+                </div>
+
+                <div class="col-sm4" title="New Apointment Date">
+                    <input type="datetime-local" min="1960-01-01" max="{{ date }}"
+                           name="new_appointment">
+                </div>
+
                 <div class="col-sm-4" title="Case Note">
                     <textarea name="casenote"
                               placeholder="Case Note: Service Need(s) AND Service(s) Provided"></textarea>
@@ -261,7 +256,7 @@
         function enter_location() {
             var ap_type = document.getElementById('appointment_type');
             var location_input = document.getElementById('appointment_location');
-            if (ap_type.value == 'Out of Office' || ap_type.value == 'In Office') {
+            if (ap_type.value == 'Location') {
                 location_input.style.visibility = "visible";
             } else {
                 location_input.style.visibility = "hidden";
