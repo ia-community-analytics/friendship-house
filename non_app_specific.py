@@ -34,9 +34,8 @@ appointment_type = [
     'Phone Call',
     'Walk In/Group',
     'Scheduled Appointment',
-    '(In Office)',
-    '(Out of Office)',
-    'Location'
+    'In Office',
+    'Out of Office'
 ]
 
 appointment_description = [
