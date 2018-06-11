@@ -1,4 +1,4 @@
-{% extends "bootstrap/base.html" %}
+{% extends "layout.html" %}
 
 {% block header %}
     <h1>{% block title %}Home{% endblock %}</h1>
@@ -24,7 +24,7 @@
     </form><br>
     {% if multiple_clients %}
         <form method="post" name="select_from_many">
-            <div id="table_div"></div>
+            <div id="table_div" class="container"></div>
         </form>
         <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
         <script type="text/javascript">

@@ -166,9 +166,18 @@ def generate_csv(json_data):
     for key in json_data.keys():
         for child_key in json_data.get(key).keys():
             temp = pd.DataFrame.from_dict(json_data.get(key).get(child_key), orient='index')
-            temp = temp[['lastname', 'firstname', 'dob', 'gender', 'race', 'inhome', 'zipcode', 'phone', 'Date',
-                         'staff_completing_csl_fname', 'staff_completing_csl_lname', 'uos', 'staff_notes', 'need_met', 'other_service_txt']]
-            temp['staff_completing_csl'] = [' '.join(el) for el in zip(temp['staff_completing_csl_fname'], temp['staff_completing_csl_lname'])]
+            # for compatibility with the old form
+            if 'staff_completing_csl_lname' in temp.columns:
+                temp = temp[['lastname', 'firstname', 'dob', 'gender', 'race', 'inhome', 'zipcode', 'phone', 'Date',
+                             'staff_completing_csl_fname', 'staff_completing_csl_lname', 'uos', 'staff_notes',
+                             'need_met', 'other_service_txt']]
+                temp['staff_completing_csl'] = [' '.join(el) for el in
+                                                zip(temp['staff_completing_csl_fname'],
+                                                    temp['staff_completing_csl_lname'])]
+            else:
+                temp = temp[['lastname', 'firstname', 'dob', 'gender', 'race', 'inhome', 'zipcode', 'phone', 'Date',
+                             'staff_completing_csl', 'uos', 'staff_notes', 'need_met', 'other_service_txt']]
+
             temp['phone'] = [format_tel(tel) for tel in temp['phone'].values]
             other_indices = temp['uos'] == 'other'
             temp.loc[other_indices, 'uos'] = temp.loc[

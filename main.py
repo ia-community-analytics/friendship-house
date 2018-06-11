@@ -8,19 +8,18 @@ from firebase_admin import db
 from firebase_admin import auth
 from flask import Flask, render_template, request, redirect, url_for, Response, flash, session
 from flask_basicauth import BasicAuth
-from flask_bootstrap import Bootstrap
 from flask_nav import Nav
 from flask_nav.elements import Navbar, View
 
 # TODO serve https and not http since we are using basic auth.
 
 app = Flask(__name__)
-Bootstrap(app)
 nav = Nav(app)
 
-nav.register_element('friend_navbar', Navbar(' ', View('Home', 'home_page'),
+nav.register_element('friend_navbar', Navbar('', View('Home', 'home_page'),
                                              View('Export', 'export'), View('Dashboards', 'dashboards'),
                                              View('Authenticate', 'authenticate')))
+nav.init_app(app)
 # TODO: use an environment variable for this app secret!
 app.secret_key = b'some46fu23yp/;:/sjdh'
 
@@ -207,7 +206,7 @@ def home_page():
 
             # if the key already exists we have to warn user
             if len(exists) > 0:
-                message = "This User Already Exists! Do you wish to update or delete the record"
+                message = "We found a matching record! Do you wish to update or delete the record?"
                 info = database.child('clients/%s/information' % user_id).get()
                 race = info.get('race')  # selected race
                 gender = info.get('gender')  # selected gender
@@ -260,16 +259,24 @@ def home_page():
             data = dict(last_name=capitalize(last_name), first_name=capitalize(first_name), dob=dob, gender=gender,
                         phone=phone,
                         nber_adults=nber_adults, nber_under_18=nber_under_18, total_in_home=total,
-                        race=race, address=address, city=city, state=state, zipcode=zipcode)
+                        race=race, address=address, city=city, state=state, zipcode=zipcode,
+                        last_updt_dt=today.strftime('%Y-%m-%d'))
 
             # TODO - update confirmation to take type of action i.e. deleted, pushed added
             if "create_record" in form.keys():
                 # using set makes sure that we only have one value for information
+                data['created_dt'] = today.strftime('%Y-%m-%d')  # day it was created
+
                 database.child('clients/' + user_id + '/information').set(data)
                 return render_template("confirmation.html")
             elif "update_record" in form.keys():
-                # using set makes sure that we only have one value for information
-                database.child('clients/' + user_id + '/information').set(data)
+                # using set makes sure that we only have one value for information - if created dt is already there
+                created_dt = database.child('clients/' + user_id + '/information').get() # cannot be None here
+                created_dt = '' if created_dt is None or created_dt.get('created_dt') is None else created_dt.get(
+                    'created_dt')
+                data['created_dt'] = created_dt # If it is already there, keep it
+
+                database.child('clients/' + user_id + '/information').update(data)  # using update instead of set
                 return render_template("confirmation.html")
             elif "delete_record" in form.keys():
                 # TODO clicking cancel on confirm dialog does not stop

@@ -1,9 +1,8 @@
-{% extends "bootstrap/base.html" %}
+{% extends "layout.html" %}
 
 {% block title %}Dashboards{% endblock %}
 
 {% block scripts %}
-    {{ super() }}
     <meta charset="UTF-8">
     <link rel="stylesheet" href="{{ url_for('static', filename='leaflet.css') }}" />
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='leaflet-legend.css') }}" />

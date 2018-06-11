@@ -1,6 +1,9 @@
-{% extends "bootstrap/base.html" %}
+<!doctype html>
+<html>
 <head>
     {% block head %}
+        <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.min.css') }}"
+              rel="stylesheet">
         <title>{% block title %}{% endblock %}</title>
     {% endblock %}
     {% block scripts %}{% endblock %}
@@ -8,3 +11,5 @@
 <body>
 {{ nav.friend_navbar.render() }}
 <div id="content" class="container-fluid">{% block content %}{% endblock %}</div>
+</body>
+</html>
