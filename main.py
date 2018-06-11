@@ -160,19 +160,10 @@ def export():
 # @basic_auth.required
 #@authentication_required
 def dashboards():
-    start = str(today.year) + '-01-01'
-    end = str(today.year) + '-12-31'
-    data = database.child('service_logs').order_by_key().start_at(start).end_at(end).get()
-    df = generate_csv(data)
-    df = df.drop(df.index[0])
-    df = df.drop(df.index[1])
-    df.to_csv("static/WebRequestsData4.csv", index=False)
     return render_template('dashboards.html')
 
 @app.route('/get_data', methods=['GET'])
 def get_data():
-    print(database.child('clients').get())
-
     start = str(today.year) + '-01-01'
     end = str(today.year) + '-12-31'
     data = database.child('service_logs').order_by_key().start_at(start).end_at(end).get()
