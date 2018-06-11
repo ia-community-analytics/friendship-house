@@ -134,7 +134,13 @@ def initials(full_name):
     # TODO: strip non acii characters?
     if full_name == '':
         return ''
-    return ''.join([el[0] for el in full_name.split(' ')])
+    initials = ''
+    name = full_name.split(' ')
+    for el in name:
+        if el == '':
+            continue
+        initials = initials + str(el[0])
+    return initials
 
 
 def get_all_client_keys(database_reference):
