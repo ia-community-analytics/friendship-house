@@ -6,7 +6,7 @@ from non_app_specific import (today, intg, races, genders, get_all_client_keys, 
 from functools import wraps
 from firebase_admin import db
 from firebase_admin import auth
-from flask import Flask, render_template, jsonify,request, redirect, url_for, Response, flash, session, make_response
+from flask import Flask, render_template, jsonify, request, redirect, url_for, Response, flash, session, make_response
 from flask_basicauth import BasicAuth
 from flask_nav import Nav
 from flask_nav.elements import Navbar, View
