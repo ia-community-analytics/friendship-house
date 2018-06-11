@@ -5,7 +5,7 @@ import io
 from functools import wraps
 from firebase_admin import db
 from firebase_admin import auth
-from flask import Flask, render_template, request, redirect, url_for, Response, flash, session
+from flask import Flask, render_template, jsonify,request, redirect, url_for, Response, flash, session, make_response
 from flask_basicauth import BasicAuth
 
 # TODO serve https and not http since we are using basic auth.
@@ -211,6 +211,7 @@ def service_log_post(record):
     push = database.child('service_logs/' + log_month + '/' + record).push(form)  # set data
     # we need to add to paths
     paths = database.child('clients/%s/paths' % record).get()  # the array or None
+
     if paths is None:
         database.child('clients/%s/paths' % record).set(['service_logs/' + log_month + '/' + record + '/' + push.key])
     else:
@@ -266,11 +267,21 @@ def dashboards():
     start = str(today.year) + '-01-01'
     end = str(today.year) + '-12-31'
     data = database.child('service_logs').order_by_key().start_at(start).end_at(end).get()
-    print(data)
     df = generate_csv(data)
-    df.to_csv("static/WebRequestsData4.csv")
+    df = df.drop(df.index[0])
+    df = df.drop(df.index[1])
+    df.to_csv("static/WebRequestsData4.csv", index=False)
     return render_template('dashboards.html')
 
+@app.route('/get_data', methods=['GET'])
+def get_data():
+    print(database.child('clients').get())
+
+    start = str(today.year) + '-01-01'
+    end = str(today.year) + '-12-31'
+    data = database.child('service_logs').order_by_key().start_at(start).end_at(end).get()
+    df = generate_csv(data)
+    return jsonify(data=df.to_csv(index=False))
 
 @app.route('/home', methods=["GET", "POST"])
 @authentication_required
