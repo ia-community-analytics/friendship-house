@@ -2,7 +2,7 @@ import firebase_admin
 import io
 from non_app_specific import (today, intg, races, genders, get_all_client_keys, generate_csv,
                               capitalize, month, create_user_id, dtype, appointment_description, appointment_type,
-                              service_uos, program_status, supportive_service_provided)
+                              service_uos, program_status, supportive_service_provided, data_for_dashboard)
 from functools import wraps
 from firebase_admin import db
 from firebase_admin import auth
@@ -160,24 +160,13 @@ def export():
 # @basic_auth.required
 #@authentication_required
 def dashboards():
-    start = str(today.year) + '-01-01'
-    end = str(today.year) + '-12-31'
-    data = database.child('service_logs').order_by_key().start_at(start).end_at(end).get()
-    df = generate_csv(data)
-    df = df.drop(df.index[0])
-    df = df.drop(df.index[1])
-    df.to_csv("static/WebRequestsData4.csv", index=False)
-    return render_template('dashboards.html')
+    df = data_for_dashboard(database)
+    buffer = io.StringIO()
+    df.to_csv(buffer, index=False)
+    content = buffer.getvalue()
+    buffer.close()
+    return render_template('dashboards.html', data_frame=content)
 
-@app.route('/get_data', methods=['GET'])
-def get_data():
-    print(database.child('clients').get())
-
-    start = str(today.year) + '-01-01'
-    end = str(today.year) + '-12-31'
-    data = database.child('service_logs').order_by_key().start_at(start).end_at(end).get()
-    df = generate_csv(data)
-    return jsonify(data=df.to_csv(index=False))
 
 @app.route('/home', methods=["GET", "POST"])
 @authentication_required

@@ -224,12 +224,24 @@ def generate_csv(json_data):
 
 
 def generate_csv_from_path(log):
-    df = pd.DataFrame(log, index=[0])  # the dataframe
+    if isinstance(log, list):
+        df = pd.DataFrame(log)
+    else:
+        df = pd.DataFrame(log, index=[0])  # the dataframe
+
+    # there may be subsets with the old log format
+
     if 'staff_completing_csl_lname' in df.columns:
-        df = df[fields_to_keep]
-        df['staff_completing_csl'] = [' '.join(el) for el in
-                                      zip(df['staff_completing_csl_fname'],
-                                          df['staff_completing_csl_lname'])]
+        df_new_format = df[pd.isnull(df['staff_completing_csl'])].copy()
+        df_old_format = df[~pd.isnull(df['staff_completing_csl'])].copy()
+        df_old_format = df_old_format[old_fields]
+
+        df_new_format = df_new_format[fields_to_keep]
+        df_new_format['staff_completing_csl'] = [' '.join(el) for el in
+                                                 zip(df_new_format['staff_completing_csl_fname'],
+                                                     df_new_format['staff_completing_csl_lname'])]
+
+        df = df_new_format.append(df_old_format)  # now they both have staff_completing_csl field
     else:
         df = df[old_fields]
 
@@ -249,8 +261,9 @@ def generate_csv_from_path(log):
     df['Service Requested/Provided'] = ''
 
     df.rename(index=str, columns=column_rename, inplace=True)
+    df['user_id'] = list(map(create_user_id, df['Last Name'].values, df['First Name'].values, df['DOB'].values))
 
-    return df[csv_columns].astype(str)
+    return df[csv_columns + ['user_id']].astype(str)
 
 
 # data for clients
@@ -263,38 +276,60 @@ def data_for_dashboard(database_reference):
     if len(all_clients) == 0 and len(archived_clients):
         return data_frame
 
+    # active client logs
+    all_clients_paths = [database_reference.child('clients').child(client).child('paths').get() for client in
+                         all_clients]
+    all_clients_paths = [path for path in all_clients_paths if path is not None]
+    all_clients_paths = [path for path_list in all_clients_paths for path in path_list if path is not None]
+
+    # archive client logs
+    arch_clients_paths = [database_reference.child('archived_clients').child(client).child('paths').get() for client in
+                          archived_clients]
+    arch_clients_paths = [path for path in arch_clients_paths if path is not None]
+    arch_clients_paths = [path for path_list in arch_clients_paths for path in path_list if path is not None]
+
+    # combined the paths and get a list of all logs
+    all_paths = all_clients_paths + arch_clients_paths
+    logs = [database_reference.child(path).get() for path in all_paths]
+    logs = [log for log in logs if log is not None]  # we do not need None
+
+    # get the full data
+    log_data = generate_csv_from_path(logs)
+
     # do it for the first. then for all others and append.
+    created_dts = []
+    deleted_dts = []
+    active_sttus = []
     for client in all_clients + archived_clients:
         if client in archived_clients:
             reference = database_reference.child('archived_clients')
         else:
             reference = database_reference.child('clients')
 
-        paths = reference.child(client).child('paths').get()
+        # get the created dt and deleted dt
+        created_dt = reference.child(client).child('information').get()
+        created_dt = '' if created_dt is None or created_dt.get('created_dt') is None else created_dt.get(
+            'created_dt')
 
-        if paths is None:
-            continue
-        for path in paths:
-            log = database_reference.child(path).get()
-            # log should not be None. but just in case
-            if log is None:
-                continue
-            created_dt = reference.child(client).child('information').get()
-            created_dt = '' if created_dt is None or created_dt.get('created_dt') is None else created_dt.get(
-                'created_dt')
+        deleted_dt = reference.child(client).child('information').get()
+        deleted_dt = '' if deleted_dt is None or deleted_dt.get('deleted_dt') is None else deleted_dt.get(
+            'deleted_dt')
 
-            deleted_dt = reference.child(client).child('information').get()
-            deleted_dt = '' if deleted_dt is None or deleted_dt.get('deleted_dt') is None else deleted_dt.get(
-                'deleted_dt')
+        created_dts.append(created_dt)
+        deleted_dts.append(deleted_dt)
+        active_sttus.append(1 if client in all_clients else 0)
 
-            temp = generate_csv_from_path(log)
-            temp['created_dt'] = created_dt
-            temp['isActive'] = 1 if client in all_clients else 0
-            temp['deleted_dt'] = deleted_dt
+    # create data from this - could use numpy
+    active_sttus_data = pd.DataFrame(columns=['user_id', 'created_dt', 'isActive', 'deleted_dt'])
 
-            data_frame = data_frame.append(temp)
+    active_sttus_data['user_id'] = all_clients + archived_clients
+    active_sttus_data['created_dt'] = created_dts
+    active_sttus_data['isActive'] = active_sttus
+    active_sttus_data['deleted_dt'] = deleted_dts
 
-    return data_frame
+    data_frame = log_data.merge(active_sttus_data, how='left', on ='user_id')
+    data_frame.fillna('')
+    return data_frame.astype(str)
 
 
 if __name__ == '__main__':
