@@ -265,16 +265,26 @@ def home_page():
             # TODO - update confirmation to take type of action i.e. deleted, pushed added
             if "create_record" in form.keys():
                 # using set makes sure that we only have one value for information
+                # if they need to add a client that was once deleted, we can bring their paths back
+                # but reset information. Even created date
                 data['created_dt'] = today.strftime('%Y-%m-%d')  # day it was created
-
                 database.child('clients/' + user_id + '/information').set(data)
+
+                # check if user_id exists in archives
+                in_archive = database.child('archived_clients').order_by_key().start_at(user_id).end_at(user_id).get()
+                if in_archive is not None:
+                    paths_to_restore = database.child('archived_clients').child(user_id).child('paths').get()
+                    if paths_to_restore is not None:
+                        database.child('clients').child(user_id).child('paths').set(paths_to_restore)
+                    database.child('archived_clients').child(user_id).delete() # delete it from archive
+
                 return render_template("confirmation.html")
             elif "update_record" in form.keys():
                 # using set makes sure that we only have one value for information - if created dt is already there
-                created_dt = database.child('clients/' + user_id + '/information').get() # cannot be None here
+                created_dt = database.child('clients/' + user_id + '/information').get()  # cannot be None here
                 created_dt = '' if created_dt is None or created_dt.get('created_dt') is None else created_dt.get(
                     'created_dt')
-                data['created_dt'] = created_dt # If it is already there, keep it
+                data['created_dt'] = created_dt  # If it is already there, keep it
 
                 database.child('clients/' + user_id + '/information').update(data)  # using update instead of set
                 return render_template("confirmation.html")
@@ -282,6 +292,18 @@ def home_page():
                 # TODO clicking cancel on confirm dialog does not stop
                 confirmation = form.get('delete_confirmation', 'NO')
                 if confirmation == 'YES':
+                    # we would archive it
+                    paths = database.child('clients').child(user_id).child('paths').get()  # an array
+                    if paths is not None:
+                        database.child('archived_clients').child(user_id).child('paths').set(
+                            paths)  # set it in archived clients
+
+                    created_dt = database.child('clients/' + user_id + '/information').get()  # cannot be None here
+                    created_dt = '' if created_dt is None or created_dt.get('created_dt') is None else created_dt.get(
+                        'created_dt')
+                    data_to_archive = dict(created_dt=created_dt, deleted_dt=today.strftime('%Y-%m-%d'))
+                    database.child('archived_clients').child(user_id).child('information').set(data_to_archive)
+
                     database.child('clients/' + user_id).delete()
                     return render_template("confirmation.html")
 
