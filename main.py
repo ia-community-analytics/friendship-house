@@ -2,7 +2,7 @@ import firebase_admin
 import io
 from non_app_specific import (today, intg, races, genders, get_all_client_keys, generate_csv,
                               capitalize, month, create_user_id, dtype, appointment_description, appointment_type,
-                              service_uos, program_status, supportive_service_provided)
+                              service_uos, program_status, supportive_service_provided, data_for_dashboard)
 from functools import wraps
 from firebase_admin import db
 from firebase_admin import auth
@@ -15,10 +15,10 @@ from flask_nav.elements import Navbar, View
 
 app = Flask(__name__)
 nav = Nav(app)
+nav_el = Navbar('', View('Home', 'home_page'), View('Export', 'export'), View('Dashboards', 'dashboards'),
+                View('Authenticate', 'authenticate'))
 
-nav.register_element('friend_navbar', Navbar('', View('Home', 'home_page'),
-                                             View('Export', 'export'), View('Dashboards', 'dashboards'),
-                                             View('Authenticate', 'authenticate')))
+nav.register_element('friend_navbar', nav_el)
 nav.init_app(app)
 # TODO: use an environment variable for this app secret!
 app.secret_key = b'some46fu23yp/;:/sjdh'
@@ -49,6 +49,7 @@ def authentication_required(f):
 def authenticate():
     if request.method == 'POST' and session.get('fire_token', None) is None:
         form = request.form
+        form = dict((a, b.strip()) for a, b in form.items())
         email = form.get('email', '')
         uid = form.get('uid', '')
         try:
@@ -104,6 +105,7 @@ def service_log_add(record):
 @authentication_required
 def service_log_post(record):
     form = request.form
+    form = dict((a, b.strip()) for a, b in form.items())
     log_month = month(form.get('Date'))
     push = database.child('service_logs/' + log_month + '/' + record).push(form)  # set data
     # we need to add to paths
@@ -140,6 +142,7 @@ def date_select():
 @authentication_required
 def export():
     form = request.form
+    form = dict((a, b.strip()) for a, b in form.items())
     start = month(form.get('start'))
     end = month(form.get('end'))
     if start == '-01' or end == '-01':
@@ -158,17 +161,15 @@ def export():
 
 @app.route('/dashboards')
 # @basic_auth.required
-#@authentication_required
+# @authentication_required
 def dashboards():
-    return render_template('dashboards.html')
+    df = data_for_dashboard(database)
+    buffer = io.StringIO()
+    df.to_csv(buffer, index=False)
+    content = buffer.getvalue()
+    buffer.close()
+    return render_template('dashboards.html', data_frame=content)
 
-@app.route('/get_data', methods=['GET'])
-def get_data():
-    start = str(today.year) + '-01-01'
-    end = str(today.year) + '-12-31'
-    data = database.child('service_logs').order_by_key().start_at(start).end_at(end).get()
-    df = generate_csv(data)
-    return jsonify(data=df.to_csv(index=False))
 
 @app.route('/home', methods=["GET", "POST"])
 @authentication_required
@@ -177,6 +178,7 @@ def home_page():
         return render_template("homepage.html")
     else:
         form = request.form
+        form = dict((a,b.strip()) for a,b in form.items()) # strip spaces
         if 'thesearchform' in form.keys():
             last_name = form.get('lname_search', '').lower()
             first_name = form.get('fname_search', '').lower()
@@ -246,19 +248,19 @@ def home_page():
 
         elif 'thecrudform' in form.keys():
             # note that if delete was seleected we would not need to get this info
-            last_name = form.get('lastname')
-            first_name = form.get('firstname')
-            dob = form.get('dob')
+            last_name = form.get('lastname','')
+            first_name = form.get('firstname','')
+            dob = form.get('dob','')
             user_id = create_user_id(last_name, first_name, dob)
-            gender = form.get('gender')
-            phone = form.get('phone')
-            nber_adults = form.get('adults')
-            nber_under_18 = form.get('under18')
-            race = form.get('race')
-            address = form.get('street_address')
-            city = form.get('city')
-            state = form.get('state')
-            zipcode = form.get('zipcode')
+            gender = form.get('gender','')
+            phone = form.get('phone','')
+            nber_adults = form.get('adults','')
+            nber_under_18 = form.get('under18','')
+            race = form.get('race','')
+            address = form.get('street_address','')
+            city = form.get('city','')
+            state = form.get('state','')
+            zipcode = form.get('zipcode','')
             total = intg(nber_adults) + intg(nber_under_18)
 
             # make data json. easy with name and dob separate
@@ -272,16 +274,26 @@ def home_page():
             # TODO - update confirmation to take type of action i.e. deleted, pushed added
             if "create_record" in form.keys():
                 # using set makes sure that we only have one value for information
+                # if they need to add a client that was once deleted, we can bring their paths back
+                # but reset information. Even created date
                 data['created_dt'] = today.strftime('%Y-%m-%d')  # day it was created
-
                 database.child('clients/' + user_id + '/information').set(data)
+
+                # check if user_id exists in archives
+                in_archive = database.child('archived_clients').order_by_key().start_at(user_id).end_at(user_id).get()
+                if in_archive is not None:
+                    paths_to_restore = database.child('archived_clients').child(user_id).child('paths').get()
+                    if paths_to_restore is not None:
+                        database.child('clients').child(user_id).child('paths').set(paths_to_restore)
+                    database.child('archived_clients').child(user_id).delete()  # delete it from archive
+
                 return render_template("confirmation.html")
             elif "update_record" in form.keys():
                 # using set makes sure that we only have one value for information - if created dt is already there
-                created_dt = database.child('clients/' + user_id + '/information').get() # cannot be None here
+                created_dt = database.child('clients/' + user_id + '/information').get()  # cannot be None here
                 created_dt = '' if created_dt is None or created_dt.get('created_dt') is None else created_dt.get(
                     'created_dt')
-                data['created_dt'] = created_dt # If it is already there, keep it
+                data['created_dt'] = created_dt  # If it is already there, keep it
 
                 database.child('clients/' + user_id + '/information').update(data)  # using update instead of set
                 return render_template("confirmation.html")
@@ -289,6 +301,18 @@ def home_page():
                 # TODO clicking cancel on confirm dialog does not stop
                 confirmation = form.get('delete_confirmation', 'NO')
                 if confirmation == 'YES':
+                    # we would archive it
+                    paths = database.child('clients').child(user_id).child('paths').get()  # an array
+                    if paths is not None:
+                        database.child('archived_clients').child(user_id).child('paths').set(
+                            paths)  # set it in archived clients
+
+                    created_dt = database.child('clients/' + user_id + '/information').get()  # cannot be None here
+                    created_dt = '' if created_dt is None or created_dt.get('created_dt') is None else created_dt.get(
+                        'created_dt')
+                    data_to_archive = dict(created_dt=created_dt, deleted_dt=today.strftime('%Y-%m-%d'))
+                    database.child('archived_clients').child(user_id).child('information').set(data_to_archive)
+
                     database.child('clients/' + user_id).delete()
                     return render_template("confirmation.html")
 

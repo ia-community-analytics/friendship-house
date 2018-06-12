@@ -7,143 +7,157 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
           integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <!--<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='bootstrap.min.css') }}"/>-->
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='dc3.0.4.css') }}" />
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='dc3.0.4.css') }}"/>
     <script
-        src="https://code.jquery.com/jquery-3.3.1.min.js"
-        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
-        crossorigin="anonymous"></script>
+            src="https://code.jquery.com/jquery-3.3.1.min.js"
+            integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+            crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
-            integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+            integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+            crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
-            integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+            integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+            crossorigin="anonymous"></script>
     <!--<script src="{{ url_for('static', filename='jquery-1.10.2.js') }}" type="text/javascript"></script>-->
     <!--<script src="{{ url_for('static', filename='bootstrap.js') }}" type="text/javascript"></script>-->
     <script src="{{ url_for('static', filename='d3_5.4.0.js') }}" type="text/javascript"></script>
     <script src="{{ url_for('static', filename='crossfilter.min.js') }}" type="text/javascript"></script>
     <script src="{{ url_for('static', filename='dc3.0.4.js') }}" type="text/javascript"></script>
 
-        <style>
-            .dc-chart {
-                font-size: 12px;
-            }
+    <style>
+        .dc-chart {
+            font-size: 12px;
+        }
 
-            .dc-table-group {
-                padding-left: 10px;
-                font-size: 14px;
-                font-weight: bold;
-            }
+        .dc-table-group {
+            padding-left: 10px;
+            font-size: 14px;
+            font-weight: bold;
+        }
 
-            .dc-table-column {
-                padding-left: 10px;
-                font-size: 12px;
-                font-weight: normal;
-            }
+        .dc-table-column {
+            padding-left: 10px;
+            font-size: 12px;
+            font-weight: normal;
+        }
 
-            .dc-chart th {
-                text-align: left
-            }
-            .dc-chart th,.dc-chart td {
-                padding-left: 10px;
-            }
-            .dc-chart tr.dc-table-group td {
-                padding-top: 4px;
-                border-bottom: 1px solid black;
-            }
-            .dc-cbox-group {
-                list-style-type: none;
-            }
-            .dc-cbox-group label {
-                display: inline-block;
-            }
-            ul.dc-cbox-group {
-                position: relative;
-                width: 100%;
-                margin: auto 0;
-                background-color: transparent;
-            }
+        .dc-chart th {
+            text-align: left
+        }
 
-            .dc-cbox-group input[type=checkbox], .dc-cbox-group input[type=radio] {
-                margin: 0 5px 5px 5px;
-            }
+        .dc-chart th, .dc-chart td {
+            padding-left: 10px;
+        }
+
+        .dc-chart tr.dc-table-group td {
+            padding-top: 4px;
+            border-bottom: 1px solid black;
+        }
+
+        .dc-cbox-group {
+            list-style-type: none;
+        }
+
+        .dc-cbox-group label {
+            display: inline-block;
+        }
+
+        ul.dc-cbox-group {
+            position: relative;
+            width: 100%;
+            margin: auto 0;
+            background-color: transparent;
+        }
+
+        .dc-cbox-group input[type=checkbox], .dc-cbox-group input[type=radio] {
+            margin: 0 5px 5px 5px;
+        }
     </style>
 {% endblock %}
 
 {% block content %}
     <h1>Dashboards fo Daizz</h1>
-        <div id="option">
-            <input name="updateButton"
-                         type="button"
-                        value="Update"
-                        onclick="updateData()" />
-        </div>
-        <div class="d-flex p-3" style="width:750px;">
-            <div class="d-flex flex-column justify-content-center align-content-center" style="width: 100%;">
-                <div class="p-1">
-                   <div class="d-flex flex-row justify-content-center">
-                       <div class="dc-data-count dc-chart p-0"></div>
-                   </div>
+    <div id="option">
+        <input name="updateButton"
+               type="button"
+               value="Update"
+               onclick="updateData()"/>
+    </div>
+    <div class="d-flex p-3" style="width:750px;">
+        <div class="d-flex flex-column justify-content-center align-content-center" style="width: 100%;">
+            <div class="p-1">
+                <div class="d-flex flex-row justify-content-center">
+                    <div class="dc-data-count dc-chart p-0"></div>
                 </div>
-                <div class="p-1">
-                    <div class="d-flex flex-row justify-content-center" >
-                        <div id="chart-ring-year" class="p-4">
-                            <strong>Year: </strong>
-                            <a class="reset" href="javascript:void(0)" onclick="yearRingChart.filterAll();dc.redrawAll();" style="display: none">reset</a>
-                            <br/>
-                        </div>
-                        <!--<div id="month-select-chart" class="col-sm-2">-->
-                            <!--<strong>Month in Year: </strong>-->
-                            <!--<a class="reset" href="javascript:void(0)" onclick="monthChart.filterAll();dc.redrawAll();" style="display: none">reset</a>-->
-                        <!--</div>-->
-                        <div id="quarter-chart" class="p-4" >
-                            <strong>Quarter: </strong>
-                            <a class="reset" href="javascript:void(0)" onclick="quarterChart.filterAll();dc.redrawAll();" style="display: none">reset</a>
-                            <br/>
-                        </div>
-                        <div id="cbox2" class="p-4">
-                        </div>
+            </div>
+            <div class="p-1">
+                <div class="d-flex flex-row justify-content-center">
+                    <div id="chart-ring-year" class="p-4">
+                        <strong>Year: </strong>
+                        <a class="reset" href="javascript:void(0)" onclick="yearRingChart.filterAll();dc.redrawAll();"
+                           style="display: none">reset</a>
+                        <br/>
+                    </div>
+                    <!--<div id="month-select-chart" class="col-sm-2">-->
+                    <!--<strong>Month in Year: </strong>-->
+                    <!--<a class="reset" href="javascript:void(0)" onclick="monthChart.filterAll();dc.redrawAll();" style="display: none">reset</a>-->
+                    <!--</div>-->
+                    <div id="quarter-chart" class="p-4">
+                        <strong>Quarter: </strong>
+                        <a class="reset" href="javascript:void(0)" onclick="quarterChart.filterAll();dc.redrawAll();"
+                           style="display: none">reset</a>
+                        <br/>
+                    </div>
+                    <div id="cbox2" class="p-4">
                     </div>
                 </div>
-                <div class="p-1">
-                    <div class="d-flex flex-row justify-content-center">
+            </div>
+            <div class="p-1">
+                <div class="d-flex flex-row justify-content-center">
 
-                        <div id="chart-line-hitsperday" class="p-0" >
-                            <div>
-                                <strong>Visitors:  </strong>
-                                <a class="reset" href="javascript:void(0)" onclick="hitslineChart.filterAll();dc.redrawAll();" style="display: none">reset</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="p-1">
-                    <div class="d-flex flex-row justify-content-center">
-                        <div id="monthly-volume-chart" class="p-0">
-                            <div class="bottom">
-                                <strong>Monthly Volume: </strong>
-                                <a class="reset" href="javascript:void(0)" onclick="volumeChart.filterAll();dc.redrawAll();" style="display: none">reset</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="p-1">
-                    <div class="d-flex flex-row justify-content-center">
-                        <div id="staff-chart" class="p-2">
-                            <strong>Staff Service Provider: </strong>
-                            <a class="reset" href="javascript:void(0)" onclick="staffChart.filterAll();dc.redrawAll();" style="display: none">reset</a>
-                        </div>
-                    </div>
-                </div>
-                <div class="p-1">
-                    <div class="d-flex flex-row justify-content-center">
-                        <div id="mytable" class="table table-hover dc-chart dc-table-group p-2" style="overflow:auto; width: 620px; height: 300px;">
-                                <strong>Top 25 Filtered Data: </strong>
-                                <a class="reset" href="javascript:void(0)" onclick="tableChart.filterAll();dc.redrawAll();" style="display: none">reset</a>
+                    <div id="chart-line-hitsperday" class="p-0">
+                        <div>
+                            <strong>Visitors: </strong>
+                            <a class="reset" href="javascript:void(0)"
+                               onclick="hitslineChart.filterAll();dc.redrawAll();" style="display: none">reset</a>
                         </div>
                     </div>
                 </div>
             </div>
+            <div class="p-1">
+                <div class="d-flex flex-row justify-content-center">
+                    <div id="monthly-volume-chart" class="p-0">
+                        <div class="bottom">
+                            <strong>Monthly Volume: </strong>
+                            <a class="reset" href="javascript:void(0)" onclick="volumeChart.filterAll();dc.redrawAll();"
+                               style="display: none">reset</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-1">
+                <div class="d-flex flex-row justify-content-center">
+                    <div id="staff-chart" class="p-2">
+                        <strong>Staff Service Provider: </strong>
+                        <a class="reset" href="javascript:void(0)" onclick="staffChart.filterAll();dc.redrawAll();"
+                           style="display: none">reset</a>
+                    </div>
+                </div>
+            </div>
+            <div class="p-1">
+                <div class="d-flex flex-row justify-content-center">
+                    <div id="mytable" class="table table-hover dc-chart dc-table-group p-2"
+                         style="overflow:auto; width: 620px; height: 300px;">
+                        <strong>Top 25 Filtered Data: </strong>
+                        <a class="reset" href="javascript:void(0)" onclick="tableChart.filterAll();dc.redrawAll();"
+                           style="display: none">reset</a>
+                    </div>
+                </div>
+            </div>
         </div>
-        <script>
+    </div>
+    <script>
         var hitslineChart = dc.compositeChart("#chart-line-hitsperday");
         var httpChart = dc.rowChart('#http-type-chart');
         var tableChart = dc.dataTable("#mytable");
@@ -154,19 +168,16 @@
         var quarterChart = dc.pieChart('#quarter-chart');
         var cbox2 = dc.cboxMenu('#cbox2');
         var dataCount = dc.dataCount('.dc-data-count');
-        var data
+        var data;
 
 
-      $( document ).ready(function() {
-          $.getJSON('/get_data', {}, function(data1) {
-            data = d3.csvParse(data1.data);
-            console.log(data)
+        $(document).ready(function () {
+            data = d3.csvParse({{ data_frame | tojson }});
+            console.log(data);
             makeCharts(data);
-          });
-          return false;
         });
 
-        function makeCharts(data){
+        function makeCharts(data) {
             var dateFormat = d3.timeFormat("%m/%d/%Y");
             var dateFormatParser = d3.timeParse("%Y-%m-%d");
             data.forEach(function (d) {
@@ -206,8 +217,12 @@
                 .dimension(quarter)
                 .group(quarterGroup);
 
-            var dateDim = ndx.dimension(function (d) { return d.date; });
-            var hits = dateDim.group().reduceSum(function (d) { return +1; });
+            var dateDim = ndx.dimension(function (d) {
+                return d.date;
+            });
+            var hits = dateDim.group().reduceSum(function (d) {
+                return +1;
+            });
             var minDate = dateDim.bottom(1)[0].date;
             var maxDate = dateDim.top(1)[0].date;
             var monthDim = ndx.dimension(function (d) {
@@ -220,8 +235,12 @@
             var monthDim2 = ndx.dimension(function (d) {
                 return d.month;
             });
-            var requestType = ndx.dimension(function (d) { return d['SEX M/F'] });
-            var requestTypeGroup = requestType.group().reduceSum(function (d) { return +1; });
+            var requestType = ndx.dimension(function (d) {
+                return d['SEX M/F']
+            });
+            var requestTypeGroup = requestType.group().reduceSum(function (d) {
+                return +1;
+            });
 
             cbox2
                 .dimension(requestType)
@@ -229,8 +248,12 @@
                 .multiple(true)
                 .controlsUseVisibility(true);
 
-            var country = ndx.dimension(function (d) { return d.country });
-            var countryGroup = country.group().reduceSum(function (d) { return +1; });
+            var country = ndx.dimension(function (d) {
+                return d.country
+            });
+            var countryGroup = country.group().reduceSum(function (d) {
+                return +1;
+            });
 
 
             var monthGroup = monthDim.group();
@@ -244,14 +267,18 @@
                     return +0;
             });
             var status_404 = dateDim.group().reduceSum(function (d) {
-                    return +1;
+                return +1;
             });
             var status_302 = dateDim.group().reduceSum(function (d) {
-                    return +0;
+                return +0;
             });
 
-            var whoDim = ndx.dimension(function (d) { return d['Staff (Initials)']; });
-            var whoGroup = whoDim.group().reduceSum(function (d) { return +1; });
+            var whoDim = ndx.dimension(function (d) {
+                return d['Staff (Initials)'];
+            });
+            var whoGroup = whoDim.group().reduceSum(function (d) {
+                return +1;
+            });
 
             //var heatColorMapping = d3.scale.linear()
             //    .domain([0, 1])
@@ -265,7 +292,7 @@
                 .elasticY(true)
                 .barPadding(0.1)
                 .outerPadding(0.05)
-                .margins({ top: 20, left: 45, right: 0, bottom: 20 })
+                .margins({top: 20, left: 45, right: 0, bottom: 20})
                 .dimension(whoDim)
                 .group(whoGroup);
 
@@ -278,7 +305,7 @@
                 // `%filter-count` and `%total-count` are replaced with the values obtained.
                 .html({
                     some: '<strong>%filter-count</strong> selected out of <strong>%total-count</strong> records' +
-                        ' | <a href=\'javascript:void(0)\' onclick=\'dc.filterAll();  dc.redrawAll();\'>Reset All</a>',
+                    ' | <a href=\'javascript:void(0)\' onclick=\'dc.filterAll();  dc.redrawAll();\'>Reset All</a>',
                     all: 'All records selected. Please click on the graph to apply filters.'
                 });
 
@@ -286,7 +313,7 @@
             httpChart
                 .width(500)
                 .height(200)
-                .margins({ top: 20, left: 10, right: 10, bottom: 20 })
+                .margins({top: 20, left: 10, right: 10, bottom: 20})
                 .group(requestTypeGroup)
                 .dimension(requestType)
                 .ordinalColors(["#a4da74", "#1648a0", "#af45d7", "#315f32", "#d02f34", "#beb92f",
@@ -294,29 +321,33 @@
                 // Assign colors to each value in the x scale domain
                 // Title sets the row text
                 .on('preRedraw', function () {
-                    httpChart.ordering(function (d) { return -d.value });  //this will make the scale adjust to the scale of filtered values.
+                    httpChart.ordering(function (d) {
+                        return -d.value
+                    });  //this will make the scale adjust to the scale of filtered values.
 
                 })
                 .title(function (d) {
                     return d.value;
                 })
-                .ordering(function (d) { return d.key })
+                .ordering(function (d) {
+                    return d.key
+                })
                 .elasticX(true)
                 .xAxis().ticks(4)
 
 
-            <!--monthChart /* dc.pieChart('#quarter-chart', 'chartGroup') */-->
-                <!--.width(180)-->
-                <!--.height(180)-->
-                <!--.radius(80)-->
-                <!--.innerRadius(30)-->
-                <!--.dimension(monthDim)-->
-                <!--.group(monthGroup)-->
-                <!--.ordering(dc.pluck('key')); //orders alphabetically by group label name-->
+
+            <!--.width(180)-->
+            <!--.height(180)-->
+            <!--.radius(80)-->
+            <!--.innerRadius(30)-->
+            <!--.dimension(monthDim)-->
+            <!--.group(monthGroup)-->
+
 
             volumeChart.width(475) /* dc.barChart('#monthly-volume-chart', 'chartGroup'); */
                 .height(72)
-                .margins({ top: 3, right: 0, bottom: 40, left: 40 })
+                .margins({top: 3, right: 0, bottom: 40, left: 40})
                 .dimension(dateDim)
                 //.round(d3.timeMonth.round)
                 .group(hits)
@@ -329,83 +360,87 @@
 
 
             hitslineChart
-            .width(475)
-            .height(250)
-            .margins({ top: 30, right: 0, bottom: 55, left: 40 })
-            .mouseZoomable(true)
-            .rangeChart(volumeChart)
-            .x(d3.scaleTime().domain([minDate, maxDate]))
-            .round(d3.timeMonth.round)
-            .xUnits(d3.timeMonths)
-            .elasticY(true)
-            .renderHorizontalGridLines(true)
-            .legend(dc.legend().x(40).y(10).itemHeight(10).gap(5).horizontal(true).itemWidth(80).legendWidth(520))
-            .compose([
-                dc.lineChart(hitslineChart)
-                    .dimension(dateDim)
-                    .colors('red')
-                    .group(status_404, "Total Visitors")
-                    .dashStyle([0,0]),
-                dc.lineChart(hitslineChart)
-                    .dimension(dateDim)
-                    .colors('blue')
-                    .group(status_302, "First Time Visitors")
-                    .dashStyle([0,0])
+                .width(475)
+                .height(250)
+                .margins({top: 30, right: 0, bottom: 55, left: 40})
+                .mouseZoomable(true)
+                .rangeChart(volumeChart)
+                .x(d3.scaleTime().domain([minDate, maxDate]))
+                .round(d3.timeMonth.round)
+                .xUnits(d3.timeMonths)
+                .elasticY(true)
+                .renderHorizontalGridLines(true)
+                .legend(dc.legend().x(40).y(10).itemHeight(10).gap(5).horizontal(true).itemWidth(80).legendWidth(520))
+                .compose([
+                    dc.lineChart(hitslineChart)
+                        .dimension(dateDim)
+                        .colors('red')
+                        .group(status_404, "Total Visitors")
+                        .dashStyle([0, 0]),
+                    dc.lineChart(hitslineChart)
+                        .dimension(dateDim)
+                        .colors('blue')
+                        .group(status_302, "First Time Visitors")
+                        .dashStyle([0, 0])
                 ])
-            .on("renderlet", function (chart) {
+                .on("renderlet", function (chart) {
                     // rotate x-axis labels
                     chart.selectAll('g.x text')
                         .attr('transform', 'translate(-13,30) rotate(270)')
                 })
-            .brushOn(false)
-            .render();
+                .brushOn(false)
+                .render();
 
 
             <!--hitslineChart-->
-                <!--.renderArea(true)-->
-                <!--.width(475)-->
-                <!--.height(250)-->
-                <!--.transitionDuration(200)-->
-                <!--.margins({ top: 30, right: 0, bottom: 60, left: 40 })-->
-                <!--.dimension(monthDim2)-->
-                <!--.mouseZoomable(true)-->
-                <!--.rangeChart(volumeChart)-->
-                <!--.x(d3.time.scale().domain([minDate, maxDate]))-->
-                <!--.round(d3.time.month.round)-->
-                <!--.xUnits(d3.time.months)-->
-                <!--.elasticY(true)-->
-                <!--.renderHorizontalGridLines(true)-->
-                <!--.legend(dc.legend().x(40).y(10).itemHeight(10).gap(5).horizontal(true).itemWidth(50).legendWidth(520))-->
-                <!--.brushOn(false)-->
-                <!--.group(status_200, "200")-->
-                <!--.stack(status_201, "201")-->
-                <!--//.stack(status_206, "206")-->
-                <!--.stack(status_302, "302")-->
-                <!--.stack(status_401, "401")-->
-                <!--.stack(status_404, "404")-->
-                <!--.stack(status_409, "409")-->
-                <!--.stack(status_503, "503")-->
-                <!--.stack(status_508, "508")-->
-                <!--.ordinalColors(["#a4da74", "#1648a0", "#af45d7", "#315f32", "#d02f34", "#beb92f",-->
-                    <!--"#462c0c", "#615594", "#bf500e"])-->
-                <!--.on("renderlet", function (chart) {-->
-                    <!--// rotate x-axis labels-->
-                    <!--chart.selectAll('g.x text')-->
-                        <!--.attr('transform', 'translate(-13,30) rotate(270)')-->
-                <!--});-->
+            <!--.renderArea(true)-->
+            <!--.width(475)-->
+            <!--.height(250)-->
+            <!--.transitionDuration(200)-->
+            <!--.margins({ top: 30, right: 0, bottom: 60, left: 40 })-->
+            <!--.dimension(monthDim2)-->
+            <!--.mouseZoomable(true)-->
+            <!--.rangeChart(volumeChart)-->
+            <!--.x(d3.time.scale().domain([minDate, maxDate]))-->
+            <!--.round(d3.time.month.round)-->
+            <!--.xUnits(d3.time.months)-->
+            <!--.elasticY(true)-->
+            <!--.renderHorizontalGridLines(true)-->
+            <!--.legend(dc.legend().x(40).y(10).itemHeight(10).gap(5).horizontal(true).itemWidth(50).legendWidth(520))-->
+            <!--.brushOn(false)-->
+            <!--.group(status_200, "200")-->
+            <!--.stack(status_201, "201")-->
+
+            <!--.stack(status_302, "302")-->
+            <!--.stack(status_401, "401")-->
+            <!--.stack(status_404, "404")-->
+            <!--.stack(status_409, "409")-->
+            <!--.stack(status_503, "503")-->
+            <!--.stack(status_508, "508")-->
+            <!--.ordinalColors(["#a4da74", "#1648a0", "#af45d7", "#315f32", "#d02f34", "#beb92f",-->
+            <!--"#462c0c", "#615594", "#bf500e"])-->
+            <!--.on("renderlet", function (chart) {-->
+
+            <!--chart.selectAll('g.x text')-->
+            <!--.attr('transform', 'translate(-13,30) rotate(270)')-->
+            <!--});-->
 
 
-
-            var yearDim = ndx.dimension(function (d) { return +d.Year; });
-            var date_total = dateDim.group().reduceSum(function (d) { return d.amount; });
-            var year_total = yearDim.group().orderNatural().reduceSum(function (d) { return +1; });
+            var yearDim = ndx.dimension(function (d) {
+                return +d.Year;
+            });
+            var date_total = dateDim.group().reduceSum(function (d) {
+                return d.amount;
+            });
+            var year_total = yearDim.group().orderNatural().reduceSum(function (d) {
+                return +1;
+            });
 
             yearRingChart
                 .width(200).height(200)
                 .dimension(yearDim)
                 .group(year_total)
-                .innerRadius(50)
-                .ordering(dc.pluck('key'));
+                .innerRadius(50);
 
             tableChart /* dc.dataTable('.dc-data-table', 'chartGroup') */
                 .width(400)
@@ -435,9 +470,8 @@
                 })
                 // (_optional_) sort order, `default = d3.ascending`
                 .order(d3.ascending)
-                // (_optional_) custom renderlet to post-process chart using [D3](http://d3js.org)
-                ;
-
+            // (_optional_) custom renderlet to post-process chart using [D3](http://d3js.org)
+            ;
 
 
             dc.renderAll();
@@ -445,11 +479,9 @@
         }
 
         function updateData() {
-              $.getJSON('/get_data', {}, function(data1) {
-                data = d3.csvParse(data1.data);
-                console.log(data)
-                makeCharts(data);
-              });
+            data = d3.csvParse({{ data_frame | tojson }});
+            console.log(data);
+            makeCharts(data);
         }
     </script>
 {% endblock %}
