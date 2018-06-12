@@ -132,9 +132,10 @@ def create_user_id(last_name, first_name, dob):
 
 def initials(full_name):
     # TODO: strip non acii characters?
+    full_name = str(full_name)
     if full_name == '':
         return ''
-    return ''.join([el[0] if len(el) > 0 else '' for el in full_name.split(' ')])
+    return ''.join([el[0].upper() if len(el) > 0 else '' for el in full_name.split(' ')])
 
 
 def get_all_client_keys(database_reference):
@@ -192,13 +193,13 @@ def generate_csv(json_data):
 
     for key in json_data.keys():
         for child_key in json_data.get(key).keys():
-            temp = pd.DataFrame.from_dict(json_data.get(key).get(child_key), orient='index')
+            temp = pd.DataFrame.from_dict(json_data.get(key).get(child_key), orient='index').fillna('')
             # for compatibility with the old form
             if 'staff_completing_csl_lname' in temp.columns:
                 temp = temp[fields_to_keep]
-                temp['staff_completing_csl'] = [' '.join(el) for el in
-                                                zip(temp['staff_completing_csl_fname'],
-                                                    temp['staff_completing_csl_lname'])]
+                temp['staff_completing_csl'] = [' '.join([str(el[0]).strip(), str(el[1]).strip()]) for el in
+                                                zip(temp['staff_completing_csl_fname'].values.astype(str),
+                                                    temp['staff_completing_csl_lname'].values.astype(str))]
             else:
                 temp = temp[old_fields]
 
@@ -210,8 +211,8 @@ def generate_csv(json_data):
             temp['UOS (.25, .5, .75, 1)'] = [uos_map.get(el, el) for el in temp['uos'].values]
 
             # TODO use a gender to sex function . put race
-            temp['SEX M/F'] = list(map(lambda x: x[0], temp['gender'].values))
-            temp['Race'] = [el[0] for el in
+            temp['SEX M/F'] = list(map(lambda x: x[0] if len(x) > 0 else x, temp['gender'].values))
+            temp['Race'] = [el[0] if len(el) > 0 else el for el in
                             temp['race'].values]  # TODO - maybe display full race or have an abbreviations
             temp['Staff (Initials)'] = temp['staff_completing_csl'].apply(initials)
             temp['SRF Done (1=Yes, 0=No)'] = ''
@@ -232,16 +233,22 @@ def generate_csv_from_path(log):
     # there may be subsets with the old log format
 
     if 'staff_completing_csl_lname' in df.columns:
-        df_new_format = df[pd.isnull(df['staff_completing_csl'])].copy()
-        df_old_format = df[~pd.isnull(df['staff_completing_csl'])].copy()
-        df_old_format = df_old_format[old_fields]
+        if 'staff_completing_csl' in df.columns:
+            df_new_format = df[pd.isnull(df['staff_completing_csl'])].copy()
+            df_old_format = df[~pd.isnull(df['staff_completing_csl'])].copy()
+            df_old_format = df_old_format[old_fields]
 
-        df_new_format = df_new_format[fields_to_keep]
-        df_new_format['staff_completing_csl'] = [' '.join(el) for el in
-                                                 zip(df_new_format['staff_completing_csl_fname'],
-                                                     df_new_format['staff_completing_csl_lname'])]
+            df_new_format = df_new_format[fields_to_keep]
+            df_new_format['staff_completing_csl'] = [' '.join([str(el[0]).strip(), str(el[1]).strip()]) for el in
+                                                     zip(df_new_format['staff_completing_csl_fname'].values.astype(str),
+                                                         df_new_format['staff_completing_csl_lname'].values.astype(
+                                                             str))]
 
-        df = df_new_format.append(df_old_format)  # now they both have staff_completing_csl field
+            df = df_new_format.append(df_old_format)  # now they both have staff_completing_csl field
+        else:
+            df['staff_completing_csl'] = [' '.join([str(el[0]).strip(), str(el[1]).strip()]) for el in
+                                          zip(df['staff_completing_csl_fname'].values.astype(str),
+                                              df['staff_completing_csl_lname'].values.astype(str))]
     else:
         df = df[old_fields]
 
@@ -252,9 +259,9 @@ def generate_csv_from_path(log):
     uos_map = {'15': '.25', '30': '.5', '45': '.75', '1': 1}
     df['UOS (.25, .5, .75, 1)'] = [uos_map.get(el, el) for el in df['uos'].values]
 
-    # TODO use a gender to sex function . put race
-    df['SEX M/F'] = list(map(lambda x: x[0], df['gender'].values))
-    df['Race'] = [el[0] for el in
+    # TODO use a gender to sex function . put race as is, no abbreviation
+    df['SEX M/F'] = list(map(lambda x: x[0] if len(x) > 0 else x, df['gender'].values))
+    df['Race'] = [el[0] if len(el) > 0 else el for el in
                   df['race'].values]  # TODO - maybe display full race or have an abbreviations
     df['Staff (Initials)'] = df['staff_completing_csl'].apply(initials)
     df['SRF Done (1=Yes, 0=No)'] = ''
@@ -267,13 +274,21 @@ def generate_csv_from_path(log):
 
 
 # data for clients
-def data_for_dashboard(database_reference):
+def data_for_dashboard(database_reference, specific_users=None):
     data_frame = pd.DataFrame(columns=csv_columns + ['created_dt', 'isActive', 'deleted_dt'])
 
-    all_clients = get_all_client_keys(database_reference)  # the list of clients - the user ids.
-    archived_clients = get_archived_client_keys(database_reference)
+    if specific_users is None:
+        all_clients = get_all_client_keys(database_reference)  # the list of clients - the user ids.
+        archived_clients = get_archived_client_keys(database_reference)
+    else:
+        # TODo - try except etc...
+        specific_users = [specific_users] if isinstance(specific_users, str) else specific_users  # must be a list
+        all_clients = [user for user in specific_users if
+                       database_reference.child('clients').child(user).get() is not None]
+        archived_clients = [user for user in specific_users if
+                            database_reference.child('archived_clients').child(user).get() is not None]
 
-    if len(all_clients) == 0 and len(archived_clients):
+    if len(all_clients) == 0 and len(archived_clients) == 0:
         return data_frame
 
     # active client logs
@@ -290,8 +305,14 @@ def data_for_dashboard(database_reference):
 
     # combined the paths and get a list of all logs
     all_paths = all_clients_paths + arch_clients_paths
+    if len(all_paths) == 0:
+        return data_frame
+
     logs = [database_reference.child(path).get() for path in all_paths]
     logs = [log for log in logs if log is not None]  # we do not need None
+
+    if len(logs) == 0:
+        return data_frame
 
     # get the full data
     log_data = generate_csv_from_path(logs)
@@ -327,9 +348,12 @@ def data_for_dashboard(database_reference):
     active_sttus_data['isActive'] = active_sttus
     active_sttus_data['deleted_dt'] = deleted_dts
 
-    data_frame = log_data.merge(active_sttus_data, how='left', on ='user_id')
+    data_frame = log_data.merge(active_sttus_data, how='left', on='user_id')
     data_frame.fillna('')
+    # TODO; drop user_id?
     return data_frame.astype(str)
+
+# TODO: create a function that provides a way to have joining date as a 1 when joining
 
 
 if __name__ == '__main__':

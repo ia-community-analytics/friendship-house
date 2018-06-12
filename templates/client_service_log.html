@@ -18,16 +18,16 @@
                     <fieldset>
                         <legend>General</legend>
                         Last Name: <input type="text" name="lastname" value="{{ data.last_name }}"
-                                          placeholder="Last Name" title="Last Name" required disabled><br>
+                                          placeholder="Last Name" title="Last Name" required><br>
                         First Name: <input type="text" name="firstname" value="{{ data.first_name }}"
-                                           placeholder="First Name" title="First Name" required disabled><br>
+                                           placeholder="First Name" title="First Name" required><br>
                         Date of Birth: <input type="date" min="1960-01-01" max="{{ date }}" name="dob"
                                               value="{{ data.dob }}" placeholder="Date of Birth" title="Date of Birth"
-                                              required disabled><br>
+                                              required><br>
                         Gender: <input type="text" name="gender" value="{{ data.gender }}" placeholder="Gender"
-                                       title="Gender" disabled><br>
+                                       title="Gender"><br>
                         Telephone: <input type="tel" name="phone" value="{{ data.phone }}" placeholder="phone #"
-                                          title="phone #" disabled>
+                                          title="phone #">
                     </fieldset>
                 </div>
 
@@ -35,12 +35,12 @@
                     <fieldset>
                         <legend>#In Home</legend>
                         # Adults: <input type="number" name="adults" min="0" value="{{ data.nber_adults }}"
-                                         placeholder="# Adults" title="# Adults" disabled><br>
+                                         placeholder="# Adults" title="# Adults"><br>
                         # Under 18: <input type="number" name="under18" min="0"
                                            value="{{ data.nber_under_18 }}" placeholder="# Under 18"
-                                           title="# Under 18" disabled><br>
+                                           title="# Under 18"><br>
                         Total: <input type="number" name="inhome" min="0" value="{{ data.total_in_home }}"
-                                      placeholder="Total" title="Total In Home" disabled>
+                                      placeholder="Total" title="Total In Home">
                     </fieldset>
                 </div>
             </fieldset>
@@ -248,8 +248,8 @@
 
             <div id="staff_notes" class="container">
                 Staff Note: <input type="text" name="staff_notes">
-                Staff Completing CSL: <input type="text" name="staff_completing_csl_fname" placeholder="First Name">
-                <input type="text" name="staff_completing_csl_lname" placeholder="Last Name">
+                Staff Completing CSL: <input type="text" name="staff_completing_csl_fname" placeholder="First Name" required>
+                <input type="text" name="staff_completing_csl_lname" placeholder="Last Name" required>
             </div>
 
             <input name="race" value="{{ data.race }}" hidden>

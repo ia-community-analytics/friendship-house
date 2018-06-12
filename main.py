@@ -15,10 +15,10 @@ from flask_nav.elements import Navbar, View
 
 app = Flask(__name__)
 nav = Nav(app)
+nav_el = Navbar('', View('Home', 'home_page'), View('Export', 'export'), View('Dashboards', 'dashboards'),
+                View('Authenticate', 'authenticate'))
 
-nav.register_element('friend_navbar', Navbar('', View('Home', 'home_page'),
-                                             View('Export', 'export'), View('Dashboards', 'dashboards'),
-                                             View('Authenticate', 'authenticate')))
+nav.register_element('friend_navbar', nav_el)
 nav.init_app(app)
 # TODO: use an environment variable for this app secret!
 app.secret_key = b'some46fu23yp/;:/sjdh'
@@ -49,6 +49,7 @@ def authentication_required(f):
 def authenticate():
     if request.method == 'POST' and session.get('fire_token', None) is None:
         form = request.form
+        form = dict((a, b.strip()) for a, b in form.items())
         email = form.get('email', '')
         uid = form.get('uid', '')
         try:
@@ -104,6 +105,7 @@ def service_log_add(record):
 @authentication_required
 def service_log_post(record):
     form = request.form
+    form = dict((a, b.strip()) for a, b in form.items())
     log_month = month(form.get('Date'))
     push = database.child('service_logs/' + log_month + '/' + record).push(form)  # set data
     # we need to add to paths
@@ -140,6 +142,7 @@ def date_select():
 @authentication_required
 def export():
     form = request.form
+    form = dict((a, b.strip()) for a, b in form.items())
     start = month(form.get('start'))
     end = month(form.get('end'))
     if start == '-01' or end == '-01':
@@ -158,7 +161,7 @@ def export():
 
 @app.route('/dashboards')
 # @basic_auth.required
-#@authentication_required
+# @authentication_required
 def dashboards():
     df = data_for_dashboard(database)
     buffer = io.StringIO()
@@ -175,6 +178,7 @@ def home_page():
         return render_template("homepage.html")
     else:
         form = request.form
+        form = dict((a,b.strip()) for a,b in form.items()) # strip spaces
         if 'thesearchform' in form.keys():
             last_name = form.get('lname_search', '').lower()
             first_name = form.get('fname_search', '').lower()
@@ -244,19 +248,19 @@ def home_page():
 
         elif 'thecrudform' in form.keys():
             # note that if delete was seleected we would not need to get this info
-            last_name = form.get('lastname')
-            first_name = form.get('firstname')
-            dob = form.get('dob')
+            last_name = form.get('lastname','')
+            first_name = form.get('firstname','')
+            dob = form.get('dob','')
             user_id = create_user_id(last_name, first_name, dob)
-            gender = form.get('gender')
-            phone = form.get('phone')
-            nber_adults = form.get('adults')
-            nber_under_18 = form.get('under18')
-            race = form.get('race')
-            address = form.get('street_address')
-            city = form.get('city')
-            state = form.get('state')
-            zipcode = form.get('zipcode')
+            gender = form.get('gender','')
+            phone = form.get('phone','')
+            nber_adults = form.get('adults','')
+            nber_under_18 = form.get('under18','')
+            race = form.get('race','')
+            address = form.get('street_address','')
+            city = form.get('city','')
+            state = form.get('state','')
+            zipcode = form.get('zipcode','')
             total = intg(nber_adults) + intg(nber_under_18)
 
             # make data json. easy with name and dob separate
@@ -281,7 +285,7 @@ def home_page():
                     paths_to_restore = database.child('archived_clients').child(user_id).child('paths').get()
                     if paths_to_restore is not None:
                         database.child('clients').child(user_id).child('paths').set(paths_to_restore)
-                    database.child('archived_clients').child(user_id).delete() # delete it from archive
+                    database.child('archived_clients').child(user_id).delete()  # delete it from archive
 
                 return render_template("confirmation.html")
             elif "update_record" in form.keys():
