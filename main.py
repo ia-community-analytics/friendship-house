@@ -6,7 +6,7 @@ from non_app_specific import (today, intg, races, genders, get_all_client_keys, 
 from functools import wraps
 from firebase_admin import db
 from firebase_admin import auth
-from flask import Flask, render_template, request, redirect, url_for, Response, flash, session
+from flask import Flask, render_template, jsonify, request, redirect, url_for, Response, flash, session, make_response
 from flask_basicauth import BasicAuth
 from flask_nav import Nav
 from flask_nav.elements import Navbar, View
@@ -158,10 +158,26 @@ def export():
 
 @app.route('/dashboards')
 # @basic_auth.required
-@authentication_required
+#@authentication_required
 def dashboards():
+    start = str(today.year) + '-01-01'
+    end = str(today.year) + '-12-31'
+    data = database.child('service_logs').order_by_key().start_at(start).end_at(end).get()
+    df = generate_csv(data)
+    df = df.drop(df.index[0])
+    df = df.drop(df.index[1])
+    df.to_csv("static/WebRequestsData4.csv", index=False)
     return render_template('dashboards.html')
 
+@app.route('/get_data', methods=['GET'])
+def get_data():
+    print(database.child('clients').get())
+
+    start = str(today.year) + '-01-01'
+    end = str(today.year) + '-12-31'
+    data = database.child('service_logs').order_by_key().start_at(start).end_at(end).get()
+    df = generate_csv(data)
+    return jsonify(data=df.to_csv(index=False))
 
 @app.route('/home', methods=["GET", "POST"])
 @authentication_required
