@@ -1,4 +1,6 @@
 import pandas as pd
+import random
+import string
 
 today = pd.datetime.today()
 races = [
@@ -187,6 +189,9 @@ column_rename = {'lastname': 'Last Name',
 
 
 # TODO check field names again
+def generate_random_url(N):
+    return ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(N))
+
 def generate_csv(json_data):
     # this may vary based on the way the data is represented.
     df = pd.DataFrame(columns=csv_columns)
@@ -277,16 +282,15 @@ def generate_csv_from_path(log):
 def data_for_dashboard(database_reference, specific_users=None):
     data_frame = pd.DataFrame(columns=csv_columns + ['created_dt', 'isActive', 'deleted_dt'])
 
-    if specific_users is None:
-        all_clients = get_all_client_keys(database_reference)  # the list of clients - the user ids.
-        archived_clients = get_archived_client_keys(database_reference)
-    else:
-        # TODo - try except etc...
+    all_clients = get_all_client_keys(database_reference)  # the list of clients - the user ids.
+    archived_clients = get_archived_client_keys(database_reference)
+
+    if specific_users is not None:
         specific_users = [specific_users] if isinstance(specific_users, str) else specific_users  # must be a list
-        all_clients = [user for user in specific_users if
-                       database_reference.child('clients').child(user).get() is not None]
-        archived_clients = [user for user in specific_users if
-                            database_reference.child('archived_clients').child(user).get() is not None]
+        # TODo - try except etc...
+
+        all_clients = [user for user in specific_users if user in all_clients]
+        archived_clients = [user for user in specific_users if user in archived_clients]
 
     if len(all_clients) == 0 and len(archived_clients) == 0:
         return data_frame

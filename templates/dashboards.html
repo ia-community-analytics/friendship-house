@@ -172,9 +172,15 @@
 
 
         $(document).ready(function () {
-            data = d3.csvParse({{ data_frame | tojson }});
-            console.log(data);
+            {#data = d3.csvParse({{ data_frame | tojson }});#}
+            {#console.log(data);#}
+            {#makeCharts(data);#}
+            $.getJSON("{{ url_for('get_data', id=id_check, type='dashboard') }}", {}, function(data1) {
+            data = d3.csvParse(data1.data);
+            console.log(data)
             makeCharts(data);
+          });
+          return false;
         });
 
         function makeCharts(data) {
@@ -479,9 +485,14 @@
         }
 
         function updateData() {
-            data = d3.csvParse({{ data_frame | tojson }});
+            {#data = d3.csvParse({{ data_frame | tojson }});#}
+            {#console.log(data);#}
+            {#makeCharts(data);#}
+            $.getJSON("{{ url_for('get_data', id=id_check, type='dashboard') }}", {}, function(data1) {
+            data = d3.csvParse(data1.data);
             console.log(data);
             makeCharts(data);
+          });
         }
     </script>
 {% endblock %}

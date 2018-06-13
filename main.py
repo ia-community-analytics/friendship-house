@@ -2,11 +2,12 @@ import firebase_admin
 import io
 from non_app_specific import (today, intg, races, genders, get_all_client_keys, generate_csv,
                               capitalize, month, create_user_id, dtype, appointment_description, appointment_type,
-                              service_uos, program_status, supportive_service_provided, data_for_dashboard)
+                              service_uos, program_status, supportive_service_provided, data_for_dashboard,
+                              generate_random_url)
 from functools import wraps
 from firebase_admin import db
 from firebase_admin import auth
-from flask import Flask, render_template, jsonify, request, redirect, url_for, Response, flash, session, make_response
+from flask import Flask, render_template, jsonify, request, redirect, url_for, Response, flash, session, abort
 from flask_basicauth import BasicAuth
 from flask_nav import Nav
 from flask_nav.elements import Navbar, View
@@ -46,10 +47,11 @@ def authentication_required(f):
 # real routes
 @app.route('/authenticate', methods=["GET", "POST"])
 # @basic_auth.required
+# TODO: in multi select, https://stackoverflow.com/questions/12502646/access-multiselect-form-field-in-flask
 def authenticate():
     if request.method == 'POST' and session.get('fire_token', None) is None:
         form = request.form
-        form = dict((a, b.strip()) for a, b in form.items())
+        form = dict((a, b.strip() if isinstance(b, str) else b) for a, b in form.items())
         email = form.get('email', '')
         uid = form.get('uid', '')
         try:
@@ -60,6 +62,7 @@ def authenticate():
             user_uid = user.uid
             if uid == user_uid:
                 session['fire_token'] = 'fire_verified'
+                session['data_posting_url'] = generate_random_url(20)
                 return redirect(url_for("home_page"))
             else:
                 return render_template("authenticate.html")
@@ -67,6 +70,8 @@ def authenticate():
             return render_template("authenticate.html")
     elif request.method == 'POST' and session.get('fire_token', None) is not None:
         session.pop('fire_token', None)
+        if 'data_posting_url' in session:
+            session.pop('data_posting_url')
         return redirect('https://www.friendship.house/')  # TODO make this a variable
     elif request.method == 'GET' and session.get('fire_token', None) is not None:
         return render_template("authenticate.html", email='somestuff@none.com', uid='friendship')
@@ -105,7 +110,7 @@ def service_log_add(record):
 @authentication_required
 def service_log_post(record):
     form = request.form
-    form = dict((a, b.strip()) for a, b in form.items())
+    form = dict((a, b.strip() if isinstance(b, str) else b) for a, b in form.items())
     log_month = month(form.get('Date'))
     push = database.child('service_logs/' + log_month + '/' + record).push(form)  # set data
     # we need to add to paths
@@ -128,12 +133,7 @@ def date_select():
     start = str(today.year) + '-01-01'
     end = str(today.year) + '-12-31'
     header = "Service Log Summary from %s to %s." % (start, end)
-    data = database.child('service_logs').order_by_key().start_at(start).end_at(end).get()
-    df = generate_csv(data)
-    columns = list(df.columns)
-    data_list = df.values.tolist()
-    return render_template('export_client_logs.html', columns=columns, data_list=data_list,
-                           ncol=len(columns), nrow=len(data_list), dtype=dtype, header=header,
+    return render_template('export_client_logs.html', id_check=session.get('data_posting_url',''), header=header,
                            date=today.strftime("%Y-%m-%d"))
 
 
@@ -142,7 +142,7 @@ def date_select():
 @authentication_required
 def export():
     form = request.form
-    form = dict((a, b.strip()) for a, b in form.items())
+    form = dict((a, b.strip() if isinstance(b, str) else b) for a, b in form.items())
     start = month(form.get('start'))
     end = month(form.get('end'))
     if start == '-01' or end == '-01':
@@ -161,14 +161,9 @@ def export():
 
 @app.route('/dashboards')
 # @basic_auth.required
-# @authentication_required
+@authentication_required
 def dashboards():
-    df = data_for_dashboard(database)
-    buffer = io.StringIO()
-    df.to_csv(buffer, index=False)
-    content = buffer.getvalue()
-    buffer.close()
-    return render_template('dashboards.html', data_frame=content)
+    return render_template('dashboards.html', id_check=session.get('data_posting_url', ''))
 
 
 @app.route('/home', methods=["GET", "POST"])
@@ -178,7 +173,7 @@ def home_page():
         return render_template("homepage.html")
     else:
         form = request.form
-        form = dict((a,b.strip()) for a,b in form.items()) # strip spaces
+        form = dict((a, b.strip() if isinstance(b, str) else b) for a, b in form.items())  # strip spaces
         if 'thesearchform' in form.keys():
             last_name = form.get('lname_search', '').lower()
             first_name = form.get('fname_search', '').lower()
@@ -248,19 +243,19 @@ def home_page():
 
         elif 'thecrudform' in form.keys():
             # note that if delete was seleected we would not need to get this info
-            last_name = form.get('lastname','')
-            first_name = form.get('firstname','')
-            dob = form.get('dob','')
+            last_name = form.get('lastname', '')
+            first_name = form.get('firstname', '')
+            dob = form.get('dob', '')
             user_id = create_user_id(last_name, first_name, dob)
-            gender = form.get('gender','')
-            phone = form.get('phone','')
-            nber_adults = form.get('adults','')
-            nber_under_18 = form.get('under18','')
-            race = form.get('race','')
-            address = form.get('street_address','')
-            city = form.get('city','')
-            state = form.get('state','')
-            zipcode = form.get('zipcode','')
+            gender = form.get('gender', '')
+            phone = form.get('phone', '')
+            nber_adults = form.get('adults', '')
+            nber_under_18 = form.get('under18', '')
+            race = form.get('race', '')
+            address = form.get('street_address', '')
+            city = form.get('city', '')
+            state = form.get('state', '')
+            zipcode = form.get('zipcode', '')
             total = intg(nber_adults) + intg(nber_under_18)
 
             # make data json. easy with name and dob separate
@@ -334,6 +329,34 @@ def home_page():
                 return redirect(url_for('home_page'))
         else:
             return redirect(url_for('home_page'))
+
+
+@app.route('/get_data/<id>/<type>', methods=['GET'])
+@authentication_required
+def get_data(id, type):
+    if id == session.get('data_posting_url', ''):
+        session.pop('data_posting_url')
+        session['data_posting_url'] = generate_random_url(20)
+
+        if type == 'dashboard':
+            df = data_for_dashboard(database)
+            return jsonify(data=df.to_csv(index=False))
+
+        elif type == 'export':
+            start = str(today.year) + '-01-01'
+            end = str(today.year) + '-12-31'
+            data = database.child('service_logs').order_by_key().start_at(start).end_at(end).get()
+            df = generate_csv(data)
+            cols = [dict(id=el, label=el, type="string") for el in df.columns]
+            rows = [dict(c=[dict(v=el) for el in s]) for s in df.values]
+            return jsonify(dict(cols=cols, rows=rows))
+
+        else:
+            return abort(404)
+    else:
+        session.pop('data_posting_url')
+        session['data_posting_url'] = generate_random_url(20)
+        return abort(403)
 
 
 if __name__ == '__main__':
