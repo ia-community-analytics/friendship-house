@@ -9,18 +9,11 @@ from firebase_admin import db
 from firebase_admin import auth
 from flask import Flask, render_template, jsonify, request, redirect, url_for, Response, flash, session, abort
 from flask_basicauth import BasicAuth
-from flask_nav import Nav
-from flask_nav.elements import Navbar, View
 
 # TODO serve https and not http since we are using basic auth.
 
 app = Flask(__name__)
-nav = Nav(app)
-nav_el = Navbar('', View('Home', 'home_page'), View('Export', 'export'), View('Dashboards', 'dashboards'),
-                View('Authenticate', 'authenticate'))
 
-nav.register_element('friend_navbar', nav_el)
-nav.init_app(app)
 # TODO: use an environment variable for this app secret!
 app.secret_key = b'some46fu23yp/;:/sjdh'
 
