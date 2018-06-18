@@ -33,6 +33,11 @@ basic_auth = BasicAuth(app)
 
 
 # TODO: have a decorator and an authenticate page where a token or id is provided.
+def reset_data_post_url():
+    session.pop('data_posting_url')
+    session['data_posting_url'] = generate_random_url(20)
+    return None
+
 # if not authenticated then do not do anything
 def authentication_required(f):
     @wraps(f)
@@ -133,7 +138,8 @@ def date_select():
     start = str(today.year) + '-01-01'
     end = str(today.year) + '-12-31'
     header = "Service Log Summary from %s to %s." % (start, end)
-    return render_template('export_client_logs.html', id_check=session.get('data_posting_url',''), header=header,
+    data_post_url = session.get('data_posting_url', '')
+    return render_template('export_client_logs.html', id_check=data_post_url, header=header,
                            date=today.strftime("%Y-%m-%d"))
 
 
@@ -163,7 +169,8 @@ def export():
 # @basic_auth.required
 @authentication_required
 def dashboards():
-    return render_template('dashboards.html', id_check=session.get('data_posting_url', ''))
+    data_post_url = session.get('data_posting_url', '')
+    return render_template('dashboards.html', id_check=data_post_url)
 
 
 @app.route('/home', methods=["GET", "POST"])
@@ -331,13 +338,21 @@ def home_page():
             return redirect(url_for('home_page'))
 
 
+def hide(f):
+    @wraps(f)
+    def a_function(*args, **kwargs):
+        resp = f(*args, **kwargs)
+        reset_data_post_url()
+        return resp
+    return a_function
+
+
 @app.route('/get_data/<id>/<type>', methods=['GET'])
 @authentication_required
+@hide
 def get_data(id, type):
     if id == session.get('data_posting_url', ''):
-        session.pop('data_posting_url')
-        session['data_posting_url'] = generate_random_url(20)
-
+        # reset_data_post_url()
         if type == 'dashboard':
             df = data_for_dashboard(database)
             return jsonify(data=df.to_csv(index=False))
@@ -352,12 +367,11 @@ def get_data(id, type):
             return jsonify(dict(cols=cols, rows=rows))
 
         else:
+            # reset_data_post_url()
             return abort(404)
     else:
-        session.pop('data_posting_url')
-        session['data_posting_url'] = generate_random_url(20)
+        # reset_data_post_url()
         return abort(403)
-
 
 if __name__ == '__main__':
     app.run(debug=True)
