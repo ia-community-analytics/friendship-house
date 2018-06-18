@@ -33,6 +33,7 @@
 
             var columns = ["Last Name", "First Name", "Date Of Birth", ""];
             var rows = {{ multiple_clients | safe }};
+            var values = {{ values | safe }};
 
             function drawTable() {
                 var data = new google.visualization.DataTable();
@@ -42,7 +43,7 @@
                 }
 
                 for (i = 0; i < rows.length; i++) {
-                    var value = rows[i].join('_');
+                    var value = values[i];
                     var html_el = document.createElement('BUTTON');
                     html_el.name = "client_select_one";
                     html_el.type = "submit";

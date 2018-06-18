@@ -73,7 +73,7 @@ supportive_service_provided = dict(
         'Multiple Outfits'
     ],
     Hygiene=[
-        'Signle Item',
+        'Single Item',
         'Basic Pack',
         'Family Pack'
     ],
@@ -100,6 +100,17 @@ supportive_service_provided = dict(
         'Family Pack'
     ])
 
+name_processing_separator = '<*>'
+
+
+# this will be used in javascript as well - see homepage. to make everything simple, only userids are processed
+def process_name(name: str):
+    return name.strip().replace(' ', name_processing_separator)
+
+
+def display_name(name: str):
+    return name.strip().replace(name_processing_separator, ' ')
+
 
 def intg(x):
     try:
@@ -108,8 +119,16 @@ def intg(x):
         return 0
 
 
-def capitalize(word):
-    return word[0].upper() + word[1:].lower()
+def capitalize(word: str, sep=name_processing_separator):
+    if sep not in word.strip():
+        if '-' in word:
+            temp = word.strip().split('-')
+            return '-'.join([el[0].upper() + el[1:].lower() for el in temp])
+        else:
+            return word[0].upper() + word[1:].lower()
+    else:
+        elements = word.split(sep)
+        return ' '.join([capitalize(el) for el in elements])
 
 
 def month(date):
@@ -129,7 +148,7 @@ def format_tel(tel):
 
 
 def create_user_id(last_name, first_name, dob):
-    return last_name.lower() + '_' + first_name.lower() + '_' + dob
+    return process_name(last_name).lower() + '_' + process_name(first_name).lower() + '_' + dob
 
 
 def initials(full_name):
@@ -192,6 +211,7 @@ column_rename = {'lastname': 'Last Name',
 def generate_random_url(N):
     return ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(N))
 
+
 def generate_csv(json_data):
     # this may vary based on the way the data is represented.
     df = pd.DataFrame(columns=csv_columns)
@@ -203,8 +223,10 @@ def generate_csv(json_data):
             if 'staff_completing_csl_lname' in temp.columns:
                 temp = temp[fields_to_keep]
                 temp['staff_completing_csl'] = [' '.join([str(el[0]).strip(), str(el[1]).strip()]) for el in
-                                                zip(temp['staff_completing_csl_fname'].values.astype(str),
-                                                    temp['staff_completing_csl_lname'].values.astype(str))]
+                                                zip(temp['staff_completing_csl_fname'].apply(
+                                                    display_name).values.astype(str),
+                                                    temp['staff_completing_csl_lname'].apply(
+                                                        display_name).values.astype(str))]
             else:
                 temp = temp[old_fields]
 
@@ -222,6 +244,10 @@ def generate_csv(json_data):
             temp['Staff (Initials)'] = temp['staff_completing_csl'].apply(initials)
             temp['SRF Done (1=Yes, 0=No)'] = ''
             temp['Service Requested/Provided'] = ''
+
+            #
+            temp['firstname'] = temp['firstname'].apply(display_name)
+            temp['lastname'] = temp['lastname'].apply(display_name)
 
             temp.rename(index=str, columns=column_rename, inplace=True)
             df = df.append(temp[csv_columns].copy())
@@ -245,15 +271,17 @@ def generate_csv_from_path(log):
 
             df_new_format = df_new_format[fields_to_keep]
             df_new_format['staff_completing_csl'] = [' '.join([str(el[0]).strip(), str(el[1]).strip()]) for el in
-                                                     zip(df_new_format['staff_completing_csl_fname'].values.astype(str),
-                                                         df_new_format['staff_completing_csl_lname'].values.astype(
+                                                     zip(df_new_format['staff_completing_csl_fname'].apply(
+                                                         display_name).values.astype(str),
+                                                         df_new_format['staff_completing_csl_lname'].apply(
+                                                             display_name).values.astype(
                                                              str))]
 
             df = df_new_format.append(df_old_format)  # now they both have staff_completing_csl field
         else:
             df['staff_completing_csl'] = [' '.join([str(el[0]).strip(), str(el[1]).strip()]) for el in
-                                          zip(df['staff_completing_csl_fname'].values.astype(str),
-                                              df['staff_completing_csl_lname'].values.astype(str))]
+                                          zip(df['staff_completing_csl_fname'].apply(display_name).values.astype(str),
+                                              df['staff_completing_csl_lname'].apply(display_name).values.astype(str))]
     else:
         df = df[old_fields]
 
@@ -272,6 +300,8 @@ def generate_csv_from_path(log):
     df['SRF Done (1=Yes, 0=No)'] = ''
     df['Service Requested/Provided'] = ''
 
+    df['firstname'] = df['firstname'].apply(display_name)
+    df['lastname'] = df['lastname'].apply(display_name)
     df.rename(index=str, columns=column_rename, inplace=True)
     df['user_id'] = list(map(create_user_id, df['Last Name'].values, df['First Name'].values, df['DOB'].values))
 
@@ -279,7 +309,7 @@ def generate_csv_from_path(log):
 
 
 # data for clients
-def data_for_dashboard(database_reference, specific_users=None):
+def old_data_for_dashboard(database_reference, specific_users=None):
     data_frame = pd.DataFrame(columns=csv_columns + ['created_dt', 'isActive', 'deleted_dt'])
 
     all_clients = get_all_client_keys(database_reference)  # the list of clients - the user ids.
@@ -357,9 +387,48 @@ def data_for_dashboard(database_reference, specific_users=None):
     # TODO; drop user_id?
     return data_frame.astype(str)
 
+
+def data_for_dashboard(database_reference):
+    active_clients = database_reference.child('clients').get()
+    archived_clients = database_reference.child('archived_clients').get()
+
+    active_clients = [(el.get('information', ['']), el.get('service_dates', [''])) for el in
+                      active_clients.values()]
+    archived_clients = [(el.get('information', ['']), el.get('service_dates', [''])) for el in
+                        archived_clients.values()]
+
+    gender, race, dob, created, deleted, service_date = [], [], [], [], [], []
+
+    for el in active_clients + archived_clients:
+        cur_gender = [el[0].get('gender', '')]
+        cur_race = [el[0].get('race', '')]
+        cur_dob = [el[0].get('dob', '')]
+        cur_crtdt = [el[0].get('created_dt', '')]
+        cur_dltdt = [el[0].get('deleted_dt', '')]
+
+        n = len(el[1]) + 1 if el[1] != [''] else 1
+
+        gender.extend(cur_gender * n)
+        race.extend(cur_race * n)
+        dob.extend(cur_dob * n)
+        created.extend(cur_crtdt * n)
+        deleted.extend(cur_dltdt * n)
+        # join.extend([1] + [0] * (n - 1))
+        service_date.extend(cur_crtdt + (el[1] if el[1] != [''] else []))
+
+    df = pd.DataFrame(columns=['service_dates', 'created_dt', 'deleted_dt', 'gender', 'race', 'dob'])
+
+    df['service_dates'] = service_date
+    df['created_dt'] = created
+    df['deleted_dt'] = deleted
+    df['gender'] = gender
+    df['race'] = race
+    df['dob'] = dob
+
+    return df
+
 # TODO: create a function that provides a way to have joining date as a 1 when joining
 
 
 if __name__ == '__main__':
     print("--")
-
