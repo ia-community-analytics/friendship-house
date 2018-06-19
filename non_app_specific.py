@@ -151,6 +151,11 @@ def create_user_id(last_name, first_name, dob):
     return process_name(last_name).lower() + '_' + process_name(first_name).lower() + '_' + dob
 
 
+def user_id_to_name(user_id):
+    temp = user_id.split('_')
+    return (capitalize(display_name(temp[1]), ' '), capitalize(display_name(temp[0]), ' '))  # first name, last name
+
+
 def initials(full_name):
     # TODO: strip non acii characters?
     full_name = str(full_name)
@@ -392,31 +397,37 @@ def data_for_dashboard(database_reference):
     active_clients = database_reference.child('clients').get()
     archived_clients = database_reference.child('archived_clients').get()
 
-    active_clients = [(el.get('information', ['']), el.get('service_dates', [''])) for el in
-                      active_clients.values()]
-    archived_clients = [(el.get('information', ['']), el.get('service_dates', [''])) for el in
-                        archived_clients.values()]
+    active_clients = [(el[0], el[1].get('information', ['']), el[1].get('service_dates', [''])) for el in
+                      active_clients.items()]
+    archived_clients = [(el[0], el[1].get('information', ['']), el[1].get('service_dates', [''])) for el in
+                        archived_clients.items()]
 
-    gender, race, dob, created, deleted, service_date = [], [], [], [], [], []
+    gender, race, dob, created, deleted, service_date, first_name, last_name = [], [], [], [], [], [], [], []
 
     for el in active_clients + archived_clients:
-        cur_gender = [el[0].get('gender', '')]
-        cur_race = [el[0].get('race', '')]
-        cur_dob = [el[0].get('dob', '')]
-        cur_crtdt = [el[0].get('created_dt', '')]
-        cur_dltdt = [el[0].get('deleted_dt', '')]
+        name = user_id_to_name(el[0])
+        cur_fname = [name[0]]
+        cur_lname = [name[1]]
+        cur_gender = [el[1].get('gender', '')]
+        cur_race = [el[1].get('race', '')]
+        cur_dob = [el[1].get('dob', '')]
+        cur_crtdt = [el[1].get('created_dt', '')]
+        cur_dltdt = [el[1].get('deleted_dt', '')]
 
-        n = len(el[1]) + 1 if el[1] != [''] else 1
+        n = len(el[2]) + 1 if el[2] != [''] else 1
 
+        last_name.extend(cur_lname * n)
+        first_name.extend(cur_fname * n)
         gender.extend(cur_gender * n)
         race.extend(cur_race * n)
         dob.extend(cur_dob * n)
         created.extend(cur_crtdt * n)
         deleted.extend(cur_dltdt * n)
         # join.extend([1] + [0] * (n - 1))
-        service_date.extend(cur_crtdt + (el[1] if el[1] != [''] else []))
+        service_date.extend(cur_crtdt + (el[2] if el[2] != [''] else []))
 
-    df = pd.DataFrame(columns=['service_dates', 'created_dt', 'deleted_dt', 'gender', 'race', 'dob'])
+    df = pd.DataFrame(
+        columns=['service_dates', 'created_dt', 'deleted_dt', 'gender', 'race', 'dob', 'last_name', 'first_name'])
 
     df['service_dates'] = service_date
     df['created_dt'] = created
@@ -424,8 +435,11 @@ def data_for_dashboard(database_reference):
     df['gender'] = gender
     df['race'] = race
     df['dob'] = dob
+    df['last_name'] = last_name
+    df['first_name'] = first_name
 
     return df
+
 
 # TODO: create a function that provides a way to have joining date as a 1 when joining
 
