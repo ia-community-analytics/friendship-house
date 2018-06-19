@@ -161,8 +161,8 @@
         var hitslineChart = dc.compositeChart("#chart-line-hitsperday");
         var httpChart = dc.rowChart('#http-type-chart');
         var tableChart = dc.dataTable("#mytable");
-        var volumeChart = dc.barChart('#monthly-volume-chart');
-        <!--var monthChart = dc.pieChart('#month-select-chart');-->
+        //var volumeChart = dc.barChart('#monthly-volume-chart');
+        //var monthChart = dc.pieChart('#month-select-chart');
         var yearRingChart = dc.pieChart("#chart-ring-year");
         var staffChart = dc.barChart("#staff-chart");
         var quarterChart = dc.pieChart('#quarter-chart');
@@ -275,9 +275,39 @@
             var status_404 = dateDim.group().reduceSum(function (d) {
                 return +1;
             });
-            var status_302 = dateDim.group().reduceSum(function (d) {
-                return +0;
-            });
+            console.log(status_404);
+            var status_302 = dateDim.group().reduce(
+
+                function (p, d) {
+                    console.log(p.people)
+                    if (d['Last Name'] in p.people)
+                        p.people[d['Last Name']]++;
+                    else {
+                        p.people[d['Last Name']] = 1;
+                        p.peopleCount++;
+                    }
+                    console.log(p);
+                    return p;
+                },
+
+                function (p, d) {
+                    console.log("deleting people");
+                    p.people[d['Last Name']]--;
+                    if (p.people[d['Last Name']] === 0) {
+                        delete p.people[d['Last Name']];
+                        p.peopleCount--;
+                    }
+                    return p;
+                },
+
+                function () {
+                    return {
+                        peopleCount: 0,
+                        people: {}
+                    };
+                }
+
+            );
 
             var whoDim = ndx.dimension(function (d) {
                 return d['Staff (Initials)'];
@@ -286,16 +316,13 @@
                 return +1;
             });
 
-            //var heatColorMapping = d3.scale.linear()
-            //    .domain([0, 1])
-            //    .range(["#e8e88b", "#171a63"]);
-
             staffChart
                 .width(720)
                 .height(250)
                 .x(d3.scaleBand())
                 .xUnits(dc.units.ordinal)
                 .elasticY(true)
+                .elasticX(true)
                 .barPadding(0.1)
                 .outerPadding(0.05)
                 .margins({top: 20, left: 45, right: 0, bottom: 20})
@@ -343,34 +370,12 @@
 
 
 
-            <!--.width(180)-->
-            <!--.height(180)-->
-            <!--.radius(80)-->
-            <!--.innerRadius(30)-->
-            <!--.dimension(monthDim)-->
-            <!--.group(monthGroup)-->
-
-
-            volumeChart.width(475) /* dc.barChart('#monthly-volume-chart', 'chartGroup'); */
-                .height(72)
-                .margins({top: 3, right: 0, bottom: 40, left: 40})
-                .dimension(dateDim)
-                //.round(d3.timeMonth.round)
-                .group(hits)
-                .centerBar(true)
-                .gap(1)
-                .x(d3.scaleTime().domain([minDate, maxDate]))
-                .xUnits(d3.timeMonth)
-                .elasticY(true)
-                .yAxis().ticks(3);
-
 
             hitslineChart
                 .width(475)
                 .height(250)
                 .margins({top: 30, right: 0, bottom: 55, left: 40})
                 .mouseZoomable(true)
-                .rangeChart(volumeChart)
                 .x(d3.scaleTime().domain([minDate, maxDate]))
                 .round(d3.timeMonth.round)
                 .xUnits(d3.timeMonths)
@@ -386,7 +391,10 @@
                     dc.lineChart(hitslineChart)
                         .dimension(dateDim)
                         .colors('blue')
-                        .group(status_302, "First Time Visitors")
+                        .group(status_302, "Unique Visitors")
+                        .valueAccessor(function (d) {
+                            return d.value.peopleCount;
+                        })
                         .dashStyle([0, 0])
                 ])
                 .on("renderlet", function (chart) {
@@ -396,41 +404,6 @@
                 })
                 .brushOn(false)
                 .render();
-
-
-            <!--hitslineChart-->
-            <!--.renderArea(true)-->
-            <!--.width(475)-->
-            <!--.height(250)-->
-            <!--.transitionDuration(200)-->
-            <!--.margins({ top: 30, right: 0, bottom: 60, left: 40 })-->
-            <!--.dimension(monthDim2)-->
-            <!--.mouseZoomable(true)-->
-            <!--.rangeChart(volumeChart)-->
-            <!--.x(d3.time.scale().domain([minDate, maxDate]))-->
-            <!--.round(d3.time.month.round)-->
-            <!--.xUnits(d3.time.months)-->
-            <!--.elasticY(true)-->
-            <!--.renderHorizontalGridLines(true)-->
-            <!--.legend(dc.legend().x(40).y(10).itemHeight(10).gap(5).horizontal(true).itemWidth(50).legendWidth(520))-->
-            <!--.brushOn(false)-->
-            <!--.group(status_200, "200")-->
-            <!--.stack(status_201, "201")-->
-
-            <!--.stack(status_302, "302")-->
-            <!--.stack(status_401, "401")-->
-            <!--.stack(status_404, "404")-->
-            <!--.stack(status_409, "409")-->
-            <!--.stack(status_503, "503")-->
-            <!--.stack(status_508, "508")-->
-            <!--.ordinalColors(["#a4da74", "#1648a0", "#af45d7", "#315f32", "#d02f34", "#beb92f",-->
-            <!--"#462c0c", "#615594", "#bf500e"])-->
-            <!--.on("renderlet", function (chart) {-->
-
-            <!--chart.selectAll('g.x text')-->
-            <!--.attr('transform', 'translate(-13,30) rotate(270)')-->
-            <!--});-->
-
 
             var yearDim = ndx.dimension(function (d) {
                 return +d.Year;
