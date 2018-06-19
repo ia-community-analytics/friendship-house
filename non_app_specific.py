@@ -95,7 +95,7 @@ supportive_service_provided = dict(
         'Other'
     ],
     HouseHold=[
-        'Signle Item',
+        'Single Item',
         'Basic Pack',
         'Family Pack'
     ])
@@ -402,7 +402,7 @@ def data_for_dashboard(database_reference):
     archived_clients = [(el[0], el[1].get('information', ['']), el[1].get('service_dates', [''])) for el in
                         archived_clients.items()]
 
-    gender, race, dob, created, deleted, service_date, first_name, last_name = [], [], [], [], [], [], [], []
+    gender, race, dob, created, deleted, service_date, first_name, last_name, join_in = [], [], [], [], [], [], [], [], []
 
     for el in active_clients + archived_clients:
         name = user_id_to_name(el[0])
@@ -423,11 +423,11 @@ def data_for_dashboard(database_reference):
         dob.extend(cur_dob * n)
         created.extend(cur_crtdt * n)
         deleted.extend(cur_dltdt * n)
-        # join.extend([1] + [0] * (n - 1))
+        join_in.extend([1] + [0] * (n - 1))
         service_date.extend(cur_crtdt + (el[2] if el[2] != [''] else []))
 
     df = pd.DataFrame(
-        columns=['service_dates', 'created_dt', 'deleted_dt', 'gender', 'race', 'dob', 'last_name', 'first_name'])
+        columns=['service_dates', 'created_dt', 'deleted_dt', 'gender', 'race', 'dob', 'last_name', 'first_name', 'join_in'])
 
     df['service_dates'] = service_date
     df['created_dt'] = created
@@ -437,6 +437,7 @@ def data_for_dashboard(database_reference):
     df['dob'] = dob
     df['last_name'] = last_name
     df['first_name'] = first_name
+    df['join_in'] = join_in
 
     return df
 

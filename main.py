@@ -63,18 +63,18 @@ def authenticate():
                 session['data_posting_url'] = generate_random_url(20)
                 return redirect(url_for("home_page"))
             else:
-                return render_template("authenticate.html")
+                return render_template("authenticate.html", logged_in=0)
         else:
-            return render_template("authenticate.html")
+            return render_template("authenticate.html", logged_in=0)
     elif request.method == 'POST' and session.get('fire_token', None) is not None:
         session.pop('fire_token', None)
         if 'data_posting_url' in session:
             session.pop('data_posting_url')
         return redirect('https://www.friendship.house/')  # TODO make this a variable
     elif request.method == 'GET' and session.get('fire_token', None) is not None:
-        return render_template("authenticate.html", email='somestuff@none.com', uid='friendship')
+        return render_template("authenticate.html", email='somestuff@none.com', uid='friendship', logged_in=1)
     else:
-        return render_template("authenticate.html")
+        return render_template("authenticate.html", logged_in=0)
 
 
 @app.route('/')
@@ -374,7 +374,6 @@ def hide(f):
 @hide
 def get_data(id, type):
     if id == session.get('data_posting_url', ''):
-        # reset_data_post_url()
         if type == 'dashboard':
             df = old_data_for_dashboard(database)
             return jsonify(data=df.to_csv(index=False))
@@ -389,10 +388,8 @@ def get_data(id, type):
             return jsonify(dict(cols=cols, rows=rows))
 
         else:
-            # reset_data_post_url()
             return abort(404)
     else:
-        # reset_data_post_url()
         return abort(403)
 
 
