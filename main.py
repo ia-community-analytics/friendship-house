@@ -1,9 +1,9 @@
 import firebase_admin
 import io
 from non_app_specific import (today, intg, races, genders, get_all_client_keys, generate_csv,
-                              capitalize, month, create_user_id, dtype, appointment_description, appointment_type,
-                              service_uos, program_status, supportive_service_provided, data_for_dashboard,
-                              generate_random_url)
+                              capitalize, month, create_user_id, appointment_description, appointment_type,
+                              service_uos, program_status, supportive_service_provided, generate_random_url,
+                              display_name, process_name, old_data_for_dashboard, data_for_dashboard)
 from functools import wraps
 from firebase_admin import db
 from firebase_admin import auth
@@ -26,6 +26,12 @@ basic_auth = BasicAuth(app)
 
 
 # TODO: have a decorator and an authenticate page where a token or id is provided.
+def reset_data_post_url():
+    session.pop('data_posting_url')
+    session['data_posting_url'] = generate_random_url(20)
+    return None
+
+
 # if not authenticated then do not do anything
 def authentication_required(f):
     @wraps(f)
@@ -44,7 +50,6 @@ def authentication_required(f):
 def authenticate():
     if request.method == 'POST' and session.get('fire_token', None) is None:
         form = request.form
-        form = dict((a, b.strip() if isinstance(b, str) else b) for a, b in form.items())
         email = form.get('email', '')
         uid = form.get('uid', '')
         try:
@@ -58,18 +63,18 @@ def authenticate():
                 session['data_posting_url'] = generate_random_url(20)
                 return redirect(url_for("home_page"))
             else:
-                return render_template("authenticate.html")
+                return render_template("authenticate.html", logged_in=0)
         else:
-            return render_template("authenticate.html")
+            return render_template("authenticate.html", logged_in=0)
     elif request.method == 'POST' and session.get('fire_token', None) is not None:
         session.pop('fire_token', None)
         if 'data_posting_url' in session:
             session.pop('data_posting_url')
         return redirect('https://www.friendship.house/')  # TODO make this a variable
     elif request.method == 'GET' and session.get('fire_token', None) is not None:
-        return render_template("authenticate.html", email='somestuff@none.com', uid='friendship')
+        return render_template("authenticate.html", email='somestuff@none.com', uid='friendship', logged_in=1)
     else:
-        return render_template("authenticate.html")
+        return render_template("authenticate.html", logged_in=0)
 
 
 @app.route('/')
@@ -104,8 +109,10 @@ def service_log_add(record):
 def service_log_post(record):
     form = request.form
     form = dict((a, b.strip() if isinstance(b, str) else b) for a, b in form.items())
-    log_month = month(form.get('Date'))
+    service_date = form.get('Date')
+    log_month = month(service_date)
     push = database.child('service_logs/' + log_month + '/' + record).push(form)  # set data
+
     # we need to add to paths
     paths = database.child('clients/%s/paths' % record).get()  # the array or None
     if paths is None:
@@ -114,7 +121,17 @@ def service_log_post(record):
         ner_paths = len(paths)
         database.child('clients/%s/paths/%s' % (record, str(ner_paths))).set(
             'service_logs/' + log_month + '/' + record + '/' + push.key)
+
+    # we need to add service dates
+    service_dates = database.child('clients/%s/service_dates' % record).get()
+    if service_dates is None:
+        database.child('clients/%s/service_dates' % record).set([service_date])
+    else:
+        nber_srvc_dts = len(service_dates)
+        database.child('clients/%s/service_dates/%s' % (record, str(nber_srvc_dts))).set(service_date)
+
     # TODO add log path to client
+    # TODO add service date
     return redirect(url_for('home_page'))
 
 
@@ -126,7 +143,8 @@ def date_select():
     start = str(today.year) + '-01-01'
     end = str(today.year) + '-12-31'
     header = "Service Log Summary from %s to %s." % (start, end)
-    return render_template('export_client_logs.html', id_check=session.get('data_posting_url',''), header=header,
+    data_post_url = session.get('data_posting_url', '')
+    return render_template('export_client_logs.html', id_check=data_post_url, header=header,
                            date=today.strftime("%Y-%m-%d"))
 
 
@@ -135,7 +153,6 @@ def date_select():
 @authentication_required
 def export():
     form = request.form
-    form = dict((a, b.strip() if isinstance(b, str) else b) for a, b in form.items())
     start = month(form.get('start'))
     end = month(form.get('end'))
     if start == '-01' or end == '-01':
@@ -156,7 +173,8 @@ def export():
 # @basic_auth.required
 @authentication_required
 def dashboards():
-    return render_template('dashboards.html', id_check=session.get('data_posting_url', ''))
+    data_post_url = session.get('data_posting_url', '')
+    return render_template('dashboards.html', id_check=data_post_url)
 
 
 @app.route('/home', methods=["GET", "POST"])
@@ -168,8 +186,8 @@ def home_page():
         form = request.form
         form = dict((a, b.strip() if isinstance(b, str) else b) for a, b in form.items())  # strip spaces
         if 'thesearchform' in form.keys():
-            last_name = form.get('lname_search', '').lower()
-            first_name = form.get('fname_search', '').lower()
+            last_name = process_name(form.get('lname_search', '')).lower()
+            first_name = process_name(form.get('fname_search', '')).lower()
             dob = form.get('dob_search', '').lower()
 
             if last_name == '' and first_name == '' and dob == '':
@@ -190,13 +208,16 @@ def home_page():
                 if len(all_keys) == 0:
                     exists = []  # this will directly send you to the add page
                 elif len(all_keys) == 1:
-                    user_id = '_'.join(all_keys[0])
+                    element = all_keys[0]
+                    user_id = create_user_id(last_name=element[0], first_name=element[1], dob=element[2])
                     exists = 'Yes'
                 else:
                     all_clients = [[capitalize(el[0]), capitalize(el[1]), el[2]]
                                    for el in all_keys]
+                    values = [create_user_id(last_name=el[0], first_name=el[1], dob=el[2]) for el in all_keys]
 
-                    return render_template("homepage.html", multiple_clients=all_clients, redirected=None)
+                    return render_template("homepage.html", multiple_clients=all_clients, values=values,
+                                           redirected=None)
             else:
                 user_id = create_user_id(last_name, first_name, dob)
                 exists = database.child('clients').order_by_key().start_at(user_id).end_at(user_id).get()
@@ -253,7 +274,8 @@ def home_page():
 
             # make data json. easy with name and dob separate
             # service_log should be a child with dates or something
-            data = dict(last_name=capitalize(last_name), first_name=capitalize(first_name), dob=dob, gender=gender,
+            data = dict(last_name=capitalize(last_name, sep=' '), first_name=capitalize(first_name, sep=' '), dob=dob,
+                        gender=gender,
                         phone=phone,
                         nber_adults=nber_adults, nber_under_18=nber_under_18, total_in_home=total,
                         race=race, address=address, city=city, state=state, zipcode=zipcode,
@@ -295,10 +317,23 @@ def home_page():
                         database.child('archived_clients').child(user_id).child('paths').set(
                             paths)  # set it in archived clients
 
-                    created_dt = database.child('clients/' + user_id + '/information').get()  # cannot be None here
-                    created_dt = '' if created_dt is None or created_dt.get('created_dt') is None else created_dt.get(
-                        'created_dt')
-                    data_to_archive = dict(created_dt=created_dt, deleted_dt=today.strftime('%Y-%m-%d'))
+                    service_dates = database.child('clients').child(user_id).child('service_dates').get()  # an array
+                    if service_dates is not None:
+                        database.child('archived_clients').child(user_id).child('service_dates').set(service_dates)
+
+                    client_info = database.child('clients/' + user_id + '/information').get()  # cannot be None here
+
+                    created_dt = '' if client_info is None or client_info.get(
+                        'created_dt') is None else client_info.get('created_dt')
+
+                    # let's keep gender, dob and race
+                    arch_gender = client_info.get('gender', '')
+                    arc_dob = client_info.get('dob', '')
+                    arch_race = client_info.get('race', '')
+
+                    data_to_archive = dict(created_dt=created_dt, deleted_dt=today.strftime('%Y-%m-%d'),
+                                           gender=arch_gender, dob=arc_dob, race=arch_race)
+
                     database.child('archived_clients').child(user_id).child('information').set(data_to_archive)
 
                     database.child('clients/' + user_id).delete()
@@ -324,15 +359,23 @@ def home_page():
             return redirect(url_for('home_page'))
 
 
+def hide(f):
+    @wraps(f)
+    def a_function(*args, **kwargs):
+        resp = f(*args, **kwargs)
+        reset_data_post_url()
+        return resp
+
+    return a_function
+
+
 @app.route('/get_data/<id>/<type>', methods=['GET'])
 @authentication_required
+@hide
 def get_data(id, type):
     if id == session.get('data_posting_url', ''):
-        session.pop('data_posting_url')
-        session['data_posting_url'] = generate_random_url(20)
-
         if type == 'dashboard':
-            df = data_for_dashboard(database)
+            df = old_data_for_dashboard(database)
             return jsonify(data=df.to_csv(index=False))
 
         elif type == 'export':
@@ -347,8 +390,6 @@ def get_data(id, type):
         else:
             return abort(404)
     else:
-        session.pop('data_posting_url')
-        session['data_posting_url'] = generate_random_url(20)
         return abort(403)
 
 

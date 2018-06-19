@@ -1,14 +1,19 @@
 {% extends "layout.html" %}
 
 {% block header %}
-    <h1>{% block title %}(UN)Authentication{% endblock %}</h1>
+    <h1>{% block title %}login{% endblock %}</h1>
 {% endblock %}
 
 
 {% block content %}
     <form method="post" autocomplete="off">
         Email:<input type="email" name="email" value="{{ email | safe }}" required>
-    Token:<input type="password" name="uid" value="{{ uid | safe }}" required>
-    <button type="submit">(UN) Authenticate</button>
+        Token:<input type="password" name="uid" value="{{ uid | safe }}" required>
+        {% if logged_in %}
+            <button type="submit">Log Out</button>
+        {% endif %}
+        {% if not logged_in %}
+            <button type="submit">Login</button>
+        {% endif %}
     </form>
 {% endblock %}
