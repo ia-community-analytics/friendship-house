@@ -11,289 +11,264 @@
             <div id="date_field">
                 Date: <input type="date" min="1960-01-01" max="{{ date }}" name="Date" value={{ date }}>
             </div>
+            <div class="d-flex p-3" style="width:800px;">
+                <div class="d-flex flex-column justify-content-center align-content-top" style="width: 100%;">
+                    <div class="p-0">
+                        <legend align="center">Client Information</legend>
+                        <div class="d-flex flex-row justify-content-center align-content-center">
+                            <div class="mx-5">
+                                <div class="d-flex flex-column justify-content-center align-content-center">
 
-            <fieldset>
-                <legend align="center">Client Information:</legend>
-                <div class="row">
-                    <div class="col-sm-6" align="left">
-                        <fieldset>
-                            <legend>General</legend>
-                            Last Name: <input type="text" name="lastname" value="{{ data.last_name }}"
-                                              placeholder="Last Name" title="Last Name" required><br>
-                            First Name: <input type="text" name="firstname" value="{{ data.first_name }}"
-                                               placeholder="First Name" title="First Name" required><br>
-                            Date of Birth: <input type="date" min="1960-01-01" max="{{ date }}" name="dob"
-                                                  value="{{ data.dob }}" placeholder="Date of Birth"
-                                                  title="Date of Birth"
-                                                  required><br>
-                            <div hidden>
-                                Gender: <input type="text" name="gender" value="{{ data.gender }}" placeholder="Gender"
-                                               title="Gender"><br>
-                                Telephone: <input type="tel" name="phone" value="{{ data.phone }}" placeholder="phone #"
-                                                  title="phone #">
-                            </div>
-                        </fieldset>
-                    </div>
-
-                    <div class="col-sm-6" align="right">
-                        <fieldset>
-                            <legend>#In Home</legend>
-                            # Adults: <input type="number" name="adults" min="0" value="{{ data.nber_adults }}"
-                                             placeholder="# Adults" title="# Adults"><br>
-                            # Under 18: <input type="number" name="under18" min="0"
-                                               value="{{ data.nber_under_18 }}" placeholder="# Under 18"
-                                               title="# Under 18"><br>
-                            Total: <input type="number" name="inhome" min="0" value="{{ data.total_in_home }}"
-                                          placeholder="Total" title="Total In Home">
-                        </fieldset>
-                    </div>
-                </div>
-            </fieldset>
-            <br>
-
-            <fieldset>
-                <legend align="center">Program & Appointment</legend>
-                <div class="row">
-                    <div class="col-sm-5" align="left">
-                        <fieldset>
-                            <legend align="left">Program Status</legend>
-                            <div class="row" align="left">
-                                <div align="left">
-                                    <select name="program_status" id="program_status" onclick="enter_status()">
-                                        {% for status in program_status %}
-                                            <option value="{{ status | safe }}">{{ status | safe }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                                <div id="program_status_other" class="col-sm-2" title="Other"
-                                     style="visibility: hidden">
-                                    <input type="text" name="program_status_other" placeholder="other program">
+                                        <legend align="center">General</legend>
+                                        Last Name: <input class="p-0" type="text" name="lastname" value="{{ data.last_name }}"
+                                                          placeholder="Last Name" title="Last Name" required><br>
+                                        First Name: <input class="p-0" type="text" name="firstname" value="{{ data.first_name }}"
+                                                           placeholder="First Name" title="First Name" required><br>
+                                        Date of Birth: <input class="p-0" type="date" min="1960-01-01" max="{{ date }}" name="dob"
+                                                              value="{{ data.dob }}" placeholder="Date of Birth"
+                                                              title="Date of Birth"
+                                                              required><br>
+                                        <div hidden>
+                                            Gender: <input type="text" name="gender" value="{{ data.gender }}" placeholder="Gender"
+                                                           title="Gender"><br>
+                                            Telephone: <input type="tel" name="phone" value="{{ data.phone }}" placeholder="phone #"
+                                                              title="phone #">
+                                        </div>
                                 </div>
                             </div>
-                        </fieldset>
-
-                    </div>
-
-                    <div class="col-sm-3" align="center">
-                        <fieldset>
-                            <legend align="center">Description</legend>
-                            <select name="appointment_description" id="appointment_description">
-                                {% for description in appointment_description %}
-                                    <option value="{{ description | safe }}">{{ description | safe }}</option>
-                                {% endfor %}
-                            </select>
-                        </fieldset>
-                    </div>
-
-                    <div class="col-sm-4" align="right">
-                        <fieldset>
-                            <legend align="right">New Appointment</legend>
-                            <input type="datetime-local" min="1960-01-01" max="{{ date }}" name="new_appointment">
-                        </fieldset>
-                    </div>
-                </div>
-                <br>
-
-                <div class="row">
-                    <fieldset>
-                        <legend align="right">Appointment Type</legend>
-                        <div class="row" align="right">
-                            <div id="appointment_location" class="col-sm-2" title="Location"
-                                 style="visibility: hidden">
-                                <input type="text" name="appointment_location" placeholder="location">
-                            </div>
-                            <div>
-                                <select name="appointment_type" id="appointment_type" onclick="enter_location()">
-                                    {% for type in appointment_type %}
-                                        <option value="{{ type | safe }}">{{ type | safe }}</option>
-                                    {% endfor %}
-                                </select>
+                            <div class="px-5">
+                                <div class="d-flex flex-column justify-content-center align-content-center">
+                                        <legend align="center">#In Home</legend>
+                                        # Adults: <input type="number" name="adults" min="0" value="{{ data.nber_adults }}"
+                                                         placeholder="# Adults" title="# Adults"><br>
+                                        # Under 18: <input type="number" name="under18" min="0"
+                                                           value="{{ data.nber_under_18 }}" placeholder="# Under 18"
+                                                           title="# Under 18"><br>
+                                        Total: <input type="number" name="inhome" min="0" value="{{ data.total_in_home }}"
+                                                      placeholder="Total" title="Total In Home">
+                                </div>
                             </div>
                         </div>
-                    </fieldset>
-                </div>
-                <br>
-                Service UOS:
-                <select name="uos" id="service_uos" onclick="enter_uos()">
-                    {% for tm in service_uos %}
-                        <option value="{{ tm.get('value') | safe }}">{{ tm.get('display') | safe }}</option>
-                    {% endfor %}
-                </select>
-                <div id="uos_other" class="col-sm-2" title="Other" style="visibility: hidden">
-                    <input type="number" name="other_service_txt" min="0" step=".25">
-                </div>
-                <br>
-            </fieldset>
-
-            <div class="col-sm-4" title="Case Note">
-                    <textarea name="casenote"
+                    </div>
+                    <br>
+                    <div class="p-0">
+                        <legend align="center">Program & Appointment</legend>
+                        <div class="d-flex flex-column justify-content-center align-content-center">
+                            <div class="p-0">
+                                <div class="d-flex flex-row justify-content-center align-content-center">
+                                    <div class="mx-3">
+                                        <legend align="center">Description</legend>
+                                        <select name="appointment_description" id="appointment_description">
+                                            {% for description in appointment_description %}
+                                                <option value="{{ description | safe }}">{{ description | safe }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="mx-3">
+                                        <div class="d-flex flex-column justify-content-center align-content-center">
+                                            <legend align="center">Service UOS</legend>
+                                            <div class="p-1" align="center">
+                                                <select name="uos" id="service_uos" onclick="enter_uos()">
+                                                    {% for tm in service_uos %}
+                                                        <option value="{{ tm.get('value') | safe }}">{{ tm.get('display') | safe }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                            <div class="p-1" align="center">
+                                                <div id="uos_other" title="Other" style="visibility: hidden">
+                                                    <input type="number" name="other_service_txt" min="0" step=".25">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mx-3">
+                                        <div class="p-1">
+                                            <legend align="center">New Appointment</legend>
+                                            <input type="datetime-local" min="1960-01-01" max="{{ date }}" name="new_appointment">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-1">
+                                <div class="d-flex flex-row justify-content-center align-content-center">
+                                    <div class="mx-3">
+                                        <div class="d-flex flex-column justify-content-center align-content-center">
+                                            <legend align="center">Appointment Type</legend>
+                                            <div class="p-1" align="center">
+                                                <select name="appointment_type" id="appointment_type" onclick="enter_location()">
+                                                    {% for type in appointment_type %}
+                                                        <option value="{{ type | safe }}">{{ type | safe }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                            <div class="p-1" align="center">
+                                                <div id="appointment_location" title="Location"
+                                                     style="visibility: hidden">
+                                                    <input type="text" name="appointment_location" placeholder="location" >
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mx-3">
+                                        <div class="d-flex flex-column justify-content-center align-content-center">
+                                            <legend align="center">Program Status</legend>
+                                            <div class="p-1" align="center">
+                                                <select name="program_status" id="program_status" onclick="enter_status()">
+                                                    {% for status in program_status %}
+                                                        <option value="{{ status | safe }}">{{ status | safe }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                            <div class="p-1" align="center">
+                                                <div id="program_status_other" title="Other"
+                                                     style="visibility: hidden">
+                                                    <input type="text" name="program_status_other" placeholder="other program">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="improvement_questions" class="p-0" align="center">
+                        Did member demonstrate Improvement in Presenting Issue (Immediate Need met)?
+                        <select name="need_met">
+                            <option value="Y">Yes</option>
+                            <option value="N">No</option>
+                            <option value="P">Pending</option>
+                        </select><br>
+                        Did member demonstrate Gained Life Management Skills (HW Completion)?
+                        <select name="hw_completion">
+                            <option value="Y">Yes</option>
+                            <option value="N">No</option>
+                            <option value="P">Pending</option>
+                        </select>
+                    </div>
+                    <div class="p-1" align="center">
+                        <div title="Case Note">
+                            <textarea name="casenote"
                               placeholder="Case Note: Service Need(s) AND Service(s) Provided"></textarea>
-            </div>
-            <br>
-
-            <div id="improvement_questions">
-                Did member demonstrate Improvement in Presenting Issue (Immediate Need met)?
-                <select name="need_met">
-                    <option value="Y">Yes</option>
-                    <option value="N">No</option>
-                    <option value="P">Pending</option>
-                </select><br>
-                Did member demonstrate Gained Life Management Skills (HW Completion)?
-                <select name="hw_completion">
-                    <option value="Y">Yes</option>
-                    <option value="N">No</option>
-                    <option value="P">Pending</option>
-                </select>
-            </div>
-            <br>
-
-            <fieldset>
-                <legend align="center">Supportive Services Provided:</legend>
-                <div class="row">
-                    <div class="col-sm-4" align="left">
-                        <fieldset>
-                            <legend align="left">Food</legend>
-                            <select name="food">
-                                {% for foo in supportive_service_provided.get('Food') %}
-                                    <option value="{{ foo | safe }}">{{ foo | safe }}</option>
-                                {% endfor %}
-                            </select><br>
-                            #<input type="number" name="foodqty"><br>
-                            $<input type="number" step="0.01" name="foodvalue">
-                        </fieldset>
+                        </div>
                     </div>
-
-                    <div class="col-sm-4" align="center">
-                        <fieldset>
-                            <legend align="center">Clothing</legend>
-                            <select name="clothing">
-                                {% for foo in supportive_service_provided.get('Clothing') %}
-                                    <option value="{{ foo | safe }}">{{ foo | safe }}</option>
-                                {% endfor %}
-                            </select><br>
-                            #<input type="number" name="clothingqty"><br>
-                            $<input type="number" step="0.01" name="clothingvalue">
-                        </fieldset>
+                    <div class="p-2" align="center">
+                        <legend align="center">Supportive Services Provided:</legend>
+                        <div class="d-flex flex-row justify-content-center align-content-center">
+                            <div class="px-4">
+                                <legend >Food</legend>
+                                <select name="food">
+                                    {% for foo in supportive_service_provided.get('Food') %}
+                                        <option value="{{ foo | safe }}">{{ foo | safe }}</option>
+                                    {% endfor %}
+                                </select><br>
+                                #<input type="number" name="foodqty"><br>
+                                $<input type="number" step="0.01" name="foodvalue">
+                            </div>
+                            <div class="px-4">
+                                <legend >Clothing</legend>
+                                <select name="clothing">
+                                    {% for foo in supportive_service_provided.get('Clothing') %}
+                                        <option value="{{ foo | safe }}">{{ foo | safe }}</option>
+                                    {% endfor %}
+                                </select><br>
+                                #<input type="number" name="clothingqty"><br>
+                                $<input type="number" step="0.01" name="clothingvalue">
+                            </div>
+                            <div class="px-4">
+                                <legend >Hygiene</legend>
+                                <select name="hygiene">
+                                    {% for foo in supportive_service_provided.get('Hygiene') %}
+                                        <option value="{{ foo | safe }}">{{ foo | safe }}</option>
+                                    {% endfor %}
+                                </select><br>
+                                #<input type="number" name="hygieneqty"><br>
+                                $<input type="number" step="0.01" name="hygienevalue">
+                            </div>
+                        </div>
                     </div>
-
-                    <div class="col-sm-4" align="right">
-                        <fieldset>
-                            <legend align="right">Hygiene</legend>
-                            <select name="hygiene">
-                                {% for foo in supportive_service_provided.get('Hygiene') %}
-                                    <option value="{{ foo | safe }}">{{ foo | safe }}</option>
-                                {% endfor %}
-                            </select><br>
-                            #<input type="number" name="hygieneqty"><br>
-                            $<input type="number" step="0.01" name="hygienevalue">
-                        </fieldset>
+                    <div class="p-1" align="center">
+                        <div class="d-flex flex-row justify-content-center align-content-center">
+                            <div class="px-4">
+                                <legend >Baby Items</legend>
+                                <select name="baby_items">
+                                    {% for foo in supportive_service_provided.get('Baby_Items') %}
+                                        <option value="{{ foo | safe }}">{{ foo | safe }}</option>
+                                    {% endfor %}
+                                </select><br>
+                                #<input type="number" name="babyqty"><br>
+                                $<input type="number" step="0.01" name="babyvalue">
+                            </div>
+                            <div class="px-4">
+                                <legend >Financial</legend>
+                                <select name="financial">
+                                    {% for foo in supportive_service_provided.get('Financial') %}
+                                        <option value="{{ foo | safe }}">{{ foo | safe }}</option>
+                                    {% endfor %}
+                                </select><br>
+                                #<input type="number" name="financeqty"><br>
+                                $<input type="number" step="0.01" name="financevalue">
+                            </div>
+                            <div class="px-4">
+                                <legend >Legal</legend>
+                                <select name="legal">
+                                    {% for foo in supportive_service_provided.get('Legal') %}
+                                        <option value="{{ foo | safe }}">{{ foo | safe }}</option>
+                                    {% endfor %}
+                                </select><br>
+                                #<input type="number" name="legalqty"><br>
+                                $<input type="number" step="0.01" name="legalvalue">
+                            </div>
+                        </div>
                     </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-sm-4" align="left">
-                        <fieldset>
-                            <legend align="left">Baby Items</legend>
-                            <select name="baby_items">
-                                {% for foo in supportive_service_provided.get('Baby_Items') %}
-                                    <option value="{{ foo | safe }}">{{ foo | safe }}</option>
-                                {% endfor %}
-                            </select><br>
-                            #<input type="number" name="babyqty"><br>
-                            $<input type="number" step="0.01" name="babyvalue">
-                        </fieldset>
+                    <div class="p-1" align="center">
+                        <div class="d-flex flex-row justify-content-center align-content-center">
+                            <div class="px-4">
+                                <legend >HouseHold</legend>
+                                <select name="household">
+                                    {% for foo in supportive_service_provided.get('HouseHold') %}
+                                        <option value="{{ foo | safe }}">{{ foo | safe }}</option>
+                                    {% endfor %}
+                                </select><br>
+                                #<input type="number" name="familyqty"><br>
+                                $<input type="number" step="0.01" name="familyvalue">
+                            </div>
+                            <div class="px-4">
+                                <legend >Transportation</legend>
+                                <input type="text" name="to/from" placeholder="To/From"><br>
+                                #<input type="text" name="miles" placeholder="Miles"><br>
+                                $<input type="number" step="0.01" name="transportationvalue">
+                            </div>
+                            <div class="px-4">
+                                <legend >Other</legend>
+                                <input type="text" name="other_service_provided"><br>
+                                #<input type="number" name="otherqty"><br>
+                                $<input type="number" step="0.01" name="othervalue">
+                            </div>
+                        </div>
                     </div>
-
-                    <div class="col-sm-4" align="center">
-                        <fieldset>
-                            <legend align="center">Financial</legend>
-                            <select name="financial">
-                                {% for foo in supportive_service_provided.get('Financial') %}
-                                    <option value="{{ foo | safe }}">{{ foo | safe }}</option>
-                                {% endfor %}
-                            </select><br>
-                            #<input type="number" name="financeqty"><br>
-                            $<input type="number" step="0.01" name="financevalue">
-                        </fieldset>
+                    <div class="p-2" align="center">
+                    <br/>
+                        <div class="d-flex flex-row justify-content-center align-content-center">
+                            <div class="px-4">
+                                <legend>External Referral Information</legend>
+                                <input type="text" name="agency" placeholder="Agency">
+                                <input type="text" name="contactperson" placeholder="Contact Person">
+                                <input type="tel" name="external_telephone" placeholder="External Telephone">
+                            </div>
+                            <div class="px-4">
+                                <legend >Staff Completing CSL</legend>
+                                <input type="text" name="staff_completing_csl_fname" placeholder="First Name" required>
+                                <input type="text" name="staff_completing_csl_mname" placeholder="Middle Name">
+                                <input type="text" name="staff_completing_csl_lname" placeholder="Last Name" required>
+                            </div>
+                            <div class="px-4">
+                                <legend>Staff Notes</legend>
+                                <textarea name="staff_notes"></textarea>
+                            </div>
+                        </div>
                     </div>
-
-                    <div class="col-sm-4" align="right">
-                        <fieldset>
-                            <legend align="right">Legal</legend>
-                            <select name="legal">
-                                {% for foo in supportive_service_provided.get('Legal') %}
-                                    <option value="{{ foo | safe }}">{{ foo | safe }}</option>
-                                {% endfor %}
-                            </select><br>
-                            #<input type="number" name="legalqty"><br>
-                            $<input type="number" step="0.01" name="legalvalue">
-                        </fieldset>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-sm-4" align="left">
-                        <fieldset>
-                            <legend align="left">HouseHold</legend>
-                            <select name="household">
-                                {% for foo in supportive_service_provided.get('HouseHold') %}
-                                    <option value="{{ foo | safe }}">{{ foo | safe }}</option>
-                                {% endfor %}
-                            </select><br>
-                            #<input type="number" name="familyqty"><br>
-                            $<input type="number" step="0.01" name="familyvalue">
-                        </fieldset>
-                    </div>
-
-                    <div class="col-sm-4" align="center">
-                        <fieldset>
-                            <legend align="center">Transportation</legend>
-                            <input type="text" name="to/from" placeholder="To/From"><br>
-                            #<input type="text" name="miles" placeholder="Miles"><br>
-                            $<input type="number" step="0.01" name="transportationvalue">
-                        </fieldset>
-                    </div>
-
-                    <div class="col-sm-4" align="right">
-                        <fieldset>
-                            <legend align="right">Other</legend>
-                            <input type="text" name="other_service_provided"><br>
-                            #<input type="number" name="otherqty"><br>
-                            $<input type="number" step="0.01" name="othervalue">
-                        </fieldset>
-                    </div>
-                </div>
-            </fieldset>
-            <br>
-
-            <div class="row">
-                <div class="col-sm-4" align="center">
-                    <fieldset>
-                        <legend align="center">External Referral Information</legend>
-                        <input type="text" name="agency" placeholder="Agency">
-                        <input type="text" name="contactperson" placeholder="Contact Person">
-                        <input type="tel" name="external_telephone" placeholder="External Telephone">
-                    </fieldset>
-                </div>
-
-                <div class="col-sm-4" align="center">
-                    <fieldset>
-                        <legend align="center">Staff Completing CSL</legend>
-                        <input type="text" name="staff_completing_csl_fname" placeholder="First Name" required>
-                        <input type="text" name="staff_completing_csl_mname" placeholder="Middle Name">
-                        <input type="text" name="staff_completing_csl_lname" placeholder="Last Name" required>
-                    </fieldset>
-                </div>
-
-                <div class="col-sm-4" align="center">
-                    <fieldset>
-                        <legend align="center">Staff Notes</legend>
-                        <textarea name="staff_notes"></textarea>
-                    </fieldset>
                 </div>
             </div>
-            <br>
-
             <input name="race" value="{{ data.race }}" hidden>
             <input name="zipcode" value="{{ data.zipcode }}" hidden>
             <input type="submit" name="action"/>
