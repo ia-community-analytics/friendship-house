@@ -9,7 +9,7 @@
         <p>Add a new service log</p>
         <form id="client_service_log" method="post">
             <div id="date_field">
-                Date: <input type="date" min="1960-01-01" max="{{ date }}" name="Date" value={{ date }}>
+                Date: <input type="date" min="1960-01-01" max="{{ date }}" name="Date" value="{{ date }}">
             </div>
 
             <fieldset>
@@ -248,7 +248,7 @@
                     <div class="col-sm-4" align="center">
                         <fieldset>
                             <legend align="center">Transportation</legend>
-                            <input type="text" name="to/from" placeholder="To/From"><br>
+                            <input type="text" name="to_from" placeholder="To/From"><br>
                             #<input type="text" name="miles" placeholder="Miles"><br>
                             $<input type="number" step="0.01" name="transportationvalue">
                         </fieldset>
