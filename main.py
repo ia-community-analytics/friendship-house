@@ -1,5 +1,6 @@
 import firebase_admin
 import io
+import json
 from non_app_specific import (today, intg, races, genders, get_all_client_keys, generate_csv,
                               capitalize, month, create_user_id, appointment_description, appointment_type,
                               service_uos, program_status, supportive_service_provided, generate_random_url,
@@ -108,10 +109,10 @@ def service_log_add(record):
 @authentication_required
 def service_log_post(record):
     form = request.form
-    form = dict((a, b.strip() if isinstance(b, str) else b) for a, b in form.items())
     service_date = form.get('Date')
     log_month = month(service_date)
-    push = database.child('service_logs/' + log_month + '/' + record).push(form)  # set data
+
+    push = database.child('service_logs').child(log_month).child(record).push(form)  # set data
 
     # we need to add to paths
     paths = database.child('clients/%s/paths' % record).get()  # the array or None
