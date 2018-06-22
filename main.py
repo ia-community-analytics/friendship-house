@@ -376,7 +376,7 @@ def hide(f):
 def get_data(id, type):
     if id == session.get('data_posting_url', ''):
         if type == 'dashboard':
-            df = old_data_for_dashboard(database)
+            df = data_for_dashboard(database)
             return jsonify(data=df.to_csv(index=False))
 
         elif type == 'export':
