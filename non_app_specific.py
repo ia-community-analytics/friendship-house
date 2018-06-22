@@ -239,7 +239,7 @@ def generate_csv(json_data):
             other_indices = temp['uos'] == 'other'
             temp.loc[other_indices, 'uos'] = temp.loc[
                 other_indices, 'other_service_txt']  # if other then there should be an entry
-            uos_map = {'15': '.25', '30': '.5', '45': '.75', '1': 1}
+            uos_map = {'15': '.25', '30': '.5', '45': '.75', '1': '1'}
             temp['UOS (.25, .5, .75, 1)'] = [uos_map.get(el, el) for el in temp['uos'].values]
 
             # TODO use a gender to sex function . put race
