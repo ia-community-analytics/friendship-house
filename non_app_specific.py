@@ -396,7 +396,7 @@ def old_data_for_dashboard(database_reference, specific_users=None):
 def data_for_dashboard(database_reference):
     df = pd.DataFrame(
         columns=['service_dates', 'created_dt', 'deleted_dt', 'gender', 'race', 'dob', 'last_name', 'first_name',
-                 'join_in'])
+                 'join_in', 'activity'])
 
     active_clients = database_reference.child('clients').get()
     archived_clients = database_reference.child('archived_clients').get()
@@ -414,7 +414,7 @@ def data_for_dashboard(database_reference):
     if len(active_clients) == 0 and len(archived_clients) == 0:
         return df
 
-    gender, race, dob, created, deleted, service_date, first_name, last_name, join_in = [], [], [], [], [], [], [], [], []
+    gender, race, dob, created, deleted, service_date, first_name, last_name, join_in, activity = [], [], [], [], [], [], [], [], [], []
 
     for el in active_clients + archived_clients:
         name = user_id_to_name(el[0])
@@ -424,19 +424,26 @@ def data_for_dashboard(database_reference):
         cur_race = [el[1].get('race', '')]
         cur_dob = [el[1].get('dob', '')]
         cur_crtdt = [el[1].get('created_dt', '')]
-        cur_dltdt = [el[1].get('deleted_dt', '')]
+        cur_dltdt = [el[1].get('deleted_dt', '')] # should be '' for active users so I will use this instead of el in archive_clients
 
         n = len(el[2]) + 1 if el[2] != [''] else 1
 
-        last_name.extend(cur_lname * n)
-        first_name.extend(cur_fname * n)
-        gender.extend(cur_gender * n)
-        race.extend(cur_race * n)
-        dob.extend(cur_dob * n)
-        created.extend(cur_crtdt * n)
-        deleted.extend(cur_dltdt * n)
-        join_in.extend([1] + [0] * (n - 1))
-        service_date.extend(cur_crtdt + (el[2] if el[2] != [''] else []))
+        last_name.extend(cur_lname * (n+1))
+        first_name.extend(cur_fname * (n+1))
+        gender.extend(cur_gender * (n+1))
+        race.extend(cur_race * (n+1))
+        dob.extend(cur_dob * (n+1))
+        created.extend(cur_crtdt * (n+1))
+        deleted.extend(cur_dltdt * (n+1))
+        join_in.extend([1] + [0] * (n))
+        if cur_dltdt == ['']:
+            # they did not leave
+            activity.extend(['join'] + ['service'] * (n-1) + [''])
+            service_date.extend(cur_crtdt + (el[2] if el[2] != [''] else []) + [''])
+        else:
+            # they left
+            activity.extend(['join'] + ['service'] * (n - 1) + ['left'])
+            service_date.extend(cur_crtdt + (el[2] if el[2] != [''] else []) + cur_dltdt)
 
     df['service_dates'] = service_date
     df['created_dt'] = created
@@ -447,9 +454,9 @@ def data_for_dashboard(database_reference):
     df['last_name'] = last_name
     df['first_name'] = first_name
     df['join_in'] = join_in
+    df['activity'] = activity
 
-    return df
-
+    return df[(df['service_dates'] != '') & (df['activity'] != '')]
 
 # TODO: create a function that provides a way to have joining date as a 1 when joining
 
