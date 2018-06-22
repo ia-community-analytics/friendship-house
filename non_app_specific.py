@@ -394,13 +394,25 @@ def old_data_for_dashboard(database_reference, specific_users=None):
 
 
 def data_for_dashboard(database_reference):
+    df = pd.DataFrame(
+        columns=['service_dates', 'created_dt', 'deleted_dt', 'gender', 'race', 'dob', 'last_name', 'first_name',
+                 'join_in'])
+
     active_clients = database_reference.child('clients').get()
     archived_clients = database_reference.child('archived_clients').get()
+    if active_clients is not None:
+        active_clients = [(el[0], el[1].get('information', ['']), el[1].get('service_dates', [''])) for el in
+                          active_clients.items()]
+    else:
+        active_clients = []
+    if archived_clients is not None:
+        archived_clients = [(el[0], el[1].get('information', ['']), el[1].get('service_dates', [''])) for el in
+                            archived_clients.items()]
+    else:
+        archived_clients = []
 
-    active_clients = [(el[0], el[1].get('information', ['']), el[1].get('service_dates', [''])) for el in
-                      active_clients.items()]
-    archived_clients = [(el[0], el[1].get('information', ['']), el[1].get('service_dates', [''])) for el in
-                        archived_clients.items()]
+    if len(active_clients) == 0 and len(archived_clients) == 0:
+        return df
 
     gender, race, dob, created, deleted, service_date, first_name, last_name, join_in = [], [], [], [], [], [], [], [], []
 
@@ -425,9 +437,6 @@ def data_for_dashboard(database_reference):
         deleted.extend(cur_dltdt * n)
         join_in.extend([1] + [0] * (n - 1))
         service_date.extend(cur_crtdt + (el[2] if el[2] != [''] else []))
-
-    df = pd.DataFrame(
-        columns=['service_dates', 'created_dt', 'deleted_dt', 'gender', 'race', 'dob', 'last_name', 'first_name', 'join_in'])
 
     df['service_dates'] = service_date
     df['created_dt'] = created
