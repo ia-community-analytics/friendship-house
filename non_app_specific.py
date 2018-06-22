@@ -294,7 +294,7 @@ def generate_csv_from_path(log):
     other_indices = df['uos'] == 'other'
     df.loc[other_indices, 'uos'] = df.loc[
         other_indices, 'other_service_txt']  # if other then there should be an entry
-    uos_map = {'15': '.25', '30': '.5', '45': '.75', '1': 1}
+    uos_map = {'15': '.25', '30': '.5', '45': '.75', '1': '1'}
     df['UOS (.25, .5, .75, 1)'] = [uos_map.get(el, el) for el in df['uos'].values]
 
     # TODO use a gender to sex function . put race as is, no abbreviation
