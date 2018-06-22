@@ -184,13 +184,14 @@
         });
 
         function makeCharts(data) {
-            var dateFormat = d3.timeFormat("%m/%d/%Y");
+            var dateFormat = d3.timeFormat("%Y-%m-%d");
             var dateFormatParser = d3.timeParse("%Y-%m-%d");
             data.forEach(function (d) {
-                d.date = dateFormatParser(d['Service Date']);
-                d.Year = d3.timeYear(d.date).getFullYear();
+                d.SDate = dateFormatParser(d['service_dates']);
+                d.JDate = dateFormatParser(d['created_dt']);
+                d.Year = d3.timeYear(d.SDate).getFullYear();
                 //console.log(d3.timeFormat('%m')(d.date) + ": " + typeof(d3.timeFormat('%m')(d.date)));
-                d.month = d3.timeMonth(d.date);
+                d.month = d3.timeMonth(d.SDate);
 
                 //d.date = d3.timeFormat("%m/%d/%Y")(d.date);
                 //console.log(d.geo);
@@ -200,7 +201,7 @@
 
 
             var quarter = ndx.dimension(function (d) {
-                var month = d.date.getMonth();
+                var month = d.SDate.getMonth();
                 if (month <= 2) {
                     return 'Q1';
                 } else if (month > 2 && month <= 5) {
@@ -224,15 +225,23 @@
                 .group(quarterGroup);
 
             var dateDim = ndx.dimension(function (d) {
-                return d.date;
+                return d.SDate;
+            });
+
+            var jDateDim = ndx.dimension(function (d) {
+                return d.JDate;
             });
             var hits = dateDim.group().reduceSum(function (d) {
                 return +1;
             });
-            var minDate = dateDim.bottom(1)[0].date;
-            var maxDate = dateDim.top(1)[0].date;
+            var minDate = dateDim.bottom(1)[0].SDate;
+            console.log(minDate);
+            var today = new Date();
+            var date1 = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+            var maxDate = today;
+            console.log(maxDate);
             var monthDim = ndx.dimension(function (d) {
-                var month = d.date.getMonth();
+                var month = d.SDate.getMonth();
                 var name = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
                 //console.log(name[month]);
                 return name[month];
@@ -242,7 +251,7 @@
                 return d.month;
             });
             var requestType = ndx.dimension(function (d) {
-                return d['SEX M/F']
+                return d['gender']
             });
             var requestTypeGroup = requestType.group().reduceSum(function (d) {
                 return +1;
@@ -272,30 +281,43 @@
                 else
                     return +0;
             });
-            var status_404 = dateDim.group().reduceSum(function (d) {
-                return +1;
+            var total_services = dateDim.group().reduceSum(function (d) {
+                if(d['activity'] == "service")
+                    return +1;
+                else
+                    return +0;
             });
-            console.log(status_404);
-            var status_302 = dateDim.group().reduce(
+            var joined = dateDim.group().reduceSum(function (d) {
+               if(d['activity'] == "join")
+                    return +1;
+                else
+                    return +0;
+            });
+
+            var unique_served = dateDim.group().reduce(
 
                 function (p, d) {
-                    console.log(p.people)
-                    if (d['Last Name'] in p.people)
-                        p.people[d['Last Name']]++;
-                    else {
-                        p.people[d['Last Name']] = 1;
-                        p.peopleCount++;
+                    //console.log(p.people)
+                    if(d['activity'] == "service"){
+                        if (d['last_name'] in p.people)
+                            p.people[d['last_name']]++;
+                        else {
+                            p.people[d['last_name']] = 1;
+                            p.peopleCount++;
+                        }
                     }
-                    console.log(p);
+                    //console.log(p);
                     return p;
                 },
 
                 function (p, d) {
-                    console.log("deleting people");
-                    p.people[d['Last Name']]--;
-                    if (p.people[d['Last Name']] === 0) {
-                        delete p.people[d['Last Name']];
-                        p.peopleCount--;
+                    //console.log("deleting people");
+                    if(d['activity'] == "service"){
+                        p.people[d['last_name']]--;
+                        if (p.people[d['last_name']] === 0) {
+                            delete p.people[d['last_name']];
+                            p.peopleCount--;
+                        }
                     }
                     return p;
                 },
@@ -309,10 +331,12 @@
 
             );
 
-            var whoDim = ndx.dimension(function (d) {
-                return d['Staff (Initials)'];
+            var raceDim = ndx.dimension(function (d) {
+                return d['race'];
             });
-            var whoGroup = whoDim.group().reduceSum(function (d) {
+           //var whoDim = ndx.dimension(function (d) {
+            //    return d['
+            var raceGroup = raceDim.group().reduceSum(function (d) {
                 return +1;
             });
 
@@ -326,8 +350,8 @@
                 .barPadding(0.1)
                 .outerPadding(0.05)
                 .margins({top: 20, left: 45, right: 0, bottom: 20})
-                .dimension(whoDim)
-                .group(whoGroup);
+                .dimension(raceDim)
+                .group(raceGroup);
 
 
             dataCount /* dc.dataCount('.dc-data-count', 'chartGroup'); */
@@ -366,14 +390,14 @@
                     return d.key
                 })
                 .elasticX(true)
-                .xAxis().ticks(4)
+                .xAxis().ticks(4);
 
 
 
 
             hitslineChart
-                .width(475)
-                .height(250)
+                .width(525)
+                .height(275)
                 .margins({top: 30, right: 0, bottom: 55, left: 40})
                 .mouseZoomable(true)
                 .x(d3.scaleTime().domain([minDate, maxDate]))
@@ -385,13 +409,18 @@
                 .compose([
                     dc.lineChart(hitslineChart)
                         .dimension(dateDim)
-                        .colors('red')
-                        .group(status_404, "Total Visitors")
+                        .colors('orange')
+                        .group(total_services, "Total Services")
+                        .dashStyle([0, 0]),
+                    dc.lineChart(hitslineChart)
+                        .dimension(dateDim)
+                        .colors('green')
+                        .group(joined, "Joined")
                         .dashStyle([0, 0]),
                     dc.lineChart(hitslineChart)
                         .dimension(dateDim)
                         .colors('blue')
-                        .group(status_302, "Unique Visitors")
+                        .group(unique_served, "Unique Visitors Served")
                         .valueAccessor(function (d) {
                             return d.value.peopleCount;
                         })
