@@ -410,16 +410,19 @@
                     dc.lineChart(hitslineChart)
                         .dimension(dateDim)
                         .colors('orange')
+                        .curve(d3.curveMonotoneX)
                         .group(total_services, "Total Services")
                         .dashStyle([0, 0]),
                     dc.lineChart(hitslineChart)
                         .dimension(dateDim)
                         .colors('green')
+                        .curve(d3.curveMonotoneX)
                         .group(joined, "Joined")
                         .dashStyle([0, 0]),
                     dc.lineChart(hitslineChart)
                         .dimension(dateDim)
                         .colors('blue')
+                        .curve(d3.curveMonotoneX)
                         .group(unique_served, "Unique Visitors Served")
                         .valueAccessor(function (d) {
                             return d.value.peopleCount;
