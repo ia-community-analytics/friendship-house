@@ -124,7 +124,7 @@
                     </div>
                 </div>
             </div>
-            <div class="p-1">
+           <!-- <div class="p-1">
                 <div class="d-flex flex-row justify-content-center">
                     <div id="monthly-volume-chart" class="p-0">
                         <div class="bottom">
@@ -134,12 +134,12 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div>-->
 
             <div class="p-1">
                 <div class="d-flex flex-row justify-content-center">
                     <div id="staff-chart" class="p-2">
-                        <strong>Staff Service Provider: </strong>
+                        <strong>Visitor's Race: </strong>
                         <a class="reset" href="javascript:void(0)" onclick="staffChart.filterAll();dc.redrawAll();"
                            style="display: none">reset</a>
                     </div>
@@ -405,21 +405,24 @@
                 .xUnits(d3.timeMonths)
                 .elasticY(true)
                 .renderHorizontalGridLines(true)
-                .legend(dc.legend().x(40).y(10).itemHeight(10).gap(5).horizontal(true).itemWidth(80).legendWidth(520))
+                .legend(dc.legend().x(40).y(10).itemHeight(10).gap(15).horizontal(true).autoItemWidth(true).legendWidth(350))
                 .compose([
                     dc.lineChart(hitslineChart)
                         .dimension(dateDim)
                         .colors('orange')
+                        .curve(d3.curveMonotoneX)
                         .group(total_services, "Total Services")
                         .dashStyle([0, 0]),
                     dc.lineChart(hitslineChart)
                         .dimension(dateDim)
                         .colors('green')
+                        .curve(d3.curveMonotoneX)
                         .group(joined, "Joined")
                         .dashStyle([0, 0]),
                     dc.lineChart(hitslineChart)
                         .dimension(dateDim)
                         .colors('blue')
+                        .curve(d3.curveMonotoneX)
                         .group(unique_served, "Unique Visitors Served")
                         .valueAccessor(function (d) {
                             return d.value.peopleCount;
