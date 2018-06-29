@@ -44,10 +44,35 @@ def authentication_required(f):
     return decorated_function
 
 
+def hide(f):
+    @wraps(f)
+    def a_function(*args, **kwargs):
+        resp = f(*args, **kwargs)
+        reset_data_post_url()
+        return resp
+
+    return a_function
+
+def error_handler(f):
+    @wraps(f)
+    def return_function(*args, **kwargs):
+        # this is the idea. if the function fails, provide a better view
+        # TODO: depending on the type of error, maybe one view is better
+        # TODO: create a logger that actuall trakcs the name of f,  the function that failed
+        try:
+            resp = f(*args, **kwargs)
+            return resp
+        except:
+            return "Sorry - Please Come Back in A second"
+
+    return return_function
+
+
 # real routes
 @app.route('/authenticate', methods=["GET", "POST"])
 # @basic_auth.required
 # TODO: in multi select, https://stackoverflow.com/questions/12502646/access-multiselect-form-field-in-flask
+@error_handler
 def authenticate():
     if request.method == 'POST' and session.get('fire_token', None) is None:
         form = request.form
@@ -81,6 +106,7 @@ def authenticate():
 @app.route('/')
 # @basic_auth.required
 @authentication_required
+@error_handler
 def homepage():
     return redirect(url_for('home_page'))
 
@@ -88,6 +114,7 @@ def homepage():
 @app.route('/admin', methods=["POST"])
 # @basic_auth.required
 @authentication_required
+@error_handler
 def service_log_admin():
     record = request.form.get('record')
     return redirect(url_for('service_log_add', record=record))
@@ -96,6 +123,7 @@ def service_log_admin():
 @app.route('/admin/<record>')
 # @basic_auth.required
 @authentication_required
+@error_handler
 def service_log_add(record):
     data = database.child('clients/' + record + '/information').get()
     return render_template('client_service_log.html', data=data, date=today.strftime("%Y-%m-%d"),
@@ -107,6 +135,7 @@ def service_log_add(record):
 @app.route('/admin/<record>', methods=["POST"])
 # @basic_auth.required
 @authentication_required
+@error_handler
 def service_log_post(record):
     form = request.form
     service_date = form.get('Date')
@@ -140,6 +169,7 @@ def service_log_post(record):
 @app.route('/admin/export')
 # @basic_auth.required
 @authentication_required
+@error_handler
 def date_select():
     start = str(today.year) + '-01-01'
     end = str(today.year) + '-12-31'
@@ -152,6 +182,7 @@ def date_select():
 @app.route('/admin/export', methods=["POST"])
 # @basic_auth.required
 @authentication_required
+@error_handler
 def export():
     form = request.form
     start = month(form.get('start'))
@@ -173,6 +204,7 @@ def export():
 @app.route('/dashboards')
 # @basic_auth.required
 @authentication_required
+@error_handler
 def dashboards():
     data_post_url = session.get('data_posting_url', '')
     return render_template('dashboards.html', id_check=data_post_url)
@@ -180,6 +212,7 @@ def dashboards():
 
 @app.route('/home', methods=["GET", "POST"])
 @authentication_required
+@error_handler
 def home_page():
     if request.method == 'GET':
         return render_template("homepage.html")
@@ -360,18 +393,15 @@ def home_page():
             return redirect(url_for('home_page'))
 
 
-def hide(f):
-    @wraps(f)
-    def a_function(*args, **kwargs):
-        resp = f(*args, **kwargs)
-        reset_data_post_url()
-        return resp
 
-    return a_function
-
+@app.route('/test')
+@error_handler
+def testing():
+    return 1/0
 
 @app.route('/get_data/<id>/<type>', methods=['GET'])
 @authentication_required
+@error_handler
 @hide
 def get_data(id, type):
     if id == session.get('data_posting_url', ''):
