@@ -144,7 +144,11 @@ def service_log_post(record):
     push = database.child('service_logs').child(log_month).child(record).push(form)  # set data
 
     # we need to add to paths
-    paths = database.child('clients/%s/paths' % record).get()  # the array or None
+    try:
+        paths = database.child('clients/%s/paths' % record).get()  # the array or None
+    except:
+        paths = None
+
     if paths is None:
         database.child('clients/%s/paths' % record).set(['service_logs/' + log_month + '/' + record + '/' + push.key])
     else:
@@ -153,7 +157,11 @@ def service_log_post(record):
             'service_logs/' + log_month + '/' + record + '/' + push.key)
 
     # we need to add service dates
-    service_dates = database.child('clients/%s/service_dates' % record).get()
+    try:
+        service_dates = database.child('clients/%s/service_dates' % record).get()
+    except:
+        service_dates = None
+
     if service_dates is None:
         database.child('clients/%s/service_dates' % record).set([service_date])
     else:
@@ -324,7 +332,11 @@ def home_page():
                 database.child('clients/' + user_id + '/information').set(data)
 
                 # check if user_id exists in archives
-                in_archive = database.child('archived_clients').order_by_key().start_at(user_id).end_at(user_id).get()
+                try:
+                    in_archive = database.child('archived_clients').order_by_key().start_at(user_id).end_at(user_id).get()
+                except:
+                    in_archive = None
+
                 if in_archive is not None:
                     paths_to_restore = database.child('archived_clients').child(user_id).child('paths').get()
                     if paths_to_restore is not None:
@@ -351,7 +363,11 @@ def home_page():
                         database.child('archived_clients').child(user_id).child('paths').set(
                             paths)  # set it in archived clients
 
-                    service_dates = database.child('clients').child(user_id).child('service_dates').get()  # an array
+                    try:
+                        service_dates = database.child('clients').child(user_id).child('service_dates').get()  # an array
+                    except:
+                        service_dates = None
+
                     if service_dates is not None:
                         database.child('archived_clients').child(user_id).child('service_dates').set(service_dates)
 
