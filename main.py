@@ -6,8 +6,7 @@ from non_app_specific import (today, intg, races, genders, get_all_client_keys, 
                               service_uos, program_status, supportive_service_provided, generate_random_url,
                               display_name, process_name, old_data_for_dashboard, data_for_dashboard)
 from functools import wraps
-from firebase_admin import db
-from firebase_admin import auth
+from firebase_admin import db, auth
 from flask import Flask, render_template, jsonify, request, redirect, url_for, Response, flash, session, abort
 from flask_basicauth import BasicAuth
 
@@ -63,7 +62,7 @@ def error_handler(f):
             resp = f(*args, **kwargs)
             return resp
         except Exception as e:
-            return jsonify(e)
+            return jsonify(e.args[0])
             # return "Sorry - Please Come Back in A second"
 
     return return_function
