@@ -83,7 +83,7 @@
                value="Update"
                onclick="updateData()"/>
     </div>
-    <div class="d-flex p-3" style="width:750px;">
+    <div class="d-flex p-3" style="width:825px;">
         <div class="d-flex flex-column justify-content-center align-content-center" style="width: 100%;">
             <div class="p-1">
                 <div class="d-flex flex-row justify-content-center">
@@ -92,7 +92,8 @@
             </div>
             <div class="p-1">
                 <div class="d-flex flex-row justify-content-center">
-                    <div id="chart-ring-year" class="p-4">
+                    <div id="cbox1" class="p-3"></div>
+                    <div id="chart-ring-year" class="p-2">
                         <strong>Year: </strong>
                         <a class="reset" href="javascript:void(0)" onclick="yearRingChart.filterAll();dc.redrawAll();"
                            style="display: none">reset</a>
@@ -102,13 +103,13 @@
                     <!--<strong>Month in Year: </strong>-->
                     <!--<a class="reset" href="javascript:void(0)" onclick="monthChart.filterAll();dc.redrawAll();" style="display: none">reset</a>-->
                     <!--</div>-->
-                    <div id="quarter-chart" class="p-4">
+                    <div id="quarter-chart" class="p-1">
                         <strong>Quarter: </strong>
                         <a class="reset" href="javascript:void(0)" onclick="quarterChart.filterAll();dc.redrawAll();"
                            style="display: none">reset</a>
                         <br/>
                     </div>
-                    <div id="cbox2" class="p-4">
+                    <div id="cbox2" class="p-2">
                     </div>
                 </div>
             </div>
@@ -159,13 +160,13 @@
     </div>
     <script>
         var hitslineChart = dc.compositeChart("#chart-line-hitsperday");
-        var httpChart = dc.rowChart('#http-type-chart');
         var tableChart = dc.dataTable("#mytable");
         //var volumeChart = dc.barChart('#monthly-volume-chart');
         //var monthChart = dc.pieChart('#month-select-chart');
         var yearRingChart = dc.pieChart("#chart-ring-year");
         var staffChart = dc.barChart("#staff-chart");
         var quarterChart = dc.pieChart('#quarter-chart');
+        var cbox1 = dc.cboxMenu('#cbox1');
         var cbox2 = dc.cboxMenu('#cbox2');
         var dataCount = dc.dataCount('.dc-data-count');
         var data;
@@ -188,7 +189,6 @@
             var dateFormatParser = d3.timeParse("%Y-%m-%d");
             data.forEach(function (d) {
                 d.SDate = dateFormatParser(d['service_dates']);
-                d.JDate = dateFormatParser(d['created_dt']);
                 d.Year = d3.timeYear(d.SDate).getFullYear();
                 //console.log(d3.timeFormat('%m')(d.date) + ": " + typeof(d3.timeFormat('%m')(d.date)));
                 d.month = d3.timeMonth(d.SDate);
@@ -227,10 +227,6 @@
             var dateDim = ndx.dimension(function (d) {
                 return d.SDate;
             });
-
-            var jDateDim = ndx.dimension(function (d) {
-                return d.JDate;
-            });
             var hits = dateDim.group().reduceSum(function (d) {
                 return +1;
             });
@@ -250,18 +246,34 @@
             var monthDim2 = ndx.dimension(function (d) {
                 return d.month;
             });
-            var requestType = ndx.dimension(function (d) {
+            var genderType = ndx.dimension(function (d) {
                 return d['gender']
             });
-            var requestTypeGroup = requestType.group().reduceSum(function (d) {
+            var genderTypeGroup = genderType.group().reduceSum(function (d) {
                 return +1;
             });
 
+            var activityDim = ndx.dimension(function (d) {
+                return d['activity']
+            });
+            var activityGroup = activityDim.group().reduceSum(function (d) {
+                return +1;
+            });
+
+            cbox1
+                .dimension(activityDim)
+                .group(activityGroup)
+                .multiple(true)
+                //    .numberVisible(10)
+                .controlsUseVisibility(true);
+
             cbox2
-                .dimension(requestType)
-                .group(requestType.group())
+                .dimension(genderType)
+                .group(genderTypeGroup)
                 .multiple(true)
                 .controlsUseVisibility(true);
+
+
 
             var country = ndx.dimension(function (d) {
                 return d.country
@@ -275,12 +287,7 @@
             var monthGroup2 = monthDim2.group().reduceSum(function (d) {
                 return +1;
             });
-            var status_200 = monthDim2.group().reduceSum(function (d) {
-                if (d.request_type === "http_200")
-                    return +1;
-                else
-                    return +0;
-            });
+
             var total_services = dateDim.group().reduceSum(function (d) {
                 if(d['activity'] == "service")
                     return +1;
@@ -289,6 +296,13 @@
             });
             var joined = dateDim.group().reduceSum(function (d) {
                if(d['activity'] == "join")
+                    return +1;
+                else
+                    return +0;
+            });
+
+            var left = dateDim.group().reduceSum(function (d) {
+               if(d['activity'] == "left")
                     return +1;
                 else
                     return +0;
@@ -334,8 +348,7 @@
             var raceDim = ndx.dimension(function (d) {
                 return d['race'];
             });
-           //var whoDim = ndx.dimension(function (d) {
-            //    return d['
+
             var raceGroup = raceDim.group().reduceSum(function (d) {
                 return +1;
             });
@@ -367,32 +380,6 @@
                 });
 
 
-            httpChart
-                .width(500)
-                .height(200)
-                .margins({top: 20, left: 10, right: 10, bottom: 20})
-                .group(requestTypeGroup)
-                .dimension(requestType)
-                .ordinalColors(["#a4da74", "#1648a0", "#af45d7", "#315f32", "#d02f34", "#beb92f",
-                    "#462c0c", "#615594", "#bf500e"])
-                // Assign colors to each value in the x scale domain
-                // Title sets the row text
-                .on('preRedraw', function () {
-                    httpChart.ordering(function (d) {
-                        return -d.value
-                    });  //this will make the scale adjust to the scale of filtered values.
-
-                })
-                .title(function (d) {
-                    return d.value;
-                })
-                .ordering(function (d) {
-                    return d.key
-                })
-                .elasticX(true)
-                .xAxis().ticks(4);
-
-
 
 
             hitslineChart
@@ -404,9 +391,16 @@
                 .round(d3.timeMonth.round)
                 .xUnits(d3.timeMonths)
                 .elasticY(true)
+                .brushOn(true)
                 .renderHorizontalGridLines(true)
                 .legend(dc.legend().x(40).y(10).itemHeight(10).gap(15).horizontal(true).autoItemWidth(true).legendWidth(350))
                 .compose([
+                    dc.lineChart(hitslineChart)
+                        .dimension(dateDim)
+                        .colors('red')
+                        .curve(d3.curveMonotoneX)
+                        .group(left, "Left")
+                        .dashStyle([0, 0]),
                     dc.lineChart(hitslineChart)
                         .dimension(dateDim)
                         .colors('orange')
@@ -454,7 +448,7 @@
                 .innerRadius(50);
 
             tableChart /* dc.dataTable('.dc-data-table', 'chartGroup') */
-                .width(400)
+                .width(425)
                 .dimension(dateDim)
                 // Data table does not use crossfilter group but rather a closure
                 // as a grouping function
@@ -467,12 +461,13 @@
                 // This code demonstrates generating the column header automatically based on the columns.
                 .columns([
                     // Use the `d.date` field; capitalized automatically
-                    'date',
+                    'SDate',
                     // Use `d.open`, `d.close` http_404: 35, http_200: 123, http_302: 41
-                    'Last Name',
-                    'SEX M/F',
-                    'Staff (Initials)',
-                    'Need Met (Y,N,P)'
+                    'last_name',
+                    'first_name',
+                    'dob',
+                    'gender',
+                    'activity'
                 ])
 
                 // (_optional_) sort using the given field, `default = function(d){return d;}`
