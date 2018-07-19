@@ -62,8 +62,9 @@ def error_handler(f):
         try:
             resp = f(*args, **kwargs)
             return resp
-        except:
-            return "Sorry - Please Come Back in A second"
+        except Exception as e:
+            return jsonify(e)
+            # return "Sorry - Please Come Back in A second"
 
     return return_function
 
