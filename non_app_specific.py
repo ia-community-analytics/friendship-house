@@ -167,13 +167,13 @@ def initials(full_name):
 def get_all_client_keys(database_reference):
     try:
         all_clients = database_reference.child('clients').order_by_key().get()
+
+        if all_clients is None:
+            all_clients = []
+        else:
+            all_clients = list(all_clients.keys())
     except:
         all_clients = []
-
-    if all_clients is None:
-        all_clients = []
-    else:
-        all_clients = list(all_clients.keys())
 
     return all_clients
 
@@ -181,13 +181,13 @@ def get_all_client_keys(database_reference):
 def get_archived_client_keys(database_reference):
     try:
         archived_clients = database_reference.child('archived_clients').order_by_key().get()
+
+        if archived_clients is None:
+            archived_clients = []
+        else:
+            archived_clients = list(archived_clients.keys())
     except:
         archived_clients = []
-
-    if archived_clients is None:
-        archived_clients = []
-    else:
-        archived_clients = list(archived_clients.keys())
 
     return archived_clients
 
