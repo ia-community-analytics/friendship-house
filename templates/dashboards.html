@@ -76,7 +76,7 @@
 {% endblock %}
 
 {% block content %}
-    <h1>Dashboards fo Daizz</h1>
+    <h1>Dashboards</h1>
     <div id="option">
         <input name="updateButton"
                type="button"
@@ -139,10 +139,8 @@
 
             <div class="p-1">
                 <div class="d-flex flex-row justify-content-center">
-                    <div id="staff-chart" class="p-2">
-                        <strong>Visitor's Race: </strong>
-                        <a class="reset" href="javascript:void(0)" onclick="staffChart.filterAll();dc.redrawAll();"
-                           style="display: none">reset</a>
+                    <div id="numbersss" class="p-2">
+                        There we a total of <span id="numbers"></span> for the selected parameters.
                     </div>
                 </div>
             </div>
@@ -169,6 +167,7 @@
         var cbox1 = dc.cboxMenu('#cbox1');
         var cbox2 = dc.cboxMenu('#cbox2');
         var dataCount = dc.dataCount('.dc-data-count');
+        var numbers = dc.numberDisplay('#numbers');
         var data;
 
 
@@ -198,6 +197,35 @@
             });
             var ndx = crossfilter(data);
             var all = ndx.groupAll();
+            var total_serv = ndx.groupAll().reduce(
+            function (p, d) {
+                    //console.log(p.people)
+                    if(d['activity'] == "service"){
+                        p.serviceCount++;
+                    }
+                    //console.log(p);
+                    return p;
+                },
+
+                function (p, d) {
+                    //console.log("deleting people");
+                    if(d['activity'] == "service"){
+                         p.serviceCount--;
+                    }
+                    return p;
+                },
+
+                function () {
+                    return {
+                        serviceCount: 0
+                    };
+                }
+
+            );
+
+
+
+
 
 
             var quarter = ndx.dimension(function (d) {
@@ -223,6 +251,7 @@
                 .innerRadius(30)
                 .dimension(quarter)
                 .group(quarterGroup);
+
 
             var dateDim = ndx.dimension(function (d) {
                 return d.SDate;
@@ -294,6 +323,19 @@
                 else
                     return +0;
             });
+
+
+            numbers
+                  .valueAccessor(function (d) {
+                            return d.serviceCount;
+                        })
+                  .group(total_serv)
+                  .html({
+                    one:"<span style=\"color:black; font-size: 20px;\">%number</span> Service",
+                    some:"<span style=\"color:black; font-size: 20px;\">%number</span> Services",
+                    none:"<span style=\"color:black; font-size: 20px;\">No</span> Services"
+                  });
+
             var joined = dateDim.group().reduceSum(function (d) {
                if(d['activity'] == "join")
                     return +1;
