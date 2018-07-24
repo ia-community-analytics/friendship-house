@@ -1,11 +1,14 @@
 import firebase_admin
 import io
 import json
+import flask
+import datetime
 from non_app_specific import (today, intg, races, genders, get_all_client_keys, generate_csv,
                               capitalize, month, create_user_id, appointment_description, appointment_type,
                               service_uos, program_status, supportive_service_provided, generate_random_url,
                               display_name, process_name, old_data_for_dashboard, data_for_dashboard)
 from functools import wraps
+from flask_bcrypt import Bcrypt
 from firebase_admin import db, auth
 from flask import Flask, render_template, jsonify, request, redirect, url_for, Response, flash, session, abort
 from flask_basicauth import BasicAuth
@@ -13,6 +16,7 @@ from flask_basicauth import BasicAuth
 # TODO serve https and not http since we are using basic auth.
 
 app = Flask(__name__)
+bcrypt = Bcrypt(app)
 
 # TODO: use an environment variable for this app secret!
 app.secret_key = b'some46fu23yp/;:/sjdh'
@@ -30,6 +34,16 @@ def reset_data_post_url():
     session.pop('data_posting_url')
     session['data_posting_url'] = generate_random_url(20)
     return None
+
+
+@app.before_request
+def before_request():
+    flask.session.permanent = True
+    app.permanent_session_lifetime = datetime.timedelta(minutes=30)
+    flask.session.modified = True
+
+
+# TODO: have a function that runs everytime the app is initiated. check users data and remove those that are no longer valid. i.e. uid changed etc
 
 
 # if not authenticated then do not do anything
@@ -51,6 +65,18 @@ def hide(f):
         return resp
 
     return a_function
+
+
+def logged_out(f):
+    @wraps(f)
+    def still_sign_up(*args, **kwargs):
+        if session.get('fire_token', None) is None:
+            return f(*args, **kwargs)
+        else:
+            return jsonify("Sorry: You cannot Sign up! Reason: You are logged in")
+
+    return still_sign_up
+
 
 def error_handler(f):
     @wraps(f)
@@ -77,28 +103,45 @@ def authenticate():
     if request.method == 'POST' and session.get('fire_token', None) is None:
         form = request.form
         email = form.get('email', '')
-        uid = form.get('uid', '')
+        pwd = form.get('pwd', '')
         try:
             user = auth.get_user_by_email(email)
         except:
             user = None
+
         if user is not None:
             user_uid = user.uid
-            if uid == user_uid:
-                session['fire_token'] = 'fire_verified'
+            user_data = database.child('users').child(user_uid).get()
+
+            if user_data is not None:
+                user_password = user_data.get('password', '')
+            else:
+                return redirect(url_for(sign_up))
+
+            try:
+                check_password = bcrypt.check_password_hash(user_password, pwd)
+            except:
+                check_password = False
+
+            if check_password:
+                ufname = user_data.get('first_name', '')
+                ulname = user_data.get('last_name', '')
+
+                session['fire_token'] = dict(fname=ufname, lname=ulname)
                 session['data_posting_url'] = generate_random_url(20)
                 return redirect(url_for("home_page"))
             else:
+                # TODO: flash message
                 return render_template("authenticate.html", logged_in=0)
         else:
-            return render_template("authenticate.html", logged_in=0)
+            return "Please contact admin to get added"
     elif request.method == 'POST' and session.get('fire_token', None) is not None:
         session.pop('fire_token', None)
         if 'data_posting_url' in session:
             session.pop('data_posting_url')
         return redirect('https://www.friendship.house/')  # TODO make this a variable
     elif request.method == 'GET' and session.get('fire_token', None) is not None:
-        return render_template("authenticate.html", email='somestuff@none.com', uid='friendship', logged_in=1)
+        return render_template("authenticate.html", email='somestuff@none.com', pwd='friendship', logged_in=1)
     else:
         return render_template("authenticate.html", logged_in=0)
 
@@ -109,6 +152,49 @@ def authenticate():
 @error_handler
 def homepage():
     return redirect(url_for('home_page'))
+
+
+@app.route('/signUp', methods=["GET", "POST"])
+@logged_out
+@error_handler
+def sign_up():
+    if request.method == "GET":
+        return render_template("sign_up.html")
+    else:
+        form = request.form
+        fname = form.get('user_first_name')
+        lname = form.get('user_last_name')
+        email = form.get('email')
+
+        try:
+            user_exists = auth.get_user_by_email(email)
+        except:
+            user_exists = None
+
+        if user_exists is None:
+            flash("You ARE NOT allowed to sign up for this website")
+            return render_template("sign_up.html", fname=fname, lname=lname)
+
+        if form.get('confirmed', "NO") == "NO":
+            flash("Your Passwords DO NOT Match")
+            return render_template("sign_up.html", fname=fname, lname=lname, email=email)
+        else:
+            pwd = form.get("pwd")
+            cpwd = form.get("pwd_confirm")
+            if pwd != cpwd:
+                # just in case someone tried to forge it
+                flash("Your Passwords DO NOT Match")
+                return render_template("sign_up.html", fname=fname, lname=lname, email=email)
+
+            user_info_in_database = database.child("users").child(user_exists.uid).get()
+
+            if user_info_in_database is None:
+                hash_pwd = bcrypt.generate_password_hash(pwd).decode("utf-8")
+                database.child('users').child(user_exists.uid).set(dict(first_name=fname, last_name=lname, email=email,
+                                                                        password=hash_pwd))
+                return redirect(url_for("authenticate"))
+            else:
+                return "You've already signed up! Please sign in instead"
 
 
 @app.route('/admin', methods=["POST"])
@@ -333,7 +419,8 @@ def home_page():
 
                 # check if user_id exists in archives
                 try:
-                    in_archive = database.child('archived_clients').order_by_key().start_at(user_id).end_at(user_id).get()
+                    in_archive = database.child('archived_clients').order_by_key().start_at(user_id).end_at(
+                        user_id).get()
                 except:
                     in_archive = None
 
@@ -364,7 +451,8 @@ def home_page():
                             paths)  # set it in archived clients
 
                     try:
-                        service_dates = database.child('clients').child(user_id).child('service_dates').get()  # an array
+                        service_dates = database.child('clients').child(user_id).child(
+                            'service_dates').get()  # an array
                     except:
                         service_dates = None
 
@@ -409,11 +497,11 @@ def home_page():
             return redirect(url_for('home_page'))
 
 
-
 @app.route('/test')
 @error_handler
 def testing():
-    return 1/0
+    return 1 / 0
+
 
 @app.route('/get_data/<id>/<type>', methods=['GET'])
 @authentication_required

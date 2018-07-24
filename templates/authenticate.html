@@ -8,7 +8,7 @@
 {% block content %}
     <form method="post" autocomplete="off">
         Email:<input type="email" name="email" value="{{ email | safe }}" required>
-        Token:<input type="password" name="uid" value="{{ uid | safe }}" required>
+        Password:<input type="password" name="pwd" value="{{ pwd | safe }}" required>
         {% if logged_in %}
             <button type="submit">Log Out</button>
         {% endif %}
