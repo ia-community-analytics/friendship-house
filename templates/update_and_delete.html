@@ -101,6 +101,7 @@
             </table>
         </div>
         <input name="thecrudform" hidden>
+        <input name="old_id" value="{{ old_id | safe }}" hidden>
         {% if allow_log == 'NO' %}
             <button type="submit" name="create_record" class="btn btn-success btn-block">Add</button>
         {% endif %}

@@ -361,14 +361,16 @@ def home_page():
                                        races_nd_selected=[dict(race=a, selected='YES' if race == a else 'NO') for a in
                                                           races],
                                        genders_nd_selected=[dict(gender=a, selected='YES' if gender == a else 'NO') for
-                                                            a in genders])
+                                                            a in genders],
+                                       old_id=user_id)
             else:
                 message = "There is no record for such client. Please Add a new record"
                 return render_template("update_and_delete.html", flash_message=message,
                                        data=dict(last_name=last_name, first_name=first_name, dob=dob),
                                        allow_log='NO',
                                        races_nd_selected=[dict(race=a, selected='NO') for a in races],
-                                       genders_nd_selected=[dict(gender=a, selected='NO') for a in genders])
+                                       genders_nd_selected=[dict(gender=a, selected='NO') for a in genders],
+                                       old_id=user_id)
 
         elif 'client_select_one' in form.keys():
             # if a client is selected
@@ -381,7 +383,8 @@ def home_page():
                                    races_nd_selected=[dict(race=a, selected='YES' if race == a else 'NO') for a in
                                                       races],
                                    genders_nd_selected=[dict(gender=a, selected='YES' if gender == a else 'NO') for a in
-                                                        genders])
+                                                        genders],
+                                   old_id=user_id)
 
         elif 'thecrudform' in form.keys():
             # note that if delete was seleected we would not need to get this info
@@ -399,6 +402,7 @@ def home_page():
             state = form.get('state', '')
             zipcode = form.get('zipcode', '')
             total = intg(nber_adults) + intg(nber_under_18)
+            old_id = form.get('old_id')
 
             # make data json. easy with name and dob separate
             # service_log should be a child with dates or something
@@ -438,7 +442,32 @@ def home_page():
                     'created_dt')
                 data['created_dt'] = created_dt  # If it is already there, keep it
 
-                database.child('clients/' + user_id + '/information').update(data)  # using update instead of set
+                # if name was change or something in id
+                if old_id != user_id:
+                    # we need to check is user_id already exists
+                    already_in = database.child('clients').child(user_id).get()
+                    if already_in is not None:
+                        return jsonify(
+                            "ERROR: The names and date of birth you entered are already in the data. Please update the corresponding client and remove the one you searched for if you wish. Thanks")
+                    else:
+                        database.child('clients/' + user_id + '/information').set(data)  # put information there
+
+                        # we need the paths and service dates if any from old id
+                        old_paths = database.child('clients').child(old_id).child('paths').get()
+                        old_service_dates = database.child('clients').child(old_id).child('service_dates').get()
+
+                        # we set the paths and service dates
+                        if old_paths is not None:
+                            database.child('clients').child(user_id).child('paths').set(old_paths)
+
+                        if old_service_dates is not None:
+                            database.child('clients').child(user_id).child('service_dates').set(old_service_dates)
+
+                        # delete
+                        database.child('clients').child(old_id).delete()
+                else:
+                    database.child('clients/' + user_id + '/information').update(data)  # using update instead of set
+
                 return render_template("confirmation.html")
             elif "delete_record" in form.keys():
                 # TODO clicking cancel on confirm dialog does not stop
@@ -488,7 +517,8 @@ def home_page():
                                                               races],
                                            genders_nd_selected=[dict(gender=a, selected='YES' if gender == a else 'NO')
                                                                 for
-                                                                a in genders])
+                                                                a in genders],
+                                           old_id=user_id)
             elif "add_client_log_for_record" in form.keys():
                 return redirect(url_for('service_log_add', record=user_id))
             else:
