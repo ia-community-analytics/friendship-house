@@ -15,6 +15,7 @@
             }
         }
     </script>
+
     {% if flash_message %}
         <script type="text/javascript">
             alert("{{ flash_message }}")
@@ -109,7 +110,42 @@
             <button type="submit" name="update_record" class="btn btn-success">Update</button>
             <button type="submit" name="delete_record" class="btn btn-danger" onclick="delete_confirm()">Delete</button>
             <button type="submit" name="add_client_log_for_record" class="btn btn-primary">Add Service Log</button>
+            <button type="button" name="view_user_logs" id="view_user_logs" class="btn btn-primary"
+                    onclick="view_log()">View Logs
+            </button>
             <input type="text" name="delete_confirmation" id="delete_confirmation" hidden>
         {% endif %}
-    </form>
+    </form><br>
+
+    <div id="table_div" style="display: none"></div>
+    <script>
+        function view_log() {
+            var b = document.getElementById("table_div");
+            b.style.display = "block";
+        }
+    </script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"
+            integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+
+    <script type="text/javascript">
+        google.charts.load('current', {'packages': ['table']});
+        google.charts.setOnLoadCallback(drawTable);
+
+        function drawTable() {
+            var jsonData = $.ajax({
+                url: "{{ url_for('get_user_logs', id=id_check, user_id=old_id) }}",
+                dataType: "json",
+                async: false
+            }).responseText;
+
+            var data = new google.visualization.DataTable(jsonData);
+            var table = new google.visualization.Table(document.getElementById('table_div'));
+
+            table.draw(data, {
+                showRowNumber: true, width: '100%', height: '100%', frozenColumns: 1,
+                page: 'enable', sortColumn: 0
+            });
+        }
+    </script>
 {% endblock %}

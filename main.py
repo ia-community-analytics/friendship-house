@@ -6,7 +6,8 @@ import datetime
 from non_app_specific import (today, intg, races, genders, get_all_client_keys, generate_csv,
                               capitalize, month, create_user_id, appointment_description, appointment_type,
                               service_uos, program_status, supportive_service_provided, generate_random_url,
-                              display_name, process_name, old_data_for_dashboard, data_for_dashboard)
+                              display_name, process_name, old_data_for_dashboard, data_for_dashboard,
+                              user_specific_logs)
 from functools import wraps
 from flask_bcrypt import Bcrypt
 from firebase_admin import db, auth
@@ -311,6 +312,7 @@ def home_page():
     if request.method == 'GET':
         return render_template("homepage.html")
     else:
+        data_post_url = session.get('data_posting_url', '')
         form = request.form
         form = dict((a, b.strip() if isinstance(b, str) else b) for a, b in form.items())  # strip spaces
         if 'thesearchform' in form.keys():
@@ -362,7 +364,7 @@ def home_page():
                                                           races],
                                        genders_nd_selected=[dict(gender=a, selected='YES' if gender == a else 'NO') for
                                                             a in genders],
-                                       old_id=user_id)
+                                       old_id=user_id, id_check=data_post_url)
             else:
                 message = "There is no record for such client. Please Add a new record"
                 return render_template("update_and_delete.html", flash_message=message,
@@ -370,7 +372,7 @@ def home_page():
                                        allow_log='NO',
                                        races_nd_selected=[dict(race=a, selected='NO') for a in races],
                                        genders_nd_selected=[dict(gender=a, selected='NO') for a in genders],
-                                       old_id=user_id)
+                                       old_id=user_id, id_check=data_post_url)
 
         elif 'client_select_one' in form.keys():
             # if a client is selected
@@ -384,7 +386,7 @@ def home_page():
                                                       races],
                                    genders_nd_selected=[dict(gender=a, selected='YES' if gender == a else 'NO') for a in
                                                         genders],
-                                   old_id=user_id)
+                                   old_id=user_id, id_check=data_post_url)
 
         elif 'thecrudform' in form.keys():
             # note that if delete was seleected we would not need to get this info
@@ -518,7 +520,7 @@ def home_page():
                                            genders_nd_selected=[dict(gender=a, selected='YES' if gender == a else 'NO')
                                                                 for
                                                                 a in genders],
-                                           old_id=user_id)
+                                           old_id=user_id, id_check=data_post_url)
             elif "add_client_log_for_record" in form.keys():
                 return redirect(url_for('service_log_add', record=user_id))
             else:
@@ -548,12 +550,28 @@ def get_data(id, type):
             end = str(today.year) + '-12-31'
             data = database.child('service_logs').order_by_key().start_at(start).end_at(end).get()
             df = generate_csv(data)
+            if df is None:
+                return "No Service Logs For This User"
             cols = [dict(id=el, label=el, type="string") for el in df.columns]
             rows = [dict(c=[dict(v=el) for el in s]) for s in df.values]
             return jsonify(dict(cols=cols, rows=rows))
 
         else:
             return abort(404)
+    else:
+        return abort(403)
+
+
+@app.route('/get_user_log/<id>/<user_id>', methods=["GET"])
+@authentication_required
+@error_handler
+@hide
+def get_user_logs(id, user_id):
+    if id == session.get('data_posting_url', ''):
+        df = user_specific_logs(database, user_id)
+        cols = [dict(id=el, label=el, type="string") for el in df.columns]
+        rows = [dict(c=[dict(v=el) for el in s]) for s in df.values]
+        return jsonify(dict(cols=cols, rows=rows))
     else:
         return abort(403)
 

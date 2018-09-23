@@ -1,8 +1,12 @@
 import pandas as pd
 import random
 import string
+import json
 
 today = pd.datetime.today()
+with open('log_column.json', 'r') as f:
+    column_mapping = json.load(f)
+
 races = [
     "African American/Black",
     "American Indian/Alaskan Native",
@@ -322,7 +326,7 @@ def generate_csv_from_path(log):
 
 
 # data for clients
-def old_data_for_dashboard(database_reference, specific_users=None):
+def old_data_for_dashboard(database_reference, specific_users=None, just_logs=None):
     data_frame = pd.DataFrame(columns=csv_columns + ['created_dt', 'isActive', 'deleted_dt'])
 
     all_clients = get_all_client_keys(database_reference)  # the list of clients - the user ids.
@@ -357,6 +361,9 @@ def old_data_for_dashboard(database_reference, specific_users=None):
 
     logs = [database_reference.child(path).get() for path in all_paths]
     logs = [log for log in logs if log is not None]  # we do not need None
+
+    if just_logs is not None:
+        return logs
 
     if len(logs) == 0:
         return data_frame
@@ -399,6 +406,22 @@ def old_data_for_dashboard(database_reference, specific_users=None):
     data_frame.fillna('')
     # TODO; drop user_id?
     return data_frame.astype(str)
+
+def user_specific_logs(database_reference, user_id: str):
+    logs = old_data_for_dashboard(database_reference, user_id, 'yes')
+    if not isinstance(logs, list) or len(logs) == 0:
+        return None
+    df = pd.DataFrame(logs) # the dataframe
+    if 'action' in df.columns:
+        df = df.drop('action', axis=1)
+    df.columns = [column_mapping.get(el) for el in df.columns]
+    dates = df["Service Date"].tolist()
+    df = df.transpose()
+    df = df.reset_index()
+    df.columns = ['Information'] + dates
+
+    return df
+
 
 
 def data_for_dashboard(database_reference):
