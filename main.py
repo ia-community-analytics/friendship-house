@@ -1,5 +1,7 @@
 import firebase_admin
 import io
+import os
+import sys
 import json
 import flask
 import datetime
@@ -11,8 +13,13 @@ from non_app_specific import (today, intg, races, genders, get_all_client_keys, 
 from functools import wraps
 from flask_bcrypt import Bcrypt
 from firebase_admin import db, auth
+from flask_dance.contrib.google import make_google_blueprint, google
 from flask import Flask, render_template, jsonify, request, redirect, url_for, Response, flash, session, abort
 from flask_basicauth import BasicAuth
+
+# insecure transfer etc...
+# TODO - fix this when we switch to better tranfer
+os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = '1'
 
 # TODO serve https and not http since we are using basic auth.
 
@@ -20,14 +27,34 @@ app = Flask(__name__)
 bcrypt = Bcrypt(app)
 
 # TODO: use an environment variable for this app secret!
-app.secret_key = b'some46fu23yp/;:/sjdh'
+# app.secret_key = b'some46fu23yp/;:/sjdh'
 
+with open("./credentials/keys.json", "r") as f:
+    creds = json.load(f)
+
+app.config["SECRET_KEY"] = b'some46fu23yp/;:/sjdh'
 app.config['BASIC_AUTH_USERNAME'] = 'someguy@domain.com'
 app.config['BASIC_AUTH_PASSWORD'] = 'Inconnu1'
+app.config["PERMANENT_SESSION_LIFETIME"] = datetime.timedelta(minutes=60)
+blueprint = make_google_blueprint(
+    client_id=creds.get('web').get('client_id'),
+    client_secret=creds.get('web').get('client_secret'),
+    scope=["https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email"]
+)
+
+app.register_blueprint(blueprint, url_prefix='/login')
 
 firebase_admin.initialize_app()
 database = db.reference()
 basic_auth = BasicAuth(app)
+
+
+@app.context_processor
+def inject_image():
+    try:
+        return dict(image=session.get("picture"))
+    except:
+        return dict(image=url_for('static', filename='default_pic.jpg'))
 
 
 # TODO: have a decorator and an authenticate page where a token or id is provided.
@@ -37,13 +64,6 @@ def reset_data_post_url():
     return None
 
 
-@app.before_request
-def before_request():
-    flask.session.permanent = True
-    app.permanent_session_lifetime = datetime.timedelta(minutes=30)
-    flask.session.modified = True
-
-
 # TODO: have a function that runs everytime the app is initiated. check users data and remove those that are no longer valid. i.e. uid changed etc
 
 
@@ -51,9 +71,10 @@ def before_request():
 def authentication_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if session.get('fire_token', None) is None:
-            return redirect(url_for('authenticate', next=request.url))
-        return f(*args, **kwargs)
+        if google.authorized and session.get('fire_token', None) is not None and session.get(
+                'verified_email') is not None:
+            return f(*args, **kwargs)
+        return redirect(url_for("homepage"))
 
     return decorated_function
 
@@ -66,17 +87,6 @@ def hide(f):
         return resp
 
     return a_function
-
-
-def logged_out(f):
-    @wraps(f)
-    def still_sign_up(*args, **kwargs):
-        if session.get('fire_token', None) is None:
-            return f(*args, **kwargs)
-        else:
-            return jsonify("Sorry: You cannot Sign up! Reason: You are logged in")
-
-    return still_sign_up
 
 
 def error_handler(f):
@@ -96,106 +106,41 @@ def error_handler(f):
 
 
 # real routes
-@app.route('/authenticate', methods=["GET", "POST"])
-# @basic_auth.required
-# TODO: in multi select, https://stackoverflow.com/questions/12502646/access-multiselect-form-field-in-flask
-@error_handler
-def authenticate():
-    if request.method == 'POST' and session.get('fire_token', None) is None:
-        form = request.form
-        email = form.get('email', '')
-        pwd = form.get('pwd', '')
-        try:
-            user = auth.get_user_by_email(email)
-        except:
-            user = None
-
-        if user is not None:
-            user_uid = user.uid
-            user_data = database.child('users').child(user_uid).get()
-
-            if user_data is not None:
-                user_password = user_data.get('password', '')
-            else:
-                return redirect(url_for(sign_up))
-
-            try:
-                check_password = bcrypt.check_password_hash(user_password, pwd)
-            except:
-                check_password = False
-
-            if check_password:
-                ufname = user_data.get('first_name', '')
-                ulname = user_data.get('last_name', '')
-
-                session['fire_token'] = dict(fname=ufname, lname=ulname)
-                session['data_posting_url'] = generate_random_url(20)
-                return redirect(url_for("home_page"))
-            else:
-                # TODO: flash message
-                return render_template("authenticate.html", logged_in=0)
-        else:
-            return "Please contact admin to get added"
-    elif request.method == 'POST' and session.get('fire_token', None) is not None:
-        session.pop('fire_token', None)
-        if 'data_posting_url' in session:
-            session.pop('data_posting_url')
-        return redirect('https://www.friendship.house/')  # TODO make this a variable
-    elif request.method == 'GET' and session.get('fire_token', None) is not None:
-        return render_template("authenticate.html", email='somestuff@none.com', pwd='friendship', logged_in=1)
-    else:
-        return render_template("authenticate.html", logged_in=0)
-
-
 @app.route('/')
-# @basic_auth.required
-@authentication_required
 @error_handler
 def homepage():
-    return redirect(url_for('home_page'))
+    if not google.authorized:
+        return redirect(url_for("google.login"))
+    resp = google.get("oauth2/v2/userinfo")
+    if not resp.ok or resp.text is None:
+        return abort(401)
 
+    tokens = google.token
+    id_token = tokens.get('id_token')
+    refresh_token = tokens.get('refresh_token', None)
 
-@app.route('/signUp', methods=["GET", "POST"])
-@logged_out
-@error_handler
-def sign_up():
-    if request.method == "GET":
-        return render_template("sign_up.html")
+    for a, b in resp.json().items():
+        session[a] = b
+
+    email = session.get("email")
+
+    # get user with this email
+    try:
+        user = auth.get_user_by_email(email)
+    except:
+        user = None
+
+    if user is not None:
+        ufname, ulname, verified = session.get('given_name'), session.get('family_name'), session.get('verified_email')
+
+        session['fire_token'] = dict(fname=ufname, lname=ulname)
+        session['data_posting_url'] = generate_random_url(20)
     else:
-        form = request.form
-        fname = form.get('user_first_name')
-        lname = form.get('user_last_name')
-        email = form.get('email')
+        return "Please Contact admin to be added"
 
-        try:
-            user_exists = auth.get_user_by_email(email)
-        except:
-            user_exists = None
+    session.permanent = True
 
-        if user_exists is None:
-            flash("You ARE NOT allowed to sign up for this website")
-            return render_template("sign_up.html", fname=fname, lname=lname)
-
-        if form.get('confirmed', "NO") == "NO":
-            flash("Your Passwords DO NOT Match")
-            return render_template("sign_up.html", fname=fname, lname=lname, email=email)
-        else:
-            pwd = form.get("pwd")
-            cpwd = form.get("pwd_confirm")
-            if pwd != cpwd:
-                # just in case someone tried to forge it
-                flash("Your Passwords DO NOT Match")
-                return render_template("sign_up.html", fname=fname, lname=lname, email=email)
-
-            user_info_in_database = database.child("users").child(user_exists.uid).get()
-
-            if user_info_in_database is None:
-                hash_pwd = bcrypt.generate_password_hash(pwd).decode("utf-8")
-                database.child('users').child(user_exists.uid).set(dict(first_name=fname, last_name=lname, email=email,
-                                                                        password=hash_pwd))
-                return redirect(url_for("authenticate"))
-            else:
-                return "You've already signed up! Please sign in instead"
+    return redirect(url_for('home_page'))
 
 
 @app.route('/admin', methods=["POST"])
@@ -213,10 +158,12 @@ def service_log_admin():
 @error_handler
 def service_log_add(record):
     data = database.child('clients/' + record + '/information').get()
+    staff_fname, staff_lname = session.get('given_name'), session.get('family_name')
     return render_template('client_service_log.html', data=data, date=today.strftime("%Y-%m-%d"),
                            appointment_type=appointment_type, program_status=program_status,
                            appointment_description=appointment_description, service_uos=service_uos,
-                           supportive_service_provided=supportive_service_provided)
+                           supportive_service_provided=supportive_service_provided, staff_fname=staff_fname,
+                           staff_lname=staff_lname)
 
 
 @app.route('/admin/<record>', methods=["POST"])
@@ -568,9 +515,12 @@ def get_data(id, type):
 @hide
 def get_user_logs(id, user_id):
     if id == session.get('data_posting_url', ''):
-        df = user_specific_logs(database, user_id)
+        df, paths = user_specific_logs(database, user_id)
         cols = [dict(id=el, label=el, type="string") for el in df.columns]
         rows = [dict(c=[dict(v=el) for el in s]) for s in df.values]
+        # we can do insert
+        # rows = [dict(c=[dict(v=el) for el in ['Edit'] + paths])] + rows
+        # print(rows[0], file=sys.stderr)
         return jsonify(dict(cols=cols, rows=rows))
     else:
         return abort(403)

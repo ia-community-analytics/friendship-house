@@ -23,7 +23,7 @@
     {% endif %}
     <form method="post">
         <div id="date_field" hidden>
-            Date: <input type="date" name="Date" min="1960-01-01" max="{{ date }}" value={{ date }}>
+            Date: <input type="date" name="Date" min="1900-01-01" max="{{ date }}" value={{ date }}>
         </div>
 
         <div id="first" class="container-fluid">
@@ -44,7 +44,7 @@
                                            required></td>
                                 <td><input type="text" name="firstname" value="{{ data.get('first_name','') | safe }}"
                                            required></td>
-                                <td><input type="date" min="1960-01-01" max="{{ date }}" name="dob"
+                                <td><input type="date" min="1900-01-01" max="{{ date }}" name="dob"
                                            value="{{ data.get('dob','') | safe }}" required></td>
                                 <td>
                                     <select name="gender">

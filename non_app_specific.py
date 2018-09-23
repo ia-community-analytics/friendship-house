@@ -359,11 +359,13 @@ def old_data_for_dashboard(database_reference, specific_users=None, just_logs=No
     if len(all_paths) == 0:
         return data_frame
 
-    logs = [database_reference.child(path).get() for path in all_paths]
-    logs = [log for log in logs if log is not None]  # we do not need None
+    logs = [(path, database_reference.child(path).get()) for path in all_paths]
+    logs = [(path, log) for path, log in logs if log is not None]  # we do not need None
+    paths_save = [el[0] for el in logs]
+    logs = [el[1] for el in logs]
 
     if just_logs is not None:
-        return logs
+        return logs, paths_save
 
     if len(logs) == 0:
         return data_frame
@@ -408,9 +410,9 @@ def old_data_for_dashboard(database_reference, specific_users=None, just_logs=No
     return data_frame.astype(str)
 
 def user_specific_logs(database_reference, user_id: str):
-    logs = old_data_for_dashboard(database_reference, user_id, 'yes')
+    logs, paths = old_data_for_dashboard(database_reference, user_id, 'yes')
     if not isinstance(logs, list) or len(logs) == 0:
-        return None
+        return None, None
     df = pd.DataFrame(logs) # the dataframe
     if 'action' in df.columns:
         df = df.drop('action', axis=1)
@@ -420,7 +422,7 @@ def user_specific_logs(database_reference, user_id: str):
     df = df.reset_index()
     df.columns = ['Information'] + dates
 
-    return df
+    return df, paths
 
 
 

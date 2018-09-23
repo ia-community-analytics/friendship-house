@@ -10,14 +10,14 @@
         <div id="search_bar">
             First Name: <input type="text" name="fname_search" required>
             Last Name: <input type="text" name="lname_search" required>
-            Date of Birth: <input type="date" name="dob_search" min="1960-01-01" max="{{ date }}" required>
+            Date of Birth: <input type="date" name="dob_search" min="1900-01-01" max="{{ date }}" required>
             <input type="text" value="searchingclients" hidden>
             <button type="submit" name="search">Search Client</button>
         </div>
     </form>
     <form method="post">
         <div id="date_field">
-            Date: <input type="date" name="Date" min="1960-01-01" max="{{ date }}" value={{ date }}>
+            Date: <input type="date" name="Date" min="1900-01-01" max="{{ date }}" value={{ date }}>
         </div>
 
         <div id="first">
@@ -36,7 +36,7 @@
                             <tr>
                                 <td><input type="text" name="lastname" required></td>
                                 <td><input type="text" name="firstname" required></td>
-                                <td><input type="date" min="1960-01-01" max="{{ date }}" name="dob" required></td>
+                                <td><input type="date" min="1900-01-01" max="{{ date }}" name="dob" required></td>
                                 <td>
                                     <select name="gender">
                                         <option value="Female">Female</option>
