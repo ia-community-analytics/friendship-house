@@ -4,7 +4,7 @@ import string
 import json
 
 today = pd.datetime.today()
-with open('log_column.json', 'r') as f:
+with open('./log_column.json', 'r') as f:
     column_mapping = json.load(f)
 
 races = [
