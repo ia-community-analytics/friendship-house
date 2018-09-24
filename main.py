@@ -13,6 +13,7 @@ from non_app_specific import (today, intg, races, genders, get_all_client_keys, 
 from functools import wraps
 from flask_bcrypt import Bcrypt
 from firebase_admin import db, auth
+from oauthlib.oauth2.rfc6749.errors import TokenExpiredError, InvalidGrantError
 from flask_dance.contrib.google import make_google_blueprint, google
 from flask import Flask, render_template, jsonify, request, redirect, url_for, Response, flash, session, abort
 from flask_basicauth import BasicAuth
@@ -49,6 +50,7 @@ database = db.reference()
 basic_auth = BasicAuth(app)
 
 
+# simply allows us to inject user profile picture in all htmls through the layout
 @app.context_processor
 def inject_image():
     try:
@@ -57,7 +59,7 @@ def inject_image():
         return dict(image=url_for('static', filename='default_pic.jpg'))
 
 
-# TODO: have a decorator and an authenticate page where a token or id is provided.
+# just a function that resets a session variable
 def reset_data_post_url():
     session.pop('data_posting_url')
     session['data_posting_url'] = generate_random_url(20)
@@ -79,6 +81,7 @@ def authentication_required(f):
     return decorated_function
 
 
+# this just allows us to reset the id in data url
 def hide(f):
     @wraps(f)
     def a_function(*args, **kwargs):
@@ -89,6 +92,7 @@ def hide(f):
     return a_function
 
 
+# to handle any error that might occur in a function. lazy approach
 def error_handler(f):
     @wraps(f)
     def return_function(*args, **kwargs):
@@ -106,12 +110,18 @@ def error_handler(f):
 
 
 # real routes
+
+# this is where authentication occurs.
 @app.route('/')
 @error_handler
 def homepage():
     if not google.authorized:
         return redirect(url_for("google.login"))
-    resp = google.get("oauth2/v2/userinfo")
+    try:
+        resp = google.get("oauth2/v2/userinfo")
+    except (InvalidGrantError, TokenExpiredError) as e:
+        return redirect(url_for("google.login"))
+
     if not resp.ok or resp.text is None:
         return abort(401)
 
@@ -143,6 +153,7 @@ def homepage():
     return redirect(url_for('home_page'))
 
 
+# service log view
 @app.route('/admin', methods=["POST"])
 # @basic_auth.required
 @authentication_required
@@ -152,6 +163,7 @@ def service_log_admin():
     return redirect(url_for('service_log_add', record=record))
 
 
+# specific user service log
 @app.route('/admin/<record>')
 # @basic_auth.required
 @authentication_required
@@ -166,6 +178,7 @@ def service_log_add(record):
                            staff_lname=staff_lname)
 
 
+# posting service log
 @app.route('/admin/<record>', methods=["POST"])
 # @basic_auth.required
 @authentication_required
@@ -221,6 +234,7 @@ def date_select():
                            date=today.strftime("%Y-%m-%d"))
 
 
+# downloadding content
 @app.route('/admin/export', methods=["POST"])
 # @basic_auth.required
 @authentication_required
@@ -243,6 +257,7 @@ def export():
                                                                "attachment; filename=export%sto%s.csv" % (start, end)})
 
 
+# dashboards
 @app.route('/dashboards')
 # @basic_auth.required
 @authentication_required
@@ -252,6 +267,7 @@ def dashboards():
     return render_template('dashboards.html', id_check=data_post_url)
 
 
+# one route for adding, updating, deleting clients. Sends to add client service log, view or update logs
 @app.route('/home', methods=["GET", "POST"])
 @authentication_required
 @error_handler
@@ -472,16 +488,31 @@ def home_page():
                 return redirect(url_for('service_log_add', record=user_id))
             else:
                 return redirect(url_for('home_page'))
+        elif "editing_logs" in form.keys():
+            log_to_edit = form.get('edit_button')
+            staff_fname, staff_lname = session.get('given_name'), session.get('family_name')
+            data = database.child(log_to_edit).get()
+            return render_template("client_service_log_update.html", data=data, date=today.strftime("%Y-%m-%d"),
+                                   appointment_type=appointment_type, program_status=program_status,
+                                   appointment_description=appointment_description, service_uos=service_uos,
+                                   supportive_service_provided=supportive_service_provided, staff_fname=staff_fname,
+                                   staff_lname=staff_lname, key_to_update=log_to_edit)
+        elif "client_service_log_updating_form" in form.keys():
+            key_to_update = form.pop('client_service_log_updating_form')
+            database.child(key_to_update).update(form)
+            return redirect(url_for('home_page'))
         else:
             return redirect(url_for('home_page'))
 
 
+# test error handler - no authentication required
 @app.route('/test')
 @error_handler
 def testing():
     return 1 / 0
 
 
+# route to get json data for dashboard and export view
 @app.route('/get_data/<id>/<type>', methods=['GET'])
 @authentication_required
 @error_handler
@@ -509,6 +540,7 @@ def get_data(id, type):
         return abort(403)
 
 
+# route to provide json data for viewing user logs
 @app.route('/get_user_log/<id>/<user_id>', methods=["GET"])
 @authentication_required
 @error_handler
@@ -516,10 +548,12 @@ def get_data(id, type):
 def get_user_logs(id, user_id):
     if id == session.get('data_posting_url', ''):
         df, paths = user_specific_logs(database, user_id)
+        if paths is not None:
+            paths = ['<button name="edit_button" type="submit" value=%s>EDIT</button>' % el for el in paths]
         cols = [dict(id=el, label=el, type="string") for el in df.columns]
         rows = [dict(c=[dict(v=el) for el in s]) for s in df.values]
         # we can do insert
-        # rows = [dict(c=[dict(v=el) for el in ['Edit'] + paths])] + rows
+        rows = [dict(c=[dict(v=el) for el in [''] + paths])] + rows
         # print(rows[0], file=sys.stderr)
         return jsonify(dict(cols=cols, rows=rows))
     else:

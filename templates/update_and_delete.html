@@ -117,7 +117,10 @@
         {% endif %}
     </form><br>
 
-    <div id="table_div" style="display: none"></div>
+    <form method="post">
+    <input type="text" name="editing_logs" hidden>
+        <div id="table_div" style="display: none"></div>
+    </form>
     <script>
         function view_log() {
             var b = document.getElementById("table_div");
@@ -144,7 +147,7 @@
 
             table.draw(data, {
                 showRowNumber: true, width: '100%', height: '100%', frozenColumns: 1,
-                page: 'enable', sortColumn: 0
+                page: 'enable', sortColumn: 0, allowHtml: true
             });
         }
     </script>

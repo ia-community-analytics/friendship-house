@@ -1,0 +1,398 @@
+{% extends "layout.html" %}
+
+{% block header %}
+    <h1>{% block title %}Client Service Log{% endblock %}</h1>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <p>Add a new service log</p>
+        <form id="client_service_log_updating_form" method="post">
+            <input name="client_service_log_updating_form" value="{{ key_to_update }}" hidden>
+            <div id="date_field">
+                Date: <input type="date" min="1900-01-01" max="{{ date }}" name="Date" value="{{ data.Date }}">
+            </div>
+            <div class="d-flex p-3" style="width:800px;">
+                <div class="d-flex flex-column justify-content-center align-content-top" style="width: 100%;">
+                    <div class="p-0">
+                        <legend align="center">Client Information</legend>
+                        <div class="d-flex flex-row justify-content-center align-content-center">
+                            <div class="mx-5">
+                                <div class="d-flex flex-column justify-content-center align-content-center">
+
+                                    <legend align="center">General</legend>
+                                    Last Name: <input class="p-0" type="text" name="lastname"
+                                                      value="{{ data.lastname }}"
+                                                      placeholder="Last Name" title="Last Name" required><br>
+                                    First Name: <input class="p-0" type="text" name="firstname"
+                                                       value="{{ data.firstname }}"
+                                                       placeholder="First Name" title="First Name" required><br>
+                                    Date of Birth: <input class="p-0" type="date" min="1900-01-01" max="{{ date }}"
+                                                          name="dob"
+                                                          value="{{ data.dob }}" placeholder="Date of Birth"
+                                                          title="Date of Birth"
+                                                          required><br>
+                                    <div hidden>
+                                        Gender: <input type="text" name="gender" value="{{ data.gender }}"
+                                                       placeholder="Gender"
+                                                       title="Gender"><br>
+                                        Telephone: <input type="tel" name="phone" value="{{ data.phone }}"
+                                                          placeholder="phone #"
+                                                          title="phone #">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="px-5">
+                                <div class="d-flex flex-column justify-content-center align-content-center">
+                                    <legend align="center">#In Home</legend>
+                                    # Adults: <input type="number" name="adults" min="0" value="{{ data.adults }}"
+                                                     placeholder="# Adults" title="# Adults"><br>
+                                    # Under 18: <input type="number" name="under18" min="0"
+                                                       value="{{ data.under18 }}" placeholder="# Under 18"
+                                                       title="# Under 18"><br>
+                                    Total: <input type="number" name="inhome" min="0" value="{{ data.inhome }}"
+                                                  placeholder="Total" title="Total In Home">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="p-0">
+                        <legend align="center">Program & Appointment</legend>
+                        <div class="d-flex flex-column justify-content-center align-content-center">
+                            <div class="p-0">
+                                <div class="d-flex flex-row justify-content-center align-content-center">
+                                    <div class="mx-3">
+                                        <legend align="center">Description</legend>
+                                        <select name="appointment_description" id="appointment_description">
+                                            {% for description in appointment_description %}
+                                                {% if data.appointment_description == description %}
+                                                    <option value="{{ description | safe }}"
+                                                            selected>{{ description | safe }}</option>
+                                                {% else %}
+                                                    <option value="{{ description | safe }}">{{ description | safe }}</option>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="mx-3">
+                                        <div class="d-flex flex-column justify-content-center align-content-center">
+                                            <legend align="center">Service UOS</legend>
+                                            <div class="p-1" align="center">
+                                                <select name="uos" id="service_uos" onclick="enter_uos()">
+                                                    {% for tm in service_uos %}
+                                                        {% if data.uos == tm %}
+                                                            <option value="{{ tm.get('value') | safe }}"
+                                                                    selected>{{ tm.get('display') | safe }}</option>
+                                                        {% else %}
+                                                            <option value="{{ tm.get('value') | safe }}"
+                                                                    selected>{{ tm.get('display') | safe }}</option>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                            <div class="p-1" align="center">
+                                                <div id="uos_other" title="Other" style="visibility: hidden">
+                                                    <input type="number" name="other_service_txt" min="0" step=".25"
+                                                           value="{{ data.other_service_txt }}">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mx-3">
+                                        <div class="p-1">
+                                            <legend align="center">New Appointment</legend>
+                                            <input type="datetime-local" min="1900-01-01" max="{{ date }}"
+                                                   name="new_appointment" value="{{ data.new_appointment }}">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-1">
+                                <div class="d-flex flex-row justify-content-center align-content-center">
+                                    <div class="mx-3">
+                                        <div class="d-flex flex-column justify-content-center align-content-center">
+                                            <legend align="center">Appointment Type</legend>
+                                            <div class="p-1" align="center">
+                                                <select name="appointment_type" id="appointment_type"
+                                                        onclick="enter_location()">
+                                                    {% for type in appointment_type %}
+                                                        {% if data.appointment_type == type %}
+                                                            <option value="{{ type | safe }}"
+                                                                    selected>{{ type | safe }}</option>
+                                                        {% else %}
+                                                            <option value="{{ type | safe }}">{{ type | safe }}</option>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                            <div class="p-1" align="center">
+                                                <div id="appointment_location" title="Location"
+                                                     style="visibility: hidden">
+                                                    <input type="text" name="appointment_location"
+                                                           placeholder="location"
+                                                           value="{{ data.appointment_location }}">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mx-3">
+                                        <div class="d-flex flex-column justify-content-center align-content-center">
+                                            <legend align="center">Program Status</legend>
+                                            <div class="p-1" align="center">
+                                                <select name="program_status" id="program_status"
+                                                        onclick="enter_status()">
+                                                    {% for status in program_status %}
+                                                        {% if data.program_status == status %}
+                                                            <option value="{{ status | safe }}"
+                                                                    selected>{{ status | safe }}</option>
+                                                        {% else %}
+                                                            <option value="{{ status | safe }}">{{ status | safe }}</option>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                            <div class="p-1" align="center">
+                                                <div id="program_status_other" title="Other"
+                                                     style="visibility: hidden">
+                                                    <input type="text" name="program_status_other"
+                                                           placeholder="other program"
+                                                           value="{{ data.program_status_other }}">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="improvement_questions" class="p-0" align="center">
+                        Did member demonstrate Improvement in Presenting Issue (Immediate Need met)?
+                        <select name="need_met">
+                            <option value="Y">Yes</option>
+                            <option value="N">No</option>
+                            <option value="P">Pending</option>
+                        </select><br>
+                        Did member demonstrate Gained Life Management Skills (HW Completion)?
+                        <select name="hw_completion">
+                            {% if data.hw_completion == "Y" %}
+                                <option value="Y" selected>Yes</option>
+                            {% else %}
+                                <option value="Y">Yes</option>
+                            {% endif %}
+
+                            {% if data.hw_completion == "N" %}
+                                <option value="N" selected>No</option>
+                            {% else %}
+                                <option value="N">No</option>
+                            {% endif %}
+
+                            {% if data.hw_completion == "P" %}
+                                <option value="P" selected>Pending</option>
+                            {% else %}
+                                <option value="P">Pending</option>
+                            {% endif %}
+                        </select>
+                    </div>
+                    <div class="p-1" align="center">
+                        <div title="Case Note">
+                            <textarea name="casenote"
+                                      placeholder="Case Note: Service Need(s) AND Service(s) Provided">
+                                {{ data.casenote }}</textarea>
+                        </div>
+                    </div>
+                    <div class="p-2" align="center">
+                        <legend align="center">Supportive Services Provided:</legend>
+                        <div class="d-flex flex-row justify-content-center align-content-center">
+                            <div class="px-4">
+                                <legend>Food</legend>
+                                <select name="food">
+                                    {% for foo in supportive_service_provided.get('Food') %}
+                                        {% if data.food == foo %}
+                                            <option value="{{ foo | safe }}" selected>{{ foo | safe }}</option>
+                                        {% else %}
+                                            <option value="{{ foo | safe }}">{{ foo | safe }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select><br>
+                                #<input type="number" name="foodqty" value="{{ data.foodqty }}"><br>
+                                $<input type="number" step="0.01" name="foodvalue" value="{{ data.foodvalue }}">
+                            </div>
+                            <div class="px-4">
+                                <legend>Clothing</legend>
+                                <select name="clothing">
+                                    {% for foo in supportive_service_provided.get('Clothing') %}
+                                        {% if data.clothing == foo %}
+                                            <option value="{{ foo | safe }}" selected>{{ foo | safe }}</option>
+                                        {% else %}
+                                            <option value="{{ foo | safe }}">{{ foo | safe }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select><br>
+                                #<input type="number" name="clothingqty" value="{{ data.clothingqty }}"><br>
+                                $<input type="number" step="0.01" name="clothingvalue" value="{{ data.clothingvalue }}">
+                            </div>
+                            <div class="px-4">
+                                <legend>Hygiene</legend>
+                                <select name="hygiene">
+                                    {% for foo in supportive_service_provided.get('Hygiene') %}
+                                        {% if data.hygiene == foo %}
+                                            <option value="{{ foo | safe }}" selected>{{ foo | safe }}</option>
+                                        {% else %}
+                                            <option value="{{ foo | safe }}">{{ foo | safe }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select><br>
+                                #<input type="number" name="hygieneqty" value="{{ data.hygieneqty }}"><br>
+                                $<input type="number" step="0.01" name="hygienevalue" value="{{ data.hygienevalue }}">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-1" align="center">
+                        <div class="d-flex flex-row justify-content-center align-content-center">
+                            <div class="px-4">
+                                <legend>Baby Items</legend>
+                                <select name="baby_items">
+                                    {% for foo in supportive_service_provided.get('Baby_Items') %}
+                                        {% if data.baby_items == foo %}
+                                            <option value="{{ foo | safe }}" selected>{{ foo | safe }}</option>
+                                        {% else %}
+                                            <option value="{{ foo | safe }}">{{ foo | safe }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select><br>
+                                #<input type="number" name="babyqty" value="{{ data.babyqty }}"><br>
+                                $<input type="number" step="0.01" name="babyvalue" value="{{ data.babyvalue }}">
+                            </div>
+                            <div class="px-4">
+                                <legend>Financial</legend>
+                                <select name="financial">
+                                    {% for foo in supportive_service_provided.get('Financial') %}
+                                        {% if data.financial == foo %}
+                                            <option value="{{ foo | safe }}" selected>{{ foo | safe }}</option>
+                                        {% else %}
+                                            <option value="{{ foo | safe }}">{{ foo | safe }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select><br>
+                                #<input type="number" name="financeqty" value="{{ data.financeqty }}"><br>
+                                $<input type="number" step="0.01" name="financevalue" value="{{ data.financevalue }}">
+                            </div>
+                            <div class="px-4">
+                                <legend>Legal</legend>
+                                <select name="legal">
+                                    {% for foo in supportive_service_provided.get('Legal') %}
+                                        {% if data.legal == foo %}
+                                            <option value="{{ foo | safe }}" selected>{{ foo | safe }}</option>
+                                        {% else %}
+                                            <option value="{{ foo | safe }}">{{ foo | safe }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select><br>
+                                #<input type="number" name="legalqty" value="{{ data.legalqty }}"><br>
+                                $<input type="number" step="0.01" name="legalvalue" value="{{ data.legalvalue }}">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-1" align="center">
+                        <div class="d-flex flex-row justify-content-center align-content-center">
+                            <div class="px-4">
+                                <legend>HouseHold</legend>
+                                <select name="household">
+                                    {% for foo in supportive_service_provided.get('HouseHold') %}
+                                        {% if data.household == foo %}
+                                            <option value="{{ foo | safe }}" selected>{{ foo | safe }}</option>
+                                        {% else %}
+                                            <option value="{{ foo | safe }}">{{ foo | safe }}</option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select><br>
+                                #<input type="number" name="familyqty" value="{{ data.familyqty }}"><br>
+                                $<input type="number" step="0.01" name="familyvalue" value="{{ data.familyvalue }}">
+                            </div>
+                            <div class="px-4">
+                                <legend>Transportation</legend>
+                                <input type="text" name="to_from" placeholder="To/From" value="{{ data.to_from }}"><br>
+                                #<input type="text" name="miles" placeholder="Miles" value="{{ data.miles }}"><br>
+                                $<input type="number" step="0.01" name="transportationvalue"
+                                        value="{{ data.transportationvalue }}">
+                            </div>
+                            <div class="px-4">
+                                <legend>Other</legend>
+                                <input type="text" name="other_service_provided"
+                                       value="{{ data.other_service_provided }}"><br>
+                                #<input type="number" name="otherqty" value="{{ data.otherqty }}"><br>
+                                $<input type="number" step="0.01" name="othervalue" value="{{ data.othervalue }}">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-2" align="center">
+                        <br/>
+                        <div class="d-flex flex-row justify-content-center align-content-center">
+                            <div class="px-4">
+                                <legend>External Referral Information</legend>
+                                <input type="text" name="agency" placeholder="Agency" value="{{ data.agency }}">
+                                <input type="text" name="contactperson" placeholder="Contact Person"
+                                       value="{{ data.contactperson }}">
+                                <input type="tel" name="external_telephone" placeholder="External Telephone"
+                                       value="{{ data.external_telephone }}">
+                            </div>
+                            <div class="px-4">
+                                <legend>Staff Completing CSL</legend>
+                                <input type="text" name="staff_completing_csl_fname" placeholder="First Name"
+                                       value="{{ staff_fname | safe }}" required>
+                                <input type="text" name="staff_completing_csl_mname" placeholder="Middle Name">
+                                <input type="text" name="staff_completing_csl_lname" placeholder="Last Name"
+                                       value="{{ staff_lname | safe }}" required>
+                            </div>
+                            <div class="px-4">
+                                <legend>Staff Notes</legend>
+                                <textarea name="staff_notes">{{ data.staff_notes }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br>
+
+            <input name="race" value="{{ data.race }}" hidden>
+            <input name="zipcode" value="{{ data.zipcode }}" hidden>
+            <input type="submit" name="action"/>
+        </form>
+    </div>
+
+    <script type="text/javascript">
+        function enter_location() {
+            var ap_type = document.getElementById('appointment_type');
+            var location_input = document.getElementById('appointment_location');
+            if (ap_type.value == 'Out of Office' || ap_type.value == 'In Office') {
+                location_input.style.visibility = "visible";
+            } else {
+                location_input.style.visibility = "hidden";
+            }
+        }
+
+        function enter_status() {
+            var pstatus = document.getElementById('program_status');
+            var other_status = document.getElementById('program_status_other');
+            console.log(other_status);
+            console.log(pstatus);
+            if (pstatus.value == 'Other') {
+                other_status.style.visibility = "visible";
+            } else {
+                other_status.style.visibility = "hidden";
+            }
+        };
+
+        function enter_uos() {
+            var suos = document.getElementById('service_uos');
+            var ouos = document.getElementById('uos_other');
+
+            if (suos.value == 'other') {
+                ouos.style.visibility = "visible";
+            } else {
+                ouos.style.visibility = "hidden";
+            }
+        }
+    </script>
+{% endblock %}
