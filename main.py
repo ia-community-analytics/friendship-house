@@ -11,7 +11,7 @@ from non_app_specific import (today, intg, races, genders, get_all_client_keys, 
                               display_name, process_name, old_data_for_dashboard, data_for_dashboard,
                               user_specific_logs)
 from functools import wraps
-from flask_bcrypt import Bcrypt
+# from flask_bcrypt import Bcrypt
 from firebase_admin import db, auth
 from oauthlib.oauth2.rfc6749.errors import TokenExpiredError, InvalidGrantError
 from flask_dance.contrib.google import make_google_blueprint, google
@@ -20,17 +20,17 @@ from flask_basicauth import BasicAuth
 
 # insecure transfer etc...
 # TODO - fix this when we switch to better tranfer
-os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = '1'
+# os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = '1'
 
 # TODO serve https and not http since we are using basic auth.
 
 app = Flask(__name__)
-bcrypt = Bcrypt(app)
+# bcrypt = Bcrypt(app)
 
 # TODO: use an environment variable for this app secret!
 # app.secret_key = b'some46fu23yp/;:/sjdh'
 
-with open("./credentials/keys.json", "r") as f:
+with open("./friendship-house/credentials/keys.json", "r") as f:
     creds = json.load(f)
 
 app.config["SECRET_KEY"] = b'some46fu23yp/;:/sjdh'
