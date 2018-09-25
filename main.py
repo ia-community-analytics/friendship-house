@@ -11,7 +11,7 @@ from non_app_specific import (today, intg, races, genders, get_all_client_keys, 
                               display_name, process_name, old_data_for_dashboard, data_for_dashboard,
                               user_specific_logs)
 from functools import wraps
-from firebase_admin import db, auth
+from firebase_admin import db, auth, credentials
 from oauthlib.oauth2.rfc6749.errors import TokenExpiredError, InvalidGrantError
 from flask_dance.contrib.google import make_google_blueprint, google
 from flask import Flask, render_template, jsonify, request, redirect, url_for, Response, flash, session, abort
@@ -28,8 +28,14 @@ app = Flask(__name__)
 # TODO: use an environment variable for this app secret!
 # app.secret_key = b'some46fu23yp/;:/sjdh'
 
+# normal mine
 with open("./credentials/keys.json", "r") as f:
     creds = json.load(f)
+
+# dev account
+# with open("./dev_credentials/keys.json", "r") as f:
+#     creds = json.load(f)
+
 
 app.config["SECRET_KEY"] = b'some46fu23yp/;:/sjdh'
 app.config['BASIC_AUTH_USERNAME'] = 'someguy@domain.com'
@@ -43,7 +49,14 @@ blueprint = make_google_blueprint(
 
 app.register_blueprint(blueprint, url_prefix='/login')
 
+# normal local
 firebase_admin.initialize_app()
+
+# using dev account
+# cred = credentials.Certificate("./dev_credentials/serviceKey.json")
+# os.environ['FIREBASE_CONFIG'] = './dev_credentials/firebase_config.json'
+# firebase_admin.initialize_app(cred)
+
 database = db.reference()
 basic_auth = BasicAuth(app)
 
@@ -97,6 +110,7 @@ def error_handler(f):
         # this is the idea. if the function fails, provide a better view
         # TODO: depending on the type of error, maybe one view is better
         # TODO: create a logger that actuall trakcs the name of f,  the function that failed
+        # return f(*args, **kwargs)
         try:
             resp = f(*args, **kwargs)
             return resp
@@ -168,6 +182,8 @@ def service_log_admin():
 @error_handler
 def service_log_add(record):
     data = database.child('clients/' + record + '/information').get()
+    data['last_name'] = capitalize(data.get('last_name'))
+    data['first_name'] = capitalize(data.get('first_name'))
     staff_fname, staff_lname = session.get('given_name'), session.get('family_name')
     return render_template('client_service_log.html', data=data, date=today.strftime("%Y-%m-%d"),
                            appointment_type=appointment_type, program_status=program_status,
@@ -317,6 +333,8 @@ def home_page():
             if len(exists) > 0:
                 message = "We found a matching record! Do you wish to update or delete the record?"
                 info = database.child('clients/%s/information' % user_id).get()
+                info['last_name'] = capitalize(info.get('last_name'))
+                info['first_name'] = capitalize(info.get('first_name'))
                 race = info.get('race')  # selected race
                 gender = info.get('gender')  # selected gender
                 return render_template("update_and_delete.html", flash_message=message, data=info,
@@ -333,7 +351,7 @@ def home_page():
                                        allow_log='NO',
                                        races_nd_selected=[dict(race=a, selected='NO') for a in races],
                                        genders_nd_selected=[dict(gender=a, selected='NO') for a in genders],
-                                       old_id=user_id, id_check=data_post_url)
+                                       old_id='', id_check=data_post_url)
 
         elif 'client_select_one' in form.keys():
             # if a client is selected
@@ -546,6 +564,8 @@ def get_data(id, type):
 def get_user_logs(id, user_id):
     if id == session.get('data_posting_url', ''):
         df, paths = user_specific_logs(database, user_id)
+        if df is None:
+            return jsonify({})
         if paths is not None:
             paths = ['<button name="edit_button" type="submit" value=%s>EDIT</button>' % el for el in paths]
         cols = [dict(id=el, label=el, type="string") for el in df.columns]

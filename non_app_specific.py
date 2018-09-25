@@ -340,7 +340,7 @@ def old_data_for_dashboard(database_reference, specific_users=None, just_logs=No
         archived_clients = [user for user in specific_users if user in archived_clients]
 
     if len(all_clients) == 0 and len(archived_clients) == 0:
-        return data_frame
+        return data_frame, []
 
     # active client logs
     all_clients_paths = [database_reference.child('clients').child(client).child('paths').get() for client in
@@ -357,7 +357,7 @@ def old_data_for_dashboard(database_reference, specific_users=None, just_logs=No
     # combined the paths and get a list of all logs
     all_paths = all_clients_paths + arch_clients_paths
     if len(all_paths) == 0:
-        return data_frame
+        return data_frame, []
 
     logs = [(path, database_reference.child(path).get()) for path in all_paths]
     logs = [(path, log) for path, log in logs if log is not None]  # we do not need None
@@ -368,7 +368,7 @@ def old_data_for_dashboard(database_reference, specific_users=None, just_logs=No
         return logs, paths_save
 
     if len(logs) == 0:
-        return data_frame
+        return data_frame, []
 
     # get the full data
     log_data = generate_csv_from_path(logs)
@@ -407,7 +407,7 @@ def old_data_for_dashboard(database_reference, specific_users=None, just_logs=No
     data_frame = log_data.merge(active_sttus_data, how='left', on='user_id')
     data_frame.fillna('')
     # TODO; drop user_id?
-    return data_frame.astype(str)
+    return data_frame.astype(str), []
 
 def user_specific_logs(database_reference, user_id: str):
     logs, paths = old_data_for_dashboard(database_reference, user_id, 'yes')
