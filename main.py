@@ -36,7 +36,6 @@ with open("./credentials/keys.json", "r") as f:
 # with open("./dev_credentials/keys.json", "r") as f:
 #     creds = json.load(f)
 
-
 app.config["SECRET_KEY"] = b'some46fu23yp/;:/sjdh'
 app.config['BASIC_AUTH_USERNAME'] = 'someguy@domain.com'
 app.config['BASIC_AUTH_PASSWORD'] = 'Inconnu1'
@@ -388,10 +387,8 @@ def home_page():
             # make data json. easy with name and dob separate
             # service_log should be a child with dates or something
             data = dict(last_name=capitalize(last_name, sep=' '), first_name=capitalize(first_name, sep=' '), dob=dob,
-                        gender=gender,
-                        phone=phone,
-                        nber_adults=nber_adults, nber_under_18=nber_under_18, total_in_home=total,
-                        race=race, address=address, city=city, state=state, zipcode=zipcode,
+                        gender=gender, phone=phone, nber_adults=nber_adults, nber_under_18=nber_under_18,
+                        total_in_home=total, race=race, address=address, city=city, state=state, zipcode=zipcode,
                         last_updt_dt=today.strftime('%Y-%m-%d'))
 
             # TODO - update confirmation to take type of action i.e. deleted, pushed added

@@ -125,6 +125,8 @@ def intg(x):
 
 def capitalize(word: str, sep=name_processing_separator):
     if sep not in word.strip():
+        sep = ' '
+    if sep not in word.strip():
         if '-' in word:
             temp = word.strip().split('-')
             return '-'.join([el[0].upper() + el[1:].lower() for el in temp])
